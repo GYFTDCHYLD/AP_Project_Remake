@@ -192,8 +192,8 @@ public class MainWindow extends JFrame{
 	
 	public void setWindowProperties() {
 		this.setJMenuBar(menuBar);
-		this.setSize(1020, 700);
-		this.setResizable(true);
+		this.setSize(700, 700);
+		this.setResizable(false);
 		this.setVisible(true);
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);

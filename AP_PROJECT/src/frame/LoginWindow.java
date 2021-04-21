@@ -85,11 +85,11 @@ public class LoginWindow extends JInternalFrame implements ActionListener{
 	
 	public void setWindowsProperties() {
 		setLayout(null);
-		this.setBounds(310, 150, 400, 250);
+		this.setBounds(150, 150, 400, 250);
 		this.setVisible(true); 
 	}
 	public LoginWindow() {
-		super("Login",false,true,false,true); 
+		super("Login",false,false,false,true); 
 		intializeComponent() ;
 		addComponentsToWindow();
 		setWindowsProperties();

@@ -147,13 +147,13 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 	
 	public void setWindowsProperties() {
 		setLayout(null);
-		this.setBounds(310,150, 400, 410); 
+		this.setBounds(150,150, 400, 410); 
 		this.setVisible(true); 
 	}
 	
 	
 	public SignUpWindow() {
-		super("Sign-Up",false,true,false,true);  
+		super("Sign-Up",false,false,false,true);  
 		intializeComponent() ;
 		addComponentsToWindow();
 		setWindowsProperties();
