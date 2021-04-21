@@ -14,7 +14,6 @@ import javax.swing.SwingConstants;
 
 import domain.Chat;
 import image.loadImages;
-import network.Client;
 import packet.Packet03Chat;
 
 public class ChatWindow extends JInternalFrame implements ActionListener{
@@ -86,7 +85,7 @@ public class ChatWindow extends JInternalFrame implements ActionListener{
 	}
 
 
-	public static JTextArea getChatArea() {
+	public JTextArea getChatArea() {
 		return ChatArea;
 	}
 	

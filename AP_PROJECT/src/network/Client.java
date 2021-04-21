@@ -69,9 +69,10 @@ public class Client extends Thread implements Serializable{
 	public void sendData(Object packet) {
 		try {
 			objOs.writeObject(packet);
-		} catch (IOException | NullPointerException e) {
-			System.out.println(" error sending data to server");
-			//e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println(" error sending data to server " + e.getMessage());
+		}catch(NullPointerException e) {
+			System.out.println(" error sending data to server " + e.getMessage());
 		}
 	} 
 	
@@ -80,9 +81,9 @@ public class Client extends Thread implements Serializable{
 		try {
 			packet = objIs.readObject();
 		} catch (IOException e) {
-			System.out.println(" error recieving data from server");
+			System.out.println(" error recieving data from server " + e.getMessage());
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			System.out.println(" error recieving data from server " + e.getMessage());
 		}
 		return packet;
 		
@@ -133,7 +134,7 @@ public class Client extends Thread implements Serializable{
 	}
 	
 	private void ChatHandler(Packet03Chat packet) { 
-		ChatWindow.getChatArea().append(packet.getData().getSender() + " " + packet.getData().getResponse() );
+		ChatWindow.getChatArea().append(packet.getData().getSender() + ": " + packet.getData().getResponse() + "\n");
 	}
 
 

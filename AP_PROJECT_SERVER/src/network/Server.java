@@ -77,7 +77,9 @@ public class Server {
 		public void sendData(Object packet) {
 			try {
 				objOs.writeObject(packet);
-			} catch (IOException | NullPointerException e) {
+			} catch (IOException e) {
+				System.out.println(" error sending data to client " + e.getMessage());
+			}catch(NullPointerException e) {
 				System.out.println(" error sending data to client " + e.getMessage());
 			}
 		} 
@@ -87,9 +89,9 @@ public class Server {
 			try {
 				packet = objIs.readObject();
 			} catch (IOException e) {
-				System.out.println(" error recieving data from server");
+				System.out.println("error recieving data from client " + e.getMessage());
 			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+				System.out.println("error recieving data from client " + e.getMessage());
 			}
 			return packet;
 			
