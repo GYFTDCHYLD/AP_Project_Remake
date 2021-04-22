@@ -39,7 +39,7 @@ public class MainWindow extends JFrame{
 	private PopupMenu popup;
 	private JLabel background;
 	private loadImages loadImages; 
-	
+	private static LoginWindow LoginWindow; 
 	public static Client ClientSocket; 
 	
 	
@@ -79,7 +79,7 @@ public class MainWindow extends JFrame{
 		background = new JLabel();
 		background.setHorizontalAlignment(SwingConstants.CENTER);
 		//background.setIcon(new ImageIcon(loadImages.mainBackground)); 
-		background.setBounds(0, 0,1020, 700);
+		//background.setBounds(0, 0,1020, 700);
 	}
 	
 	public void addMenuItemsToPopup() {
@@ -99,7 +99,8 @@ public class MainWindow extends JFrame{
 	}
 	
 	public void addComponentsToWindow() {
-		desktopPane.add(new LoginWindow()); 
+		LoginWindow = new LoginWindow();
+		desktopPane.add(LoginWindow); 
 		this.add(background);
 		this.add(desktopPane);
 		
@@ -205,6 +206,10 @@ public class MainWindow extends JFrame{
 
 	public static Client getClientSocket() {
 		return ClientSocket;
-	}	
+	}
+
+	public static LoginWindow getLoginWindow() {
+		return LoginWindow;
+	}
 	
 }

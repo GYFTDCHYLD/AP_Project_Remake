@@ -20,7 +20,7 @@ import packet.Packet01Login;
 import domain.Login;
 
 
-public class LoginWindow extends JInternalFrame implements ActionListener{
+public class Dashboard extends JInternalFrame implements ActionListener{
 	private JTextField loginIdField;
 	private JLabel loginIdLabel;
 	
@@ -65,31 +65,24 @@ public class LoginWindow extends JInternalFrame implements ActionListener{
 		
 		background = new JLabel();
 		background.setHorizontalAlignment(SwingConstants.CENTER);
-		background.setIcon(new ImageIcon(loadImages.formBackground)); 
-		background.setBounds(0, 0,400, 250);
+		//background.setIcon(new ImageIcon(loadImages.formBackground)); 
+		background.setBounds(0, 0,700, 500);
 			
 		
 	}
 	public void addComponentsToWindow(){
-		getContentPane().add(loginIdField);
-		getContentPane().add(loginIdLabel);
 		
-		getContentPane().add(passwordField);
-		getContentPane().add(passwordLabel);
-		
-		getContentPane().add(signUp);
-		getContentPane().add(Login);
 		
 		getContentPane().add(background);
 	}
 	
 	public void setWindowsProperties() {
 		setLayout(null);
-		this.setBounds(125, 150, 400, 250);
+		this.setBounds(-10, 0, 710, 560);
 		this.setVisible(true); 
 	}
-	public LoginWindow() {
-		super("Login",false,false,false,true); 
+	public Dashboard(String title) { 
+		super(title,false,false,false,true); 
 		intializeComponent() ;
 		addComponentsToWindow();
 		setWindowsProperties();
@@ -98,16 +91,6 @@ public class LoginWindow extends JInternalFrame implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		if(e.getActionCommand().equals("Sign-Up")) {
-			MainWindow.getDesktopPane().add(new SignUpWindow());
-			this.dispose();
-		}
 		
-		if(e.getActionCommand().equals("Submit")) {
-			Login Login = new Login(loginIdField.getText(), passwordField.getText());  
-			Packet01Login Packet = new Packet01Login(Login);
-			Packet.writeData(MainWindow.getClientSocket());  
-			
-		} 
 	}
 }

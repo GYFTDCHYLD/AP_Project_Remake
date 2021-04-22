@@ -17,10 +17,13 @@ public class Packet03Chat extends Packet{
 		Message = data;
 	}
 	
+	
+	
 	@Override
-	public void writeData(Server Server) {
-		Server.sendData(this);
+	public void writeData(Server server) {
+		server.sendDataToAllClients(this);	
 	}
+
 
 	@Override
 	public Chat getData() {

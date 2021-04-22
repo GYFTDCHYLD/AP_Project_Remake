@@ -26,11 +26,16 @@ public class Server {
 	private Socket connectionSocket;
 	private Calendar date;
 	private int clientCount;
-	private List<User> connectedUsers = new ArrayList<User>(); 
+	private List<User> connectedUsers; 
 	
 	public Server() {
 		
 		try {
+			connectedUsers = new ArrayList<User>(); 
+			User User = new User("C123","Craig", "Reid", "12345");
+			addConnection(User); 
+			User = new User("A123","Ashari", "Jones", "12345");
+			addConnection(User); 
 			this.serverSocket = new ServerSocket(8000);
 		}
 		catch(Exception ex) {
@@ -137,8 +142,17 @@ public class Server {
 		
 
 		private void LoginHandler(Packet01Login packet) {
+			Packet07User loginData = new Packet07User(new User());
 			System.out.println(packet.getData().getUserId());
-			sendData(packet);
+			for (User user : connectedUsers) {
+				if(user.getUserId().equals(packet.getData().getUserId()) && user.getPassword().equals(packet.getData().getPassword())) {
+					loginData = new Packet07User(user);
+				}
+			}
+			sendData(loginData);
+			//User User = new User();
+			//User.setUserId(String.valueOf(clientCount+1));
+			//addConnection(User); 
 		}
 		
 		private void ChatHandler(Packet03Chat packet) { 
@@ -176,5 +190,52 @@ public class Server {
 		// TODO Auto-generated method stub
 		
 	}
-	
+
+	public void addConnection(User user) { 
+		boolean alreadyConnected = false;
+		for (User uzr : this.connectedUsers) { 
+			if (user.getUserId().equalsIgnoreCase(uzr.getUserId())) {
+				alreadyConnected = true;
+			}
+		}
+		if (!alreadyConnected) {
+			this.connectedUsers.add(user);
+		}
+	}
+
+	public void removeConnection(Packet02Logout packet) {
+		try {
+			this.connectedUsers.remove(getPlayerMPIndex(packet.getData().getUserId()));
+			packet.writeData(this);
+		} catch (IndexOutOfBoundsException e) {
+
+		}
+	}
+
+	public User getPlayerMP(String userId) {
+		for (User user : this.connectedUsers) {
+			if (user.getUserId().equals(userId)) {
+				return user;
+			}
+		}
+		return null;
+	}
+
+	public int getPlayerMPIndex(String userId) throws IndexOutOfBoundsException {
+		int index = 0;
+		for (User user : this.connectedUsers) {
+			if (user.getUserId().equals(userId)) {
+				break;
+			}
+			index++;
+		}
+		return index;
+	}
+
+	public void sendDataToAllClients(Packet03Chat data) {
+		for (User user : connectedUsers) {
+			sendData(data);
+		}
+	}
+
 }

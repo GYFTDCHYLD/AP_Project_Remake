@@ -13,7 +13,7 @@ public class Packet07User extends Packet{
 	private User User; 
 	
 	public Packet07User(User data) {
-		super(03);
+		super(07);
 		User = data;
 	}
 	

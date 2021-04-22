@@ -6,12 +6,19 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.Socket;
 
+import javax.swing.JOptionPane;
+
+import org.w3c.dom.UserDataHandler;
+
 import packet.Packet;
 import packet.Packet01Login;
 import packet.Packet03Chat;
+import packet.Packet07User;
 import packet.Packet.PacketTypes;
 import packet.Packet00Register;
 import frame.ChatWindow;
+import frame.Dashboard;
+import frame.MainWindow;
 
 
 public class Client extends Thread implements Serializable{
@@ -118,10 +125,12 @@ public class Client extends Thread implements Serializable{
 			case CHAT: 
 							ChatHandler((Packet03Chat) data);			
 				break;
+			case USERS: 
+							UserDataHandler((Packet07User) data);			
+				break;
 			
 		}
 	}
-	
 	
 
 	private void RegisterHandler(Packet00Register data) {
@@ -131,6 +140,15 @@ public class Client extends Thread implements Serializable{
 
 	private void LoginHandler(Packet01Login packet) {
 		System.out.println("login successfully");
+	}
+	
+	
+	private void UserDataHandler(Packet07User data) {
+		if(data.getData().getFirstName() != null) {
+			MainWindow.getDesktopPane().add(new Dashboard(data.getData().getFirstName() + " " + data.getData().getLastName()));
+			MainWindow.getLoginWindow().dispose();
+		}else 
+			JOptionPane.showMessageDialog(null, "Invalid Id or Password", "",JOptionPane.ERROR_MESSAGE);
 	}
 	
 	private void ChatHandler(Packet03Chat packet) { 
