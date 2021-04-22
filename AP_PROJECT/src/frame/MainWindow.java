@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+import javax.swing.ImageIcon;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -29,9 +30,6 @@ public class MainWindow extends JFrame{
 
 	private JMenuBar menuBar;
 	private JMenu Menu; 
-	private JMenu editJMenu;
-	private JMenuItem menuItemChat; 
-	private JMenuItem menuItemSave;
 	private MenuItem menuAbout;
 	private MenuItem menuOpen;
 	private MenuItem menuClose;
@@ -53,8 +51,8 @@ public class MainWindow extends JFrame{
 		addComponentsToWindow();
 		registerListeners();
 		setWindowProperties();
-		ClientSocket = new Client();
-		ClientSocket.start();
+		ClientSocket = new Client(this); 
+		ClientSocket.run(); 
 	}
 
 	public void initializeComponent() {
@@ -64,11 +62,6 @@ public class MainWindow extends JFrame{
 		menuBar = new JMenuBar();
 		Menu = new JMenu("Menu");
 		Menu.setMnemonic(KeyEvent.VK_A);
-		editJMenu = new JMenu("Edit");
-		editJMenu.setMnemonic(KeyEvent.VK_S);
-		menuItemChat = new JMenuItem("Chat");
-		menuItemSave = new JMenuItem("Save Item");
-		menuItemSave.setToolTipText("Saves the active document");
 		menuAbout = new MenuItem("About");
 		menuOpen = new MenuItem("Open");
 		menuClose = new MenuItem("Close");
@@ -78,8 +71,8 @@ public class MainWindow extends JFrame{
 		
 		background = new JLabel();
 		background.setHorizontalAlignment(SwingConstants.CENTER);
-		//background.setIcon(new ImageIcon(loadImages.mainBackground)); 
-		//background.setBounds(0, 0,1020, 700);
+		background.setIcon(new ImageIcon(loadImages.mainBackground)); 
+		background.setBounds(0, 0,700, 700);
 	}
 	
 	public void addMenuItemsToPopup() {
@@ -89,32 +82,22 @@ public class MainWindow extends JFrame{
 	}
 	
 	public void addMenuItemsToMenu() {
-		Menu.add(menuItemChat);
-		editJMenu.add(menuItemSave);
+		
 	}
 	
 	public void addMenusToMenuBar() {
-		menuBar.add(Menu);
-		menuBar.add(editJMenu);
+		
 	}
 	
 	public void addComponentsToWindow() {
 		LoginWindow = new LoginWindow();
 		desktopPane.add(LoginWindow); 
-		this.add(background);
-		this.add(desktopPane);
+		desktopPane.add(background); 
+		this.add(desktopPane); 
 		
 	}
 	
 	public void registerListeners() {
-		
-		
-		menuItemChat.addActionListener( new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				desktopPane.add(ClientSocket.getChat()); 
-			}
-		});
 		
 		menuClose.addActionListener( new ActionListener() {
 			@Override
@@ -200,16 +183,11 @@ public class MainWindow extends JFrame{
 		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 	}
 	
-	public static JDesktopPane getDesktopPane() {
+	public JDesktopPane getDesktopPane() {
 		return desktopPane;
 	}
 
 	public static Client getClientSocket() {
 		return ClientSocket;
 	}
-
-	public static LoginWindow getLoginWindow() {
-		return LoginWindow;
-	}
-	
 }

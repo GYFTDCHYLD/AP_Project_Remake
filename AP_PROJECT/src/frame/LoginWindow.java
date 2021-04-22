@@ -10,12 +10,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
 import image.loadImages;
+import network.Client;
 import packet.Packet01Login;
 import domain.Login;
 
@@ -99,14 +101,20 @@ public class LoginWindow extends JInternalFrame implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		
 		if(e.getActionCommand().equals("Sign-Up")) {
-			MainWindow.getDesktopPane().add(new SignUpWindow());
+			Client.getMainWindow().getDesktopPane().add(new SignUpWindow());
 			this.dispose();
 		}
 		
 		if(e.getActionCommand().equals("Submit")) {
-			Login Login = new Login(loginIdField.getText(), passwordField.getText());  
-			Packet01Login Packet = new Packet01Login(Login);
-			Packet.writeData(MainWindow.getClientSocket());  
+			if(loginIdField.getText().equals("")) 
+				JOptionPane.showMessageDialog(null, "Enter your User Id", "",JOptionPane.ERROR_MESSAGE);
+			else if(passwordField.getText().equals("")) 
+				JOptionPane.showMessageDialog(null, "Enter your Password", "",JOptionPane.ERROR_MESSAGE);
+			else {
+				Login Login = new Login(loginIdField.getText(), passwordField.getText());  
+				Packet01Login Packet = new Packet01Login(Login);
+				Packet.writeData(MainWindow.getClientSocket());  
+			}
 			
 		} 
 	}

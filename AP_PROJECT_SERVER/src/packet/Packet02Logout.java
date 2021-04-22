@@ -16,7 +16,7 @@ public class Packet02Logout extends Packet {
     }
 	@Override
 	public void writeData(Server client) {
-		client.sendData(getData());
+		client.sendData(this);
 	}
 
 

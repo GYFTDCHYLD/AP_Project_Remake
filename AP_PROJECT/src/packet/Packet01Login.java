@@ -9,7 +9,7 @@ public class Packet01Login extends Packet{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
+	
 	Login Login;
 	public Packet01Login(Login data) {
 		super(01);

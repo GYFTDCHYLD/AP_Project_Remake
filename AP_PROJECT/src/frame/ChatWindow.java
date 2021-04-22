@@ -60,13 +60,13 @@ public class ChatWindow extends JInternalFrame implements ActionListener{
 	
 	public void setWindowsProperties() {
 		setLayout(null);
-		this.setBounds(310, 150, 400, 410); 
+		this.setBounds(125, 150, 400, 410); 
 		this.setVisible(true); 
 	}
 	
 	
 	public ChatWindow() {
-		super("Chat",false,true,false,true);  
+		super("Chat",false,false,false,true);  
 		intializeComponent() ;
 		addComponentsToWindow();
 		setWindowsProperties();
@@ -89,5 +89,4 @@ public class ChatWindow extends JInternalFrame implements ActionListener{
 		return ChatArea;
 	}
 	
-
 }

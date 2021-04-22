@@ -65,7 +65,7 @@ public class Dashboard extends JInternalFrame implements ActionListener{
 		
 		background = new JLabel();
 		background.setHorizontalAlignment(SwingConstants.CENTER);
-		//background.setIcon(new ImageIcon(loadImages.formBackground)); 
+		background.setIcon(new ImageIcon(loadImages.dashboardBackground)); 
 		background.setBounds(0, 0,700, 500);
 			
 		
@@ -78,7 +78,7 @@ public class Dashboard extends JInternalFrame implements ActionListener{
 	
 	public void setWindowsProperties() {
 		setLayout(null);
-		this.setBounds(-10, 0, 710, 560);
+		this.setBounds(-10, 0, 720, 560);
 		this.setVisible(true); 
 	}
 	public Dashboard(String title) { 

@@ -9,9 +9,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import domain.Login;
 import domain.User;
-import domain.Logout;
 import packet.Packet;
 import packet.Packet00Register;
 import packet.Packet01Login;
@@ -20,7 +18,7 @@ import packet.Packet03Chat;
 import packet.Packet07User;
 import packet.Packet.PacketTypes;
 
-public class Server {
+public class Server{
 
 	private ServerSocket serverSocket;
 	private Socket connectionSocket;
@@ -79,9 +77,9 @@ public class Server {
 			}
 		}
 		
-		public void sendData(Object packet) {
+		public void sendData(Packet data) { 
 			try {
-				objOs.writeObject(packet);
+				objOs.writeObject(data);
 			} catch (IOException e) {
 				System.out.println(" error sending data to client " + e.getMessage());
 			}catch(NullPointerException e) {
@@ -89,16 +87,16 @@ public class Server {
 			}
 		} 
 		
-		public Object readData() {
-			Object packet = null; 
+		public Packet readData() { 
+			Packet data = null; 
 			try {
-				packet = objIs.readObject();
+				data = (Packet) objIs.readObject();
 			} catch (IOException e) {
 				System.out.println("error recieving data from client " + e.getMessage());
 			} catch (ClassNotFoundException e) {
 				System.out.println("error recieving data from client " + e.getMessage());
 			}
-			return packet;
+			return data;
 			
 		}
 		
@@ -106,15 +104,15 @@ public class Server {
 		public void run() {
 			
 			while(true) {
-				Object packet = readData();
-				parsePacket(packet);	
+				Packet data = readData(); 
+				parsePacket(data);	
 			}
 			
 		}
 		
-		private void parsePacket(Object data) { 
+		private void parsePacket(Packet data) { 
 			
-			PacketTypes type = Packet.lookupPacket(((Packet) data).getPacketId()); 
+			PacketTypes type = Packet.lookupPacket(data.getPacketId()); 
 			
 			switch(type) {
 				default:
@@ -141,56 +139,28 @@ public class Server {
 		}
 		
 
-		private void LoginHandler(Packet01Login packet) {
+		private void LoginHandler(Packet01Login data) { 
 			Packet07User loginData = new Packet07User(new User());
-			System.out.println(packet.getData().getUserId());
 			for (User user : connectedUsers) {
-				if(user.getUserId().equals(packet.getData().getUserId()) && user.getPassword().equals(packet.getData().getPassword())) {
+				if(user.getUserId().equals(data.getData().getUserId()) && user.getPassword().equals(data.getData().getPassword())) {
 					loginData = new Packet07User(user);
 				}
 			}
 			sendData(loginData);
-			//User User = new User();
-			//User.setUserId(String.valueOf(clientCount+1));
-			//addConnection(User); 
 		}
 		
-		private void ChatHandler(Packet03Chat packet) { 
-			sendData(packet);
+		private void ChatHandler(Packet03Chat data) {  
+			sendData(data);
 		}
 		
 	}
 
 
-	public void sendData(Packet03Chat packet03Chat) {
-		// TODO Auto-generated method stub
-		
+	public void sendData(Packet data) { 
+		data.writeData(this); 
 	}
 
-
-	public void sendData(Packet00Register packet00Register) { 
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	public void sendData(Login data) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	public void sendData(Logout data) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	public void sendData(Packet07User packet07User) {
-		// TODO Auto-generated method stub
-		
-	}
-
+	
 	public void addConnection(User user) { 
 		boolean alreadyConnected = false;
 		for (User uzr : this.connectedUsers) { 
@@ -203,10 +173,10 @@ public class Server {
 		}
 	}
 
-	public void removeConnection(Packet02Logout packet) {
+	public void removeConnection(Packet02Logout data) { 
 		try {
-			this.connectedUsers.remove(getPlayerMPIndex(packet.getData().getUserId()));
-			packet.writeData(this);
+			this.connectedUsers.remove(getPlayerMPIndex(data.getData().getUserId()));
+			data.writeData(this);
 		} catch (IndexOutOfBoundsException e) {
 
 		}
@@ -234,7 +204,7 @@ public class Server {
 
 	public void sendDataToAllClients(Packet03Chat data) {
 		for (User user : connectedUsers) {
-			sendData(data);
+			this.sendData(data); 
 		}
 	}
 

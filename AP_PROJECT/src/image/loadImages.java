@@ -9,14 +9,16 @@ import javax.imageio.ImageIO;
 public class loadImages {
 	
 	public static BufferedImage formBackground;
-	public static BufferedImage mainBackground;
+	public static BufferedImage dashboardBackground;
+	public static BufferedImage mainBackground; 
 	
 	
 	
 	
 	public void init() {
-		mainBackground = imageLoader("/NikolaTesla.jpg");
+		mainBackground = imageLoader("/MainBackground.png");
 		formBackground = imageLoader("/formBackground.jpg");
+		dashboardBackground = imageLoader("/DashboardBackground.jpg");
 		
 		
 	}

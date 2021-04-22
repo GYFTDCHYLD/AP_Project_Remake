@@ -3,12 +3,12 @@ package network;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.net.InetAddress;
 import java.net.Socket;
 
+import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 
-import org.w3c.dom.UserDataHandler;
 
 import packet.Packet;
 import packet.Packet01Login;
@@ -16,34 +16,36 @@ import packet.Packet03Chat;
 import packet.Packet07User;
 import packet.Packet.PacketTypes;
 import packet.Packet00Register;
-import frame.ChatWindow;
 import frame.Dashboard;
 import frame.MainWindow;
 
 
-public class Client extends Thread implements Serializable{
+public class Client implements Runnable{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
 	private int PORTNUMBER = 8000;
-	private Socket connectionSocket;
+	private Socket connectionSocket; 
 	private  ObjectOutputStream objOs;
 	private ObjectInputStream objIs;
-	private ChatWindow ChatWindow;
+	private static MainWindow mainWindow;  
 	
 	
+
 	
-	public Client() {
-		ChatWindow = new ChatWindow();
+	public Client(MainWindow main) {
+		mainWindow = main;
 		this.createConnection();
 		this.configureStreams();
+		
 	}
 	
+
 	private void createConnection() {
 		try {
-			connectionSocket = new Socket("127.0.0.1",PORTNUMBER);
+			connectionSocket = new Socket(InetAddress.getLocalHost(), PORTNUMBER);
 		}
 		catch(IOException ex) {
 			ex.printStackTrace();
@@ -73,9 +75,9 @@ public class Client extends Thread implements Serializable{
 	}
 	
 	
-	public void sendData(Object packet) {
+	public void sendData(Packet data) { 
 		try {
-			objOs.writeObject(packet);
+			objOs.writeObject(data);
 		} catch (IOException e) {
 			System.out.println(" error sending data to server " + e.getMessage());
 		}catch(NullPointerException e) {
@@ -83,31 +85,31 @@ public class Client extends Thread implements Serializable{
 		}
 	} 
 	
-	public Object readData() {
-		Object packet = null; 
+	public Packet readData() { 
+		Packet data = null;  
 		try {
-			packet = objIs.readObject();
+			data = (Packet) objIs.readObject();
 		} catch (IOException e) {
 			System.out.println(" error recieving data from server " + e.getMessage());
 		} catch (ClassNotFoundException e) {
 			System.out.println(" error recieving data from server " + e.getMessage());
 		}
-		return packet;
-		
+		return data;
+		 
 	}	
 
 	public void run() {
 		while(true) {
-			Object packet = readData();
-			parsePacket(packet);
+			Packet data = readData(); 
+			parsePacket(data);
 			
 		}
 	}
 	
 	
-	private void parsePacket(Object data) { 
+	private void parsePacket(Packet data) {  
 		
-		PacketTypes type = Packet.lookupPacket(((Packet) data).getPacketId()); 
+		PacketTypes type = Packet.lookupPacket(data.getPacketId()); 
 		
 		switch(type) {
 			default:
@@ -138,25 +140,25 @@ public class Client extends Thread implements Serializable{
 		
 	}
 
-	private void LoginHandler(Packet01Login packet) {
+	private void LoginHandler(Packet01Login data) {
 		System.out.println("login successfully");
 	}
 	
 	
 	private void UserDataHandler(Packet07User data) {
 		if(data.getData().getFirstName() != null) {
-			MainWindow.getDesktopPane().add(new Dashboard(data.getData().getFirstName() + " " + data.getData().getLastName()));
-			MainWindow.getLoginWindow().dispose();
+			mainWindow.getDesktopPane().add(new Dashboard(data.getData().getFirstName() + " " + data.getData().getLastName()));
+			((JInternalFrame) mainWindow.getDesktopPane().getComponent(0)).dispose(); 
 		}else 
 			JOptionPane.showMessageDialog(null, "Invalid Id or Password", "",JOptionPane.ERROR_MESSAGE);
 	}
 	
-	private void ChatHandler(Packet03Chat packet) { 
-		ChatWindow.getChatArea().append(packet.getData().getSender() + ": " + packet.getData().getResponse() + "\n");
+	private void ChatHandler(Packet03Chat data) { 
+		//mainWindow.getDesktopPane().getComponent(1)).append(data.getData().getSender() + ": " + data.getData().getResponse() + "\n");
 	}
 
 
-	public int getPORTNUMBER() {
+	public int getPORTNUMBER() { 
 		return PORTNUMBER;
 	}
 
@@ -168,8 +170,10 @@ public class Client extends Thread implements Serializable{
 		return serialVersionUID;
 	}
 
-	public ChatWindow getChat() { 
-		return ChatWindow;
+
+	public static MainWindow getMainWindow() {
+		return mainWindow;
 	}
+	
 	
 }

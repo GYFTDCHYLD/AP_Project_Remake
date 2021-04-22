@@ -9,6 +9,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -16,6 +17,7 @@ import javax.swing.border.LineBorder;
 
 import domain.Register;
 import image.loadImages;
+import network.Client;
 import packet.Packet00Register;
 
 public class SignUpWindow extends JInternalFrame implements ActionListener{
@@ -163,13 +165,29 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		
 		if(e.getActionCommand().equals("Submit")) {
-			Register Register = new Register(firstName.getText(),lastName.getText(),Long.valueOf(phoneNumber.getText()), email.getText(), passwordField.getText()); 
-			Packet00Register Packet = new Packet00Register(Register);
-			Packet.writeData(MainWindow.getClientSocket());
-			this.dispose();
-			MainWindow.getDesktopPane().add(new LoginWindow());
+			if(firstName.getText().equals("")) 
+				JOptionPane.showMessageDialog(null, "Enter your First Name", "",JOptionPane.ERROR_MESSAGE);
+			else if(lastName.getText().equals("")) 
+				JOptionPane.showMessageDialog(null, "Enter your Last Name", "",JOptionPane.ERROR_MESSAGE);
+			else if(email.getText().equals("")) 
+				JOptionPane.showMessageDialog(null, "Enter your Email", "",JOptionPane.ERROR_MESSAGE);
+			else if(phoneNumber.getText().equals("")) 
+				JOptionPane.showMessageDialog(null, "Enter your Phone Number", "",JOptionPane.ERROR_MESSAGE);
+			else if(passwordField.getText().equals("")) 
+				JOptionPane.showMessageDialog(null, "Enter your Password", "",JOptionPane.ERROR_MESSAGE); 
+			else if(passwordConfirmField.getText().equals("")) 
+				JOptionPane.showMessageDialog(null, "ConfirmPassword", "",JOptionPane.ERROR_MESSAGE);
+			else if(!passwordField.getText().equals(passwordConfirmField.getText())) 
+				JOptionPane.showMessageDialog(null, "Passwords Did Not Match!", "",JOptionPane.ERROR_MESSAGE);
+			else {
+				Register Register = new Register(firstName.getText(),lastName.getText(),Long.valueOf(phoneNumber.getText()), email.getText(), passwordField.getText()); 
+				Packet00Register Packet = new Packet00Register(Register);
+				Packet.writeData(MainWindow.getClientSocket());
+				this.dispose();
+				Client.getMainWindow().getDesktopPane().add(new LoginWindow());
+			}
 		}else if(e.getActionCommand().equals("Login")) {
-			MainWindow.getDesktopPane().add(new LoginWindow());
+			Client.getMainWindow().getDesktopPane().add(new LoginWindow());
 			this.dispose();
 		}
 	}
