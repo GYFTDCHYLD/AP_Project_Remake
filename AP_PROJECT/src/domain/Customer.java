@@ -11,6 +11,10 @@ public class Customer extends User  implements Serializable{
 		super();
 	}
 	
+	public Customer(String userId, String firstName, String lastName, String password) {
+		super(userId, firstName, lastName, password);
+	}
+	
 	public Customer(BillingAccount billingAccount) {
 		super();
 		BillingAccount = billingAccount;
@@ -19,6 +23,10 @@ public class Customer extends User  implements Serializable{
 
 	public BillingAccount getBillingAccount() {
 		return BillingAccount;
+	}
+
+	public void setBillingAccount(BillingAccount billingAccount) {
+		BillingAccount = billingAccount;
 	}
 	
 }

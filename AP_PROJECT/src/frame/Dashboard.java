@@ -11,57 +11,48 @@ import javax.swing.JButton;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
+import javax.swing.table.JTableHeader;
+
+import org.w3c.dom.UserDataHandler;
 
 import image.loadImages;
+import packet.Packet00Register;
 import packet.Packet01Login;
+import packet.Packet07User;
+import domain.Employee;
 import domain.Login;
+import domain.User;
 
 
 public class Dashboard extends JInternalFrame implements ActionListener{
-	private JTextField loginIdField;
-	private JLabel loginIdLabel;
-	
-	private JPasswordField passwordField; 
-	private JLabel passwordLabel;
-	
-	private JButton signUp;
-	private JButton Login;
+	private JTabbedPane tablePane;
+	private JTable table; 
+	private JTableHeader tableHeader; 
+	private User user;
 	
 	private JLabel background;
 	
 	
 	public void intializeComponent() {
 		
-		loginIdField = new JTextField(); 
-		loginIdField.setBounds(10, 50, 180, 25); 
-		loginIdField.setBorder(new LineBorder(java.awt.Color.RED, 1));
-		loginIdField.setFont(new Font("arial", Font.TYPE1_FONT, 16));
+		tablePane = new JTabbedPane(); 
+		tablePane.setBounds(10, 50, 680, 450); 
+		tablePane.setBorder(new LineBorder(java.awt.Color.WHITE, 1));
+		tablePane.setFont(new Font("arial", Font.TYPE1_FONT, 16));
 		
-		loginIdLabel = new JLabel("User ID");
-		loginIdLabel.setBounds(200, 50, 150, 25);
-		loginIdLabel.setForeground(Color.WHITE);
-		loginIdLabel.setFont(new Font("arial", Font.TYPE1_FONT, 16));
+		table = new JTable();
+		table.setForeground(Color.WHITE);
+		table.setFont(new Font("arial", Font.TYPE1_FONT, 16));
 		
-		passwordField = new JPasswordField(); 
-		passwordField.setBounds(10, 90, 180, 25); 
-		passwordField.setBorder(new LineBorder(java.awt.Color.RED, 1));
-		passwordField.setFont(new Font("arial", Font.TYPE1_FONT, 16));
-		
-		passwordLabel = new JLabel("Password");
-		passwordLabel.setBounds(200, 90, 150, 25);
-		passwordLabel.setForeground(Color.WHITE);
-		passwordLabel.setFont(new Font("arial", Font.TYPE1_FONT, 16));
-		
-		signUp = new JButton("Sign-Up");
-		signUp.addActionListener(this);
-		signUp.setBounds(80, 150, 100, 30);
-		
-		Login = new JButton("Submit");
-		Login.addActionListener(this);
-		Login.setBounds(200, 150, 100, 30);
+
+		tableHeader = new JTableHeader();
+		tableHeader.setForeground(Color.WHITE);
+		tableHeader.setFont(new Font("arial", Font.TYPE1_FONT, 16));
 		
 		background = new JLabel();
 		background.setHorizontalAlignment(SwingConstants.CENTER);
@@ -71,8 +62,9 @@ public class Dashboard extends JInternalFrame implements ActionListener{
 		
 	}
 	public void addComponentsToWindow(){
-		
-		
+		table.add(tableHeader);
+		tablePane.add(table);
+		getContentPane().add(tablePane);
 		getContentPane().add(background);
 	}
 	
@@ -81,13 +73,19 @@ public class Dashboard extends JInternalFrame implements ActionListener{
 		this.setBounds(-10, 0, 720, 560);
 		this.setVisible(true); 
 	}
-	public Dashboard(String title) { 
-		super(title,false,false,false,true); 
+	
+	public Dashboard(User user) {  
+		super("",false,false,false,true); 
+		if(user instanceof Employee)
+			this.title = ((Employee) user).getJobTitle() + " Dashboard";
+		else 
+			this.title = "Customer Dashboard";
+		this.user = user;
 		intializeComponent() ;
 		addComponentsToWindow();
 		setWindowsProperties();
 	}
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		

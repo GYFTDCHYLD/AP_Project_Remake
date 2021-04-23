@@ -184,7 +184,6 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 				Packet00Register Packet = new Packet00Register(Register);
 				Packet.writeData(MainWindow.getClientSocket());
 				this.dispose();
-				Client.getMainWindow().getDesktopPane().add(new LoginWindow());
 			}
 		}else if(e.getActionCommand().equals("Login")) {
 			Client.getMainWindow().getDesktopPane().add(new LoginWindow());

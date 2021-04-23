@@ -12,7 +12,7 @@ public abstract class Packet implements Serializable{
  
 
 	public static enum PacketTypes{
-		INVALID(-1), REGISTER(00), LOGIN(01),LOGOUT(02), CHAT(03), COMPLAIN(4), ASSIGNCOMPLAIN(5), COMPLAINSCHEDULE(6), USERS(7), PASSWORDRESET(8);
+		INVALID(-1), REGISTER(00), LOGIN(01),LOGOUT(02), CHAT(03), COMPLAIN(04), ASSIGNCOMPLAIN(05), COMPLAINSCHEDULE(06), USERS(07), PASSWORDRESET(8), INFO(9);
 		
 		private int packetId;
 		

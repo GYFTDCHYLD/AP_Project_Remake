@@ -9,14 +9,17 @@ import java.net.Socket;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 
-
+import domain.Customer;
+import domain.User;
 import packet.Packet;
 import packet.Packet01Login;
 import packet.Packet03Chat;
 import packet.Packet07User;
+import packet.Packet9Info;
 import packet.Packet.PacketTypes;
 import packet.Packet00Register;
 import frame.Dashboard;
+import frame.LoginWindow;
 import frame.MainWindow;
 
 
@@ -115,11 +118,11 @@ public class Client implements Runnable{
 			default:
 			case INVALID: 	System.err.println("Invalid request!!");
 				break;
-			case REGISTER:
-							RegisterHandler((Packet00Register) data) ;	  
+			case INFO:
+							InfoHandler((Packet9Info) data); 	  
 				break;
-			case LOGIN:
-							LoginHandler((Packet01Login) data) ;
+			case REGISTER:
+							RegisterHandler((Packet00Register) data);	
 				break;
 			case LOGOUT:
 							System.out.println("logout");								 
@@ -135,20 +138,20 @@ public class Client implements Runnable{
 	}
 	
 
-	private void RegisterHandler(Packet00Register data) {
-		System.out.println("registered successfully");
-		
+	private void InfoHandler(Packet9Info data) { 
+		JOptionPane.showMessageDialog(null, data.getData(), "INFO",JOptionPane.INFORMATION_MESSAGE);
 	}
 
-	private void LoginHandler(Packet01Login data) {
-		System.out.println("login successfully");
+	private void RegisterHandler(Packet00Register data) {
+		LoginWindow LoginWindow = new LoginWindow();
+		LoginWindow.getLoginIdField().setText(data.getData().getPassword());// extract the user Id that the server placed in the password field 
+		mainWindow.getDesktopPane().add(LoginWindow);
 	}
-	
 	
 	private void UserDataHandler(Packet07User data) {
 		if(data.getData().getFirstName() != null) {
-			mainWindow.getDesktopPane().add(new Dashboard(data.getData().getFirstName() + " " + data.getData().getLastName()));
-			((JInternalFrame) mainWindow.getDesktopPane().getComponent(0)).dispose(); 
+			mainWindow.getDesktopPane().add(new Dashboard(data.getData()));
+			((JInternalFrame) mainWindow.getDesktopPane().getComponent(0)).dispose();// remove  login window
 		}else 
 			JOptionPane.showMessageDialog(null, "Invalid Id or Password", "",JOptionPane.ERROR_MESSAGE);
 	}

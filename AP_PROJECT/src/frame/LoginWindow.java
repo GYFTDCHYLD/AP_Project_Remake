@@ -118,4 +118,9 @@ public class LoginWindow extends JInternalFrame implements ActionListener{
 			
 		} 
 	}
+	public JTextField getLoginIdField() {
+		return loginIdField;
+	}
+	
+	
 }

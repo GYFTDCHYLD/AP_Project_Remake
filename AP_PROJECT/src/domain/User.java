@@ -77,5 +77,4 @@ public class User  implements Serializable{
 	public void setComplains(List<Complain> complains) {
 		Complains = complains;
 	}
-	
 }

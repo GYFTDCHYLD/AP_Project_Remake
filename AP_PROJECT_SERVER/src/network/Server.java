@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import domain.Customer;
+import domain.Employee;
 import domain.User;
 import packet.Packet;
 import packet.Packet00Register;
@@ -16,6 +18,7 @@ import packet.Packet01Login;
 import packet.Packet02Logout;
 import packet.Packet03Chat;
 import packet.Packet07User;
+import packet.Packet9Info;
 import packet.Packet.PacketTypes;
 
 public class Server{
@@ -30,9 +33,9 @@ public class Server{
 		
 		try {
 			connectedUsers = new ArrayList<User>(); 
-			User User = new User("C123","Craig", "Reid", "12345");
+			User User = new Employee("C123","Craig", "Reid", "12345", "Technitian");  
 			addConnection(User); 
-			User = new User("A123","Ashari", "Jones", "12345");
+			User = new Customer("A123","Ashari", "Jones", "12345");
 			addConnection(User); 
 			this.serverSocket = new ServerSocket(8000);
 		}
@@ -135,7 +138,13 @@ public class Server{
 		}
 
 		private void RegisterHandler(Packet00Register data) {
-			sendData(data);
+			String id = (data.getData().getFirstName().charAt(0))+connectedUsers.size()+"34";
+			User User = new Customer(id, data.getData().getFirstName(), data.getData().getFirstName(), data.getData().getPassword());
+			addConnection(User);
+			Packet infoPacket = new Packet9Info("Sussessfully Registered");
+			((Packet00Register)data).getData().setPassword(id);// replace the pasword in the object with the New User ID 
+			sendData(data);// send the the object to the user to extract the User ID
+			sendData(infoPacket);// send the info object/packet to the user
 		}
 		
 
@@ -146,6 +155,7 @@ public class Server{
 					loginData = new Packet07User(user);
 				}
 			}
+			//addConnection(loginData.getData());
 			sendData(loginData);
 		}
 		
