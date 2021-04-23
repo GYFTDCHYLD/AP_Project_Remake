@@ -138,6 +138,7 @@ public class Client implements Runnable{
 	
 
 	private void InfoHandler(Packet9Info data) { 
+		mainWindow.setMessageFromServer(data.getData());
 		JOptionPane.showMessageDialog(null, data.getData(), "INFO",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
 	}
 
@@ -156,7 +157,7 @@ public class Client implements Runnable{
 			JOptionPane.showMessageDialog(null, "Invalid Id or Password", "",JOptionPane.ERROR_MESSAGE);
 	}
 	
-	private void ChatHandler(Packet03Chat data) { 
+	private void ChatHandler(Packet03Chat data) {  
 		mainWindow.getDesktopPane().add(new ChatWindow());
 	}
 

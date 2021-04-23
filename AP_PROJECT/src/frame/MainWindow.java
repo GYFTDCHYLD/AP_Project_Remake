@@ -41,7 +41,8 @@ public class MainWindow extends JFrame{
 	private JLabel background;
 	private loadImages loadImages; 
 	private static LoginWindow LoginWindow; 
-	public static Client ClientSocket; 
+	public static Client ClientSocket;
+	private static String messageFromServer;
 	
 	
 	
@@ -194,6 +195,16 @@ public class MainWindow extends JFrame{
 		return ClientSocket;
 	}
 	
+	
+	
+	public static String getMessageFromServer() {
+		return messageFromServer;
+	}
+
+	public static  void setMessageFromServer(String message) { 
+		messageFromServer = message;
+	}
+
 	public static String hashPasword(String password){
 		try {
 			MessageDigest m;

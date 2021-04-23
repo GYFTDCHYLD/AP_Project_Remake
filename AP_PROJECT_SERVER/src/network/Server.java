@@ -17,6 +17,7 @@ import packet.Packet00Register;
 import packet.Packet01Login;
 import packet.Packet02Logout;
 import packet.Packet03Chat;
+import packet.Packet04Complain;
 import packet.Packet07User;
 import packet.Packet9Info;
 import packet.Packet.PacketTypes;
@@ -137,9 +138,13 @@ public class Server{
 				case CHAT: 
 								ChatHandler((Packet03Chat) data);	 	
 					break;
+				case COMPLAIN: 
+								ComplainHandler((Packet04Complain) data); 	 	
+		break;
 				
 			}
 		}
+
 
 		private void RegisterHandler(Packet00Register data) {
 			String id = (data.getData().getFirstName()).substring(0,1) + "34" + connectedUsers.size();//create user Id Using Fist letter of first name plus 34 plus the amount of user;
@@ -161,6 +166,11 @@ public class Server{
 			}
 			//addConnection(loginData.getData());
 			sendData(loginData);
+		}
+		
+		private void ComplainHandler(Packet04Complain data) {
+			Packet infoPacket = new Packet9Info("Complain Recieved"); 
+			sendData(infoPacket);// send the info object/packet to the user
 		}
 		
 		private void ChatHandler(Packet03Chat data) {  
