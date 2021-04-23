@@ -18,6 +18,7 @@ import packet.Packet07User;
 import packet.Packet9Info;
 import packet.Packet.PacketTypes;
 import packet.Packet00Register;
+import frame.ChatWindow;
 import frame.Dashboard;
 import frame.LoginWindow;
 import frame.MainWindow;
@@ -139,13 +140,14 @@ public class Client implements Runnable{
 	
 
 	private void InfoHandler(Packet9Info data) { 
-		JOptionPane.showMessageDialog(null, data.getData(), "INFO",JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(null, data.getData(), "INFO",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
 	}
 
 	private void RegisterHandler(Packet00Register data) {
 		LoginWindow LoginWindow = new LoginWindow();
 		LoginWindow.getLoginIdField().setText(data.getData().getPassword());// extract the user Id that the server placed in the password field 
 		mainWindow.getDesktopPane().add(LoginWindow);
+		mainWindow.getDesktopPane().moveToFront(LoginWindow); //move the login window to the front of all component, without doing this, it would ended up behind the background image the was added b4 it  
 	}
 	
 	private void UserDataHandler(Packet07User data) {
@@ -157,7 +159,7 @@ public class Client implements Runnable{
 	}
 	
 	private void ChatHandler(Packet03Chat data) { 
-		//mainWindow.getDesktopPane().getComponent(1)).append(data.getData().getSender() + ": " + data.getData().getResponse() + "\n");
+		mainWindow.getDesktopPane().add(new ChatWindow());
 	}
 
 

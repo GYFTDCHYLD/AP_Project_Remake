@@ -34,9 +34,7 @@ public class Server{
 		try {
 			connectedUsers = new ArrayList<User>(); 
 			User User = new Employee("C123","Craig", "Reid", "12345", "Technitian");  
-			addConnection(User); 
-			User = new Customer("A123","Ashari", "Jones", "12345");
-			addConnection(User); 
+			addConnection(User);
 			this.serverSocket = new ServerSocket(8000);
 		}
 		catch(Exception ex) {
@@ -138,7 +136,7 @@ public class Server{
 		}
 
 		private void RegisterHandler(Packet00Register data) {
-			String id = (data.getData().getFirstName().charAt(0))+connectedUsers.size()+"34";
+			String id = (data.getData().getFirstName()).substring(0,1) + "34" + connectedUsers.size();//create user Id Using Fist letter of first name plus 34 plus the amount of user;
 			User User = new Customer(id, data.getData().getFirstName(), data.getData().getFirstName(), data.getData().getPassword());
 			addConnection(User);
 			Packet infoPacket = new Packet9Info("Sussessfully Registered");
