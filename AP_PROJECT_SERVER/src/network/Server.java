@@ -33,12 +33,14 @@ public class Server{
 		
 		try {
 			connectedUsers = new ArrayList<User>(); 
-			User User = new Employee("C123","Craig", "Reid", "12345", "Technitian");  
+			User User = new Employee("C123", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Technitian");  
+			addConnection(User);
+			User = new Employee("C124", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Customer"); 
 			addConnection(User);
 			this.serverSocket = new ServerSocket(8000);
 		}
-		catch(Exception ex) {
-			ex.printStackTrace();
+		catch(Exception e) {
+			System.err.println("error " + e.getMessage());
 		}
 		this.date = Calendar.getInstance();
 		this.clientCount = 0;
@@ -55,7 +57,7 @@ public class Server{
 				Thread thread = new Thread((Runnable) clientHandler);
 				thread.start();
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.err.println("error " + e.getMessage());
 			}
 		}
 	}
@@ -73,18 +75,20 @@ public class Server{
 				this.objOs = new ObjectOutputStream(clientHandlerSocket.getOutputStream());
 				this.objIs = new ObjectInputStream(clientHandlerSocket.getInputStream());
 			}
-			catch(Exception ex) {
-				ex.printStackTrace();
+			catch(Exception e) {
+				System.err.println("error " + e.getMessage());
 			}
+			Packet infoPacket = new Packet9Info("Sussessfully Connected to server");
+			sendData(infoPacket);// send the info object/packet to the user
 		}
 		
 		public void sendData(Packet data) { 
 			try {
 				objOs.writeObject(data);
 			} catch (IOException e) {
-				System.out.println(" error sending data to client " + e.getMessage());
+				System.out.println("error sending data to client " + e.getMessage());
 			}catch(NullPointerException e) {
-				System.out.println(" error sending data to client " + e.getMessage());
+				System.out.println("error sending data to client " + e.getMessage());
 			}
 		} 
 		
@@ -94,8 +98,10 @@ public class Server{
 				data = (Packet) objIs.readObject();
 			} catch (IOException e) {
 				System.out.println("error recieving data from client " + e.getMessage());
-			} catch (ClassNotFoundException e) {
-				System.out.println("error recieving data from client " + e.getMessage());
+			}catch (ClassNotFoundException e) {
+				System.out.println(" error recieving data from client " + e.getMessage()); 
+			}catch(NullPointerException e) {
+				System.err.println("error recieving data from client" + e.getMessage());
 			}
 			return data;
 			
@@ -137,7 +143,7 @@ public class Server{
 
 		private void RegisterHandler(Packet00Register data) {
 			String id = (data.getData().getFirstName()).substring(0,1) + "34" + connectedUsers.size();//create user Id Using Fist letter of first name plus 34 plus the amount of user;
-			User User = new Customer(id, data.getData().getFirstName(), data.getData().getFirstName(), data.getData().getPassword());
+			User User = new Customer(id,data.getData().getNameTitle(), data.getData().getFirstName(), data.getData().getLastName(), data.getData().getPassword());
 			addConnection(User);
 			Packet infoPacket = new Packet9Info("Sussessfully Registered");
 			((Packet00Register)data).getData().setPassword(id);// replace the pasword in the object with the New User ID 
@@ -186,7 +192,7 @@ public class Server{
 			this.connectedUsers.remove(getPlayerMPIndex(data.getData().getUserId()));
 			data.writeData(this);
 		} catch (IndexOutOfBoundsException e) {
-
+			System.err.println("error " + e.getMessage());
 		}
 	}
 

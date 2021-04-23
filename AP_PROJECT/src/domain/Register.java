@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public class Register implements Serializable{
 	
+	private String nameTitle;
 	private String firstName;
 	private String lastName;
 	private long phoneNumber;
@@ -17,13 +18,25 @@ public class Register implements Serializable{
 	}
 	
 	
-	public Register(String firstName, String lastName, long phoneNumber, String email, String password) {
+	public Register(String nameTitle, String firstName, String lastName, long phoneNumber, String email, String password) {
 		super();
+		
+		this.nameTitle = nameTitle;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.phoneNumber = phoneNumber;
 		this.email = email;
 		this.password = password;
+	}
+
+	
+	public String getNameTitle() {
+		return nameTitle;
+	}
+
+
+	public void setNameTitle(String nameTitle) {
+		this.nameTitle = nameTitle;
 	}
 
 

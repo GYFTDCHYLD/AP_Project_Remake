@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -21,6 +22,10 @@ import network.Client;
 import packet.Packet00Register;
 
 public class SignUpWindow extends JInternalFrame implements ActionListener{
+	
+	private String[] choices;
+	private JComboBox<String> dropdown;
+	private JLabel nameTitle;
 	
 	private JTextField firstName;
 	private JLabel firstNameLabel;
@@ -48,73 +53,82 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 	
 	public void intializeComponent() {
 		
+		choices = new String[]{"", "Mr", "Ms", "Mrs"};
+		dropdown = new JComboBox<String>(choices);
+		dropdown.setBounds(10, 20, 180, 25);
+		
+		nameTitle = new JLabel("Name Title");
+		nameTitle.setBounds(200, 20, 150, 25);
+		nameTitle.setForeground(Color.WHITE);
+		nameTitle.setFont(new Font("arial", Font.TYPE1_FONT, 16));
+		
 		firstName = new JTextField(); 
-		firstName.setBounds(10, 20, 180, 25); 
+		firstName.setBounds(10, 60, 180, 25); 
 		firstName.setBorder(new LineBorder(java.awt.Color.RED, 1));
 		firstName.setFont(new Font("arial", Font.TYPE1_FONT, 16)); 
 		
 		firstNameLabel = new JLabel("first Name"); 
-		firstNameLabel.setBounds(200, 20, 150, 25);
+		firstNameLabel.setBounds(200, 60, 150, 25);
 		firstNameLabel.setForeground(Color.WHITE);
 		firstNameLabel.setFont(new Font("arial", Font.TYPE1_FONT, 16));
 		
 		lastName = new JTextField(); 
-		lastName.setBounds(10, 60, 180, 25); 
+		lastName.setBounds(10, 100, 180, 25); 
 		lastName.setBorder(new LineBorder(java.awt.Color.RED, 1));
 		lastName.setFont(new Font("arial", Font.TYPE1_FONT, 16)); 
 		
 		lastNameLabel = new JLabel("Last Name"); 
-		lastNameLabel.setBounds(200, 60, 150, 25);
+		lastNameLabel.setBounds(200, 100, 150, 25);
 		lastNameLabel.setForeground(Color.WHITE);
 		lastNameLabel.setFont(new Font("arial", Font.TYPE1_FONT, 16));
 		
 		email = new JTextField(); 
-		email.setBounds(10, 100, 180, 25); 
+		email.setBounds(10, 140, 180, 25); 
 		email.setBorder(new LineBorder(java.awt.Color.RED, 1));
 		email.setFont(new Font("arial", Font.TYPE1_FONT, 16)); 
 		
 		emailLabel = new JLabel("Email"); 
-		emailLabel.setBounds(200, 100, 150, 25);
+		emailLabel.setBounds(200, 140, 150, 25);
 		emailLabel.setForeground(Color.WHITE);
 		emailLabel.setFont(new Font("arial", Font.TYPE1_FONT, 16));
 		
 		phoneNumber = new JTextField(); 
-		phoneNumber.setBounds(10, 140, 180, 25); 
+		phoneNumber.setBounds(10, 180, 180, 25); 
 		phoneNumber.setBorder(new LineBorder(java.awt.Color.RED, 1));
 		phoneNumber.setFont(new Font("arial", Font.TYPE1_FONT, 16)); 
 		
 		phoneNumberLabel = new JLabel("Phone Number"); 
-		phoneNumberLabel.setBounds(200, 140, 150, 25);
+		phoneNumberLabel.setBounds(200, 180, 150, 25);
 		phoneNumberLabel.setForeground(Color.WHITE);
 		phoneNumberLabel.setFont(new Font("arial", Font.TYPE1_FONT, 16));
 		
 		passwordField = new JPasswordField(); 
-		passwordField.setBounds(10, 180, 180, 25); 
+		passwordField.setBounds(10, 220, 180, 25); 
 		passwordField.setBorder(new LineBorder(java.awt.Color.RED, 1));
 		passwordField.setFont(new Font("arial", Font.TYPE1_FONT, 16));
 		
 		passwordLabel = new JLabel("Password");
-		passwordLabel.setBounds(200, 180, 150, 25);
+		passwordLabel.setBounds(200, 220, 150, 25);
 		passwordLabel.setForeground(Color.WHITE);
 		passwordLabel.setFont(new Font("arial", Font.TYPE1_FONT, 16));
 		
 		passwordConfirmField = new JPasswordField(); 
-		passwordConfirmField.setBounds(10, 220, 180, 25); 
+		passwordConfirmField.setBounds(10, 260, 180, 25); 
 		passwordConfirmField.setBorder(new LineBorder(java.awt.Color.RED, 1));
 		passwordConfirmField.setFont(new Font("arial", Font.TYPE1_FONT, 16));
 		
 		passwordConfirmLabel = new JLabel("Confirm Password");
-		passwordConfirmLabel.setBounds(200, 220, 150, 25);
+		passwordConfirmLabel.setBounds(200, 260, 150, 25);
 		passwordConfirmLabel.setForeground(Color.WHITE);
 		passwordConfirmLabel.setFont(new Font("arial", Font.TYPE1_FONT, 16));
 		
 		signUp = new JButton("Login");
 		signUp.addActionListener(this);
-		signUp.setBounds(80, 300, 100, 30);
+		signUp.setBounds(120, 320, 100, 30);
 		
 		Login = new JButton("Submit");
 		Login.addActionListener(this);
-		Login.setBounds(200, 300, 100, 30);
+		Login.setBounds(240, 320, 100, 30);
 		
 		background = new JLabel();
 		background.setHorizontalAlignment(SwingConstants.CENTER);
@@ -123,6 +137,9 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 		
 	}
 	public void addComponentsToWindow(){
+		getContentPane().add(dropdown);
+		getContentPane().add(nameTitle);
+		
 		getContentPane().add(firstName);
 		getContentPane().add(firstNameLabel);
 		
@@ -165,7 +182,9 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		
 		if(e.getActionCommand().equals("Submit")) {
-			if(firstName.getText().equals("")) 
+			if(dropdown.getSelectedItem().equals("")) 
+				JOptionPane.showMessageDialog(null, "Select Name Title", "",JOptionPane.ERROR_MESSAGE);
+			else if(firstName.getText().equals("")) 
 				JOptionPane.showMessageDialog(null, "Enter your First Name", "",JOptionPane.ERROR_MESSAGE);
 			else if(lastName.getText().equals("")) 
 				JOptionPane.showMessageDialog(null, "Enter your Last Name", "",JOptionPane.ERROR_MESSAGE);
@@ -180,7 +199,7 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 			else if(!passwordField.getText().equals(passwordConfirmField.getText())) 
 				JOptionPane.showMessageDialog(null, "Passwords Did Not Match!", "",JOptionPane.ERROR_MESSAGE);
 			else {
-				Register Register = new Register(firstName.getText(),lastName.getText(),Long.valueOf(phoneNumber.getText()), email.getText(), Client.getMainWindow().hashPasword(passwordField.getText())); 
+				Register Register = new Register(dropdown.getSelectedItem().toString(),firstName.getText(),lastName.getText(),Long.valueOf(phoneNumber.getText()), email.getText(), Client.getMainWindow().hashPasword(passwordField.getText())); 
 				Packet00Register Packet = new Packet00Register(Register);
 				Packet.writeData(MainWindow.getClientSocket());
 				this.dispose();

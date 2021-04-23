@@ -113,7 +113,7 @@ public class MainWindow extends JFrame{
 		menuAbout.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(null, "info about this awsome app");
+				JOptionPane.showMessageDialog(null, "Michrstar Cable Company App");
 			}
 		});
 		

@@ -10,7 +10,9 @@ public class loadImages {
 	
 	public static BufferedImage formBackground;
 	public static BufferedImage dashboardBackground;
-	public static BufferedImage mainBackground; 
+	public static BufferedImage mainBackground;
+	public static BufferedImage maleAvtar; 
+	public static BufferedImage femaleAvtar;  
 	
 	
 	
@@ -19,6 +21,8 @@ public class loadImages {
 		mainBackground = imageLoader("/MainBackground.png");
 		formBackground = imageLoader("/formBackground.jpg");
 		dashboardBackground = imageLoader("/DashboardBackground.jpg");
+		maleAvtar = imageLoader("/male.png");
+		femaleAvtar = imageLoader("/female.png");
 		
 		
 	}

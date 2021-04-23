@@ -11,8 +11,8 @@ public class Customer extends User  implements Serializable{
 		super();
 	}
 	
-	public Customer(String userId, String firstName, String lastName, String password) {
-		super(userId, firstName, lastName, password);
+	public Customer(String userId, String nameTitle, String firstName, String lastName, String password) {
+		super(userId, nameTitle, firstName, lastName, password);
 	}
 	
 	public Customer(BillingAccount billingAccount) {

@@ -9,10 +9,7 @@ import java.net.Socket;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 
-import domain.Customer;
-import domain.User;
 import packet.Packet;
-import packet.Packet01Login;
 import packet.Packet03Chat;
 import packet.Packet07User;
 import packet.Packet9Info;
@@ -51,8 +48,8 @@ public class Client implements Runnable{
 		try {
 			connectionSocket = new Socket(InetAddress.getLocalHost(), PORTNUMBER);
 		}
-		catch(IOException ex) {
-			ex.printStackTrace();
+		catch(IOException e) {
+			parsePacket(new Packet9Info("Not Connected to server:  " + e.getMessage()));
 		}
 	}
 	
@@ -62,7 +59,7 @@ public class Client implements Runnable{
 			objOs = new ObjectOutputStream(connectionSocket.getOutputStream());
 		}
 		catch(IOException e) {
-			e.printStackTrace();
+			parsePacket(new Packet9Info("Not Connected to server:  " + e.getMessage()));
 		}
 	}	
 
@@ -73,8 +70,8 @@ public class Client implements Runnable{
 			objIs.close();
 			connectionSocket.close();
 		}
-		catch(IOException ex) {
-			ex.printStackTrace();
+		catch(IOException e) {
+			System.err.println("error " + e.getMessage());
 		}
 	}
 	
@@ -94,9 +91,11 @@ public class Client implements Runnable{
 		try {
 			data = (Packet) objIs.readObject();
 		} catch (IOException e) {
-			System.out.println(" error recieving data from server " + e.getMessage());
+			System.out.println("error recieving data from server " + e.getMessage());
 		} catch (ClassNotFoundException e) {
-			System.out.println(" error recieving data from server " + e.getMessage());
+			System.out.println("error recieving data from server  " + e.getMessage()); 
+		}catch(NullPointerException e) {
+			System.err.println("error recieving data from server " + e.getMessage());
 		}
 		return data;
 		 
@@ -106,7 +105,6 @@ public class Client implements Runnable{
 		while(true) {
 			Packet data = readData(); 
 			parsePacket(data);
-			
 		}
 	}
 	
