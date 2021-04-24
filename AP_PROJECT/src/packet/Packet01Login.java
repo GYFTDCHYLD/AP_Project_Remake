@@ -1,7 +1,6 @@
 package packet;
 
 import network.Client;
-import domain.Login;
 
 public class Packet01Login extends Packet{
 	
@@ -9,11 +8,13 @@ public class Packet01Login extends Packet{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private String userId;
+	private String password; 
 	
-	Login Login;
-	public Packet01Login(Login data) {
+	public Packet01Login(String userId, String password) {
 		super(01);
-		Login = data;
+		this.userId = userId;
+		this.password = password;
 	}
 
 	@Override
@@ -21,11 +22,16 @@ public class Packet01Login extends Packet{
 		client.sendData(this); 
 	}
 
-
 	@Override
-	public Login getData() {
-		return this.Login;
+	public Object getData() {
+		return this;
 	}
 
+	public String getUserId() {
+		return userId;
+	}
 
+	public String getPassword() {
+		return password;
+	}
 }

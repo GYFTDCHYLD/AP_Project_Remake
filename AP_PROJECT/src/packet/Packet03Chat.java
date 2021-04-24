@@ -1,7 +1,6 @@
 package packet;
 
 import network.Client;
-import domain.Chat;
 
 public class Packet03Chat extends Packet{
 	
@@ -9,12 +8,15 @@ public class Packet03Chat extends Packet{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private String sender;
+	private String reciever;
+	private String message;
 	
-	private Chat Message; 
-	
-	public Packet03Chat(Chat data) {
+	public Packet03Chat(String sender, String reciever, String message) { 
 		super(03);
-		Message = data;
+		this.sender = sender;
+		this.reciever = reciever;
+		this.message = message;
 	}
 	
 	
@@ -24,8 +26,21 @@ public class Packet03Chat extends Packet{
 	}
 
 	@Override
-	public Chat getData() {
-		return this.Message;
+	public Packet03Chat getData() {
+		return this; 
 	}
-	
+
+	public String getSender() {
+		return sender;
+	}
+
+
+	public String getReciever() {
+		return reciever;
+	}
+
+
+	public String getMessage() {
+		return message;
+	}	
 }

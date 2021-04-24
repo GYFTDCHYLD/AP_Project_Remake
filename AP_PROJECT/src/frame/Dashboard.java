@@ -25,6 +25,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import image.loadImages;
+import packet.Packet02Logout;
 import packet.Packet04Complain;
 import domain.Complain;
 import domain.Employee;
@@ -47,6 +48,8 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	private JButton viewComplain;
 	private JButton viewAccount;
 	private JButton payBill;
+	
+	private JButton logOut;
 	
 	private JButton assignComplain;
 	
@@ -94,6 +97,10 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		payBill = new JButton("Pay Bill");
 		payBill.setBounds(540, 20,120, 30);
 		payBill.addActionListener(this);
+		
+		logOut = new JButton("logout");
+		logOut.setBounds(540, 60,120, 30);
+		logOut.addActionListener(this);
 		
 		assignComplain = new JButton("Assign a complain");
 		assignComplain.setBounds(120, 20,150, 30);
@@ -176,6 +183,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		dashboard.add(complainText);
 		dashboard.add(complainLabel);
 		dashboard.add(submit);
+		dashboard.add(logOut);
 		
 		dashboard.add(background);
 	}
@@ -216,6 +224,10 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			case "Assign a complain":
 										break;
 			case "Set visit date":
+										break;
+			case "logout":
+										Packet02Logout Packet = new Packet02Logout(MainWindow.getLoginID());
+										Packet.writeData(MainWindow.getClientSocket());
 										break;
 			
 			default:
@@ -308,15 +320,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	private void sendComplain() { 
 		Packet04Complain Packet = new Packet04Complain(new Complain(1, user.getUserId(), String.valueOf(complainType.getSelectedItem()), complainText.getText(), "", "", new Date(0,0,0)));
 		Packet.writeData(MainWindow.getClientSocket()); 
-		
-		for(int i = 0; i < 1000000; i++) {
-			if(MainWindow.getMessageFromServer().equals("Complain Recieved")) {// loop and check for message from server
-				this.complainText.setText("");// clear the text window if complain has been sent
-				JOptionPane.showMessageDialog(null,MainWindow.getMessageFromServer(), "From Server",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
-				MainWindow.setMessageFromServer("");// clear the message from server 
-				break;
-			}
-		}
+		this.complainText.setText("");
 	}
 	
 			
@@ -350,48 +354,19 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
     }
 	
 	public void createTable() {
-		String column[]={"ID","NAME","SALARY"};
-		String data[][]={ 		{"101","Amit","670000"},    
-								{"102","Jai","780000"}, 
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								{"101","Amit","670000"},    
-								{"102","Jai","780000"},
-								
-								{"101","Sachin","700000"}
-						};  
+
+		String column[]={"ID","TYPE","MESSAGE","REPRESENTATIVE","ASSIGNED TECHNICIAN","VISIT DATE"};
+		String data[][];
+		data = new String[MainWindow.getComplain().size()][7];
+		for(int row = 0; row < MainWindow.getComplain().size(); row ++) {
+			data[row][0] = MainWindow.getComplain().get(row).getId()+"";
+			data[row][1] = MainWindow.getComplain().get(row).getType();
+			data[row][2] = MainWindow.getComplain().get(row).getMessage();
+			data[row][3] = MainWindow.getComplain().get(row).getRepId();
+			data[row][4] = MainWindow.getComplain().get(row).getTecId();
+			data[row][5] = MainWindow.getComplain().get(row).getVisitDate()+"";
+			
+		}
 			
 			
 		table = new JTable(data, column);

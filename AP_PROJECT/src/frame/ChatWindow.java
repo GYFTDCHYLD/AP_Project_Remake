@@ -12,7 +12,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import domain.Chat;
 import image.loadImages;
 import packet.Packet03Chat;
 
@@ -78,7 +77,7 @@ public class ChatWindow extends JInternalFrame implements ActionListener{
 		String getText = ChatBox.getText();
 		if(!getText.equals("")) {
 			ChatBox.setText("");
-			Packet03Chat Chat = new Packet03Chat(new Chat("Me", "", getText));
+			Packet03Chat Chat = new Packet03Chat("Me", "", getText);
 			Chat.writeData(MainWindow.getClientSocket());
 		}
 		

@@ -14,6 +14,8 @@ import java.awt.event.WindowListener;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDesktopPane;
@@ -21,12 +23,14 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
+import domain.Complain;
 import image.loadImages;
 import network.Client;
+import packet.Packet02Logout;
+import packet.Packet03Chat;
 
 public class MainWindow extends JFrame{
 	private static JDesktopPane desktopPane;
@@ -38,11 +42,16 @@ public class MainWindow extends JFrame{
 	private MenuItem menuClose;
 	private TrayIcon trayIcon;
 	private PopupMenu popup;
-	private JLabel background;
+	public static JLabel background;
 	private loadImages loadImages; 
 	private static LoginWindow LoginWindow; 
 	public static Client ClientSocket;
 	private static String messageFromServer;
+	private static String loginID;
+
+	private static List<Complain> complain;  
+	private static List<Packet03Chat> chat;  
+	
 	
 	
 	
@@ -60,6 +69,8 @@ public class MainWindow extends JFrame{
 	}
 
 	public void initializeComponent() {
+		setComplain(new ArrayList<Complain>());
+		setChat(new ArrayList<Packet03Chat>()); 
 		loadImages = new loadImages();
 		loadImages.init();
 		desktopPane = new JDesktopPane();
@@ -107,8 +118,10 @@ public class MainWindow extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				SystemTray.getSystemTray().remove(trayIcon);
-				System.exit(0); 
-			}
+				Packet02Logout Packet = new Packet02Logout(getLoginID());
+				Packet.writeData(MainWindow.getClientSocket());
+				System.exit(MainWindow.EXIT_ON_CLOSE); 
+			} 
 		});
 		
 		menuAbout.addActionListener( new ActionListener() {
@@ -225,4 +238,29 @@ public class MainWindow extends JFrame{
 		}
 		return password; 
 	}
+
+	public static List<Packet03Chat> getChat() {
+		return chat;
+	}
+
+	public void setChat(List<Packet03Chat> chat) {
+		this.chat = chat;
+	}
+
+	public static List<Complain> getComplain() {
+		return complain;
+	}
+
+	public static void setComplain(List<Complain> list) {
+		complain = list;
+	}
+
+	public static void setLoginID(String id) {
+		loginID = id;
+	}
+
+	public static String getLoginID() {
+		return loginID;
+	}
+
 }

@@ -1,18 +1,17 @@
 package packet;
 
-import network.Server;
-import domain.Logout; 
+import network.Server; 
 
 public class Packet02Logout extends Packet {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-    Logout Logout;
+	private String userId;
 
-    public Packet02Logout(Logout data) {
+    public Packet02Logout(String data) {
         super(02);
-        Logout = data;
+        userId = data;
     }
 	@Override
 	public void writeData(Server client) {
@@ -21,7 +20,7 @@ public class Packet02Logout extends Packet {
 
 
     @Override
-    public Logout getData() {
-        return this.Logout;
+    public String getData() {
+        return this.userId;
     }
 }

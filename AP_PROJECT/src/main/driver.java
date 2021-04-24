@@ -1,7 +1,6 @@
 package main;
 
 import frame.MainWindow;
-import network.Client;
 
 public class driver {
 

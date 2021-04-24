@@ -1,7 +1,6 @@
 package packet;
 
 import network.Server;
-import domain.User;
 
 public class Packet9Info extends Packet{
 	

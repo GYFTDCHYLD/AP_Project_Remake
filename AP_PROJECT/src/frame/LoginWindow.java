@@ -17,9 +17,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
 import image.loadImages;
-import network.Client;
 import packet.Packet01Login;
-import domain.Login;
 
 
 public class LoginWindow extends JInternalFrame implements ActionListener{
@@ -111,8 +109,7 @@ public class LoginWindow extends JInternalFrame implements ActionListener{
 			else if(passwordField.getText().equals("")) 
 				JOptionPane.showMessageDialog(null, "Enter your Password", "",JOptionPane.ERROR_MESSAGE);
 			else {
-				Login Login = new Login(loginIdField.getText(), MainWindow.hashPasword(passwordField.getText()));  
-				Packet01Login Packet = new Packet01Login(Login);
+				Packet01Login Packet = new Packet01Login(loginIdField.getText(), MainWindow.hashPasword(passwordField.getText()));
 				Packet.writeData(MainWindow.getClientSocket());  
 			}
 			
