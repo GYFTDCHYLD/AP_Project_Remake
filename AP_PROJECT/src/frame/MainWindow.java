@@ -55,7 +55,7 @@ public class MainWindow extends JFrame{
 		addComponentsToWindow();
 		registerListeners();
 		setWindowProperties();
-		ClientSocket = new Client(this); 
+		ClientSocket = new Client(); 
 		ClientSocket.run(); 
 	}
 
@@ -187,7 +187,7 @@ public class MainWindow extends JFrame{
 		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 	}
 	
-	public JDesktopPane getDesktopPane() {
+	public static JDesktopPane getDesktopPane() {
 		return desktopPane;
 	}
 
@@ -201,7 +201,7 @@ public class MainWindow extends JFrame{
 		return messageFromServer;
 	}
 
-	public static  void setMessageFromServer(String message) { 
+	public static  void setMessageFromServer(String message) {  
 		messageFromServer = message;
 	}
 

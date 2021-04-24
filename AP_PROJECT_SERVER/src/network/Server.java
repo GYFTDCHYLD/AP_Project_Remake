@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import domain.Chat;
+import domain.Complain;
 import domain.Customer;
 import domain.Employee;
 import domain.User;
@@ -29,11 +31,16 @@ public class Server{
 	private Calendar date;
 	private int clientCount;
 	private List<User> connectedUsers; 
+	private List<Complain> complain; 
+	private List<Chat> chat; 
 	
 	public Server() {
 		
 		try {
 			connectedUsers = new ArrayList<User>(); 
+			complain = new ArrayList<Complain>();
+			chat = new ArrayList<Chat>();
+			
 			User User = new Employee("C123", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Technitian");  
 			addConnection(User);
 			User = new Employee("C124", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Customer"); 
@@ -58,6 +65,8 @@ public class Server{
 				Thread thread = new Thread((Runnable) clientHandler);
 				thread.start();
 			} catch (IOException e) {
+				System.err.println("error " + e.getMessage());
+			}catch(Exception e) {
 				System.err.println("error " + e.getMessage());
 			}
 		}
@@ -140,7 +149,7 @@ public class Server{
 					break;
 				case COMPLAIN: 
 								ComplainHandler((Packet04Complain) data); 	 	
-		break;
+					break;
 				
 			}
 		}
@@ -169,11 +178,13 @@ public class Server{
 		}
 		
 		private void ComplainHandler(Packet04Complain data) {
+			complain.add(data.getData());
 			Packet infoPacket = new Packet9Info("Complain Recieved"); 
 			sendData(infoPacket);// send the info object/packet to the user
 		}
 		
-		private void ChatHandler(Packet03Chat data) {  
+		private void ChatHandler(Packet03Chat data) { 
+			chat.add(data.getData());
 			sendData(data);
 		}
 		

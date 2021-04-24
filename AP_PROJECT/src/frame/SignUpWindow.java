@@ -199,13 +199,13 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 			else if(!passwordField.getText().equals(passwordConfirmField.getText())) 
 				JOptionPane.showMessageDialog(null, "Passwords Did Not Match!", "",JOptionPane.ERROR_MESSAGE);
 			else {
-				Register Register = new Register(dropdown.getSelectedItem().toString(),firstName.getText(),lastName.getText(),Long.valueOf(phoneNumber.getText()), email.getText(), Client.getMainWindow().hashPasword(passwordField.getText())); 
+				Register Register = new Register(dropdown.getSelectedItem().toString(),firstName.getText(),lastName.getText(),Long.valueOf(phoneNumber.getText()), email.getText(), MainWindow.hashPasword(passwordField.getText())); 
 				Packet00Register Packet = new Packet00Register(Register);
 				Packet.writeData(MainWindow.getClientSocket());
 				this.dispose();
 			}
 		}else if(e.getActionCommand().equals("Login")) {
-			Client.getMainWindow().getDesktopPane().add(new LoginWindow());
+			MainWindow.getDesktopPane().add(new LoginWindow());
 			this.dispose();
 		}
 	}

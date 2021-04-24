@@ -5,12 +5,17 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 
+import domain.Chat;
+import domain.Complain;
 import packet.Packet;
 import packet.Packet03Chat;
+import packet.Packet04Complain;
 import packet.Packet07User;
 import packet.Packet9Info;
 import packet.Packet.PacketTypes;
@@ -31,13 +36,15 @@ public class Client implements Runnable{
 	private Socket connectionSocket; 
 	private  ObjectOutputStream objOs;
 	private ObjectInputStream objIs;
-	private static MainWindow mainWindow;  
+	private List<Complain> complain; 
+	private List<Chat> chat; 
 	
 	
 
 	
-	public Client(MainWindow main) {
-		mainWindow = main;
+	public Client() {
+		complain = new ArrayList<Complain>();
+		chat = new ArrayList<Chat>();
 		this.createConnection();
 		this.configureStreams();
 		
@@ -132,33 +139,43 @@ public class Client implements Runnable{
 			case USERS: 
 							UserDataHandler((Packet07User) data);			
 				break;
+			case COMPLAIN: 
+							ComplainHandler((Packet04Complain) data); 	 	
+			break;
 			
 		}
 	}
 	
 
 	private void InfoHandler(Packet9Info data) { 
-		mainWindow.setMessageFromServer(data.getData());
-		JOptionPane.showMessageDialog(null, data.getData(), "INFO",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
+		System.out.println(data.getData());
+		MainWindow.setMessageFromServer(data.getData());
 	}
 
 	private void RegisterHandler(Packet00Register data) {
 		LoginWindow LoginWindow = new LoginWindow();
 		LoginWindow.getLoginIdField().setText(data.getData().getPassword());// extract the user Id that the server placed in the password field 
-		mainWindow.getDesktopPane().add(LoginWindow);
-		mainWindow.getDesktopPane().moveToFront(LoginWindow); //move the login window to the front of all component, without doing this, it would ended up behind the background image the was added b4 it  
+		MainWindow.getDesktopPane().add(LoginWindow);
+		MainWindow.getDesktopPane().moveToFront(LoginWindow); //move the login window to the front of all component, without doing this, it would ended up behind the background image the was added b4 it  
 	}
 	
 	private void UserDataHandler(Packet07User data) {
 		if(data.getData().getFirstName() != null) {
-			mainWindow.getDesktopPane().add(new Dashboard(data.getData()));
-			((JInternalFrame) mainWindow.getDesktopPane().getComponent(0)).dispose();// remove  login window
+			MainWindow.getDesktopPane().add(new Dashboard(data.getData()));
+			((JInternalFrame) MainWindow.getDesktopPane().getComponent(0)).dispose();// remove  login window
 		}else 
 			JOptionPane.showMessageDialog(null, "Invalid Id or Password", "",JOptionPane.ERROR_MESSAGE);
 	}
 	
-	private void ChatHandler(Packet03Chat data) {  
-		mainWindow.getDesktopPane().add(new ChatWindow());
+	private void ChatHandler(Packet03Chat data) { 
+		chat.add(data.getData());
+		MainWindow.getDesktopPane().add(new ChatWindow());
+	}
+	
+	private void ComplainHandler(Packet04Complain data) {
+		complain.add(data.getData());
+		Packet infoPacket = new Packet9Info("Complain Recieved"); 
+		sendData(infoPacket);// send the info object/packet to the user
 	}
 
 
@@ -173,11 +190,5 @@ public class Client implements Runnable{
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
-
-
-	public static MainWindow getMainWindow() {
-		return mainWindow;
-	}
-	
 	
 }

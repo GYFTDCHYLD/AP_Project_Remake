@@ -101,7 +101,7 @@ public class LoginWindow extends JInternalFrame implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		
 		if(e.getActionCommand().equals("Sign-Up")) {
-			Client.getMainWindow().getDesktopPane().add(new SignUpWindow());
+			MainWindow.getDesktopPane().add(new SignUpWindow());
 			this.dispose();
 		}
 		
@@ -111,7 +111,7 @@ public class LoginWindow extends JInternalFrame implements ActionListener{
 			else if(passwordField.getText().equals("")) 
 				JOptionPane.showMessageDialog(null, "Enter your Password", "",JOptionPane.ERROR_MESSAGE);
 			else {
-				Login Login = new Login(loginIdField.getText(), Client.getMainWindow().hashPasword(passwordField.getText()));  
+				Login Login = new Login(loginIdField.getText(), MainWindow.hashPasword(passwordField.getText()));  
 				Packet01Login Packet = new Packet01Login(Login);
 				Packet.writeData(MainWindow.getClientSocket());  
 			}

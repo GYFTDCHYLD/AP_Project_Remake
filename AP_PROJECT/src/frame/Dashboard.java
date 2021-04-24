@@ -13,13 +13,16 @@ import javax.swing.JComboBox;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
-import javax.swing.table.JTableHeader;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import image.loadImages;
 import packet.Packet04Complain;
@@ -28,10 +31,10 @@ import domain.Employee;
 import domain.User;
 
 
-public class Dashboard extends JInternalFrame implements ActionListener{
-	private JTabbedPane tablePane;
+public class Dashboard extends JInternalFrame implements ActionListener, ListSelectionListener{
+	private JScrollPane scrollPane;
 	private JTable table; 
-	private JTableHeader tableHeader; 
+	private ListSelectionModel cellSelect;
 	private User user;
 	private JDesktopPane dashboard;
 	
@@ -65,11 +68,6 @@ public class Dashboard extends JInternalFrame implements ActionListener{
 	public void intializeComponent() {
 		
 		dashboard = new JDesktopPane();
-				
-		tablePane = new JTabbedPane(); 
-		tablePane.setBounds(10, 50, 680, 450); 
-		tablePane.setBorder(new LineBorder(java.awt.Color.WHITE, 1));
-		tablePane.setFont(new Font("arial", Font.TYPE1_FONT, 16));
 		
 		profileImage = new JLabel();
 		profileImage.setHorizontalAlignment(SwingConstants.CENTER);
@@ -147,22 +145,14 @@ public class Dashboard extends JInternalFrame implements ActionListener{
 		submit.addActionListener(this);
 		submit.setVisible(false);
 		
-		table = new JTable();
-		table.setForeground(Color.WHITE);
-		table.setFont(new Font("arial", Font.TYPE1_FONT, 16));
-		
-
-		tableHeader = new JTableHeader();
-		tableHeader.setForeground(Color.WHITE);
-		tableHeader.setFont(new Font("arial", Font.TYPE1_FONT, 16));
-		
 		background = new JLabel();
 		background.setHorizontalAlignment(SwingConstants.CENTER);
 		background.setIcon(new ImageIcon(loadImages.dashboardBackground)); 
-		background.setBounds(0, 0,700, 500);
+		background.setBounds(0, 0,700, 600);
 			
 		
 	}
+	
 	public void addComponentsToWindow(String user){
 		add(dashboard);
 		if(user.equals("Customer")) {
@@ -186,11 +176,8 @@ public class Dashboard extends JInternalFrame implements ActionListener{
 		dashboard.add(complainText);
 		dashboard.add(complainLabel);
 		dashboard.add(submit);
-		dashboard.add(background);
 		
-		//table.add(tableHeader);
-		//tablePane.add(table);
-		//desktopPane.add(tablePane);
+		dashboard.add(background);
 	}
 	
 	public void DisplayComponent(String clicked){
@@ -200,6 +187,13 @@ public class Dashboard extends JInternalFrame implements ActionListener{
 		complainLabel.setVisible(false);
 		complainType.setVisible(false);
 		submit.setVisible(false);
+		
+		try {
+			scrollPane.setVisible(false);
+			dashboard.remove(scrollPane);
+		} catch (Exception e) {
+				
+		}
 		
 		switch (clicked) {
 		
@@ -212,6 +206,8 @@ public class Dashboard extends JInternalFrame implements ActionListener{
 										submit.setText("Send"); 
 										break;
 			case "View Complains":
+										
+										createTable();
 										break;
 			case "View Account":
 										break;
@@ -262,8 +258,24 @@ public class Dashboard extends JInternalFrame implements ActionListener{
 		else {
 			
 			if(e.getActionCommand().equals("Send")){
-				sendComplain();
-				complainCategory.setSelectedIndex(0); 
+				
+				if(complainCategory.getSelectedItem().equals("")) 
+					JOptionPane.showMessageDialog(null, "Choose a complain Category", "",JOptionPane.ERROR_MESSAGE);
+				else {
+					if(!complainCategory.getSelectedItem().equals("Other")) {
+						if(complainType.getSelectedItem().equals("")) {
+							JOptionPane.showMessageDialog(null, "Choose a complain type", "",JOptionPane.ERROR_MESSAGE);
+							return;
+						}
+					}
+					if(complainText.getText().equals("")) {
+						JOptionPane.showMessageDialog(null, "Type your Complain", "",JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					
+					sendComplain();
+				}
+					
 			}else {
 				complainType.setVisible(true); 
 				switch (String.valueOf(complainCategory.getSelectedItem())) {
@@ -297,14 +309,17 @@ public class Dashboard extends JInternalFrame implements ActionListener{
 		Packet04Complain Packet = new Packet04Complain(new Complain(1, user.getUserId(), String.valueOf(complainType.getSelectedItem()), complainText.getText(), "", "", new Date(0,0,0)));
 		Packet.writeData(MainWindow.getClientSocket()); 
 		
-		while(true) {
+		for(int i = 0; i < 1000000; i++) {
 			if(MainWindow.getMessageFromServer().equals("Complain Recieved")) {// loop and check for message from server
-				complainText.setText("");// clear the text window if complain has been sent
+				this.complainText.setText("");// clear the text window if complain has been sent
+				JOptionPane.showMessageDialog(null,MainWindow.getMessageFromServer(), "From Server",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
 				MainWindow.setMessageFromServer("");// clear the message from server 
 				break;
 			}
 		}
 	}
+	
+			
 	
 	
 	public JDesktopPane getDashboard() {
@@ -319,6 +334,86 @@ public class Dashboard extends JInternalFrame implements ActionListener{
 	public void setComplainText(String complainText) {
 		this.complainText.setText(complainText);
 	}
+	@Override
+	public void valueChanged(ListSelectionEvent e) {
+		 String Data = null;  
+         int[] row = table.getSelectedRows();  
+         int[] columns = table.getSelectedColumns();  
+         for (int i = 0; i < row.length; i++) {  
+           for (int j = 0; j < columns.length; j++) {  
+             Data = (String) table.getValueAt(row[i], columns[j]); 
+             
+           } 
+         }  
+         System.out.println("Table element selected is: " + Data);
+         
+    }
 	
-	
+	public void createTable() {
+		String column[]={"ID","NAME","SALARY"};
+		String data[][]={ 		{"101","Amit","670000"},    
+								{"102","Jai","780000"}, 
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								{"101","Amit","670000"},    
+								{"102","Jai","780000"},
+								
+								{"101","Sachin","700000"}
+						};  
+			
+			
+		table = new JTable(data, column);
+		table.setCellSelectionEnabled(true);
+		table.setForeground(Color.BLACK);
+		table.setGridColor(Color.BLUE);
+		table.setOpaque(true); 
+		table.setFont(new Font("arial", Font.PLAIN, 14));
+		table.setAutoscrolls(true); 
+		
+		cellSelect = table.getSelectionModel();  
+		cellSelect.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		cellSelect.addListSelectionListener(this);
+		
+		scrollPane = new JScrollPane(table); 
+		scrollPane.setBounds(10, 110, 680, 400); 
+		scrollPane.setOpaque(true);;
+		
+		dashboard.add(scrollPane);
+		dashboard.moveToFront(scrollPane); 
+		scrollPane.setVisible(true);
+		
+	}
+
 }
