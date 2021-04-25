@@ -9,11 +9,11 @@ public class Packet10Error extends Packet{
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	String info; 
+	private String error; 
 	
 	public Packet10Error(String data) {
 		super(10);
-		info = data;
+		error = data;
 	}
 	
 	
@@ -24,7 +24,7 @@ public class Packet10Error extends Packet{
 
 	@Override
 	public String getData() {
-		return this.info;
+		return this.error;
 	}
 	
 }

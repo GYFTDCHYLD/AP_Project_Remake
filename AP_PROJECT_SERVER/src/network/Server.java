@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 import domain.*;
 import packet.*;
 import packet.Packet.PacketTypes;
@@ -25,7 +27,7 @@ public class Server{
 	private List<Complain> complain;
 	private List<BillingAccount> billigAccount; 
 	private List<Packet03Chat> chat; 
-	private List<Thread> online;
+	private List<Thread> onlineThreads; 
 	private List<SocketAddress> online2;
 	
 	
@@ -37,7 +39,7 @@ public class Server{
 			complain = new ArrayList<Complain>();
 			billigAccount = new ArrayList<BillingAccount>(); 
 			chat = new ArrayList<Packet03Chat>();
-			online = new ArrayList<Thread>();
+			onlineThreads = new ArrayList<Thread>();
 			online2 = new ArrayList<SocketAddress>();
 			
 			User User = new Employee("S122", "Ms", "Shericka", "Jones", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
@@ -58,7 +60,8 @@ public class Server{
 		this.date = Calendar.getInstance();
 		this.clientCount = 0;
 		
-		System.out.println("Server has started at "+ date.getTime());	
+		JOptionPane.showMessageDialog(null,"Server has started at "+ date.getTime(), "Server Online",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
+		
 
 		while(true) {
 			try {
@@ -70,7 +73,7 @@ public class Server{
 				ClientHandler clientHandler = new ClientHandler(connectionSocket);
 				Thread thread = new Thread((Runnable) clientHandler);
 				thread.start();
-				online.add(thread);
+				onlineThreads.add(thread);
 			} catch (IOException e) {
 				System.err.println("error " + e.getMessage());
 			}catch(Exception e) {
@@ -157,6 +160,9 @@ public class Server{
 					case COMPLAIN: 
 									ComplainHandler((Packet04Complain) data); 	 	
 						break;
+					case INFO:
+									InfoHandler((Packet9Info) data); 	  
+						break;
 						
 					default:
 					
@@ -166,6 +172,17 @@ public class Server{
 			}
 		}
 
+		
+		private void InfoHandler(Packet9Info info) { 
+			if(info.getInfo().equals("killThread")) 
+				killThread(info.getThreadIndex());
+		}
+		
+		private void killThread(int index) { 
+			onlineThreads.get(index).stop();// stop the users thread;
+			onlineThreads.remove(index);// remove the users thread from the list of threads
+		}
+		
 		private void ErrorHandler(Packet10Error error) {// handle invalid request
 			sendData(error);// send error message to client
 		}
@@ -212,9 +229,12 @@ public class Server{
 					Packet Complains = new Packet11List(myComplains(loginData.getData().getUserId()));/// prepare the packet with the list that will be sent to the user
 					sendData(Complains);// send the packet to the user
 					sendData(loginData);// send the data for the user dashboard
+					
+					Packet9Info infoPacket = new Packet9Info("Login Sussessfully");// prepare message 
+					infoPacket.setThreadIndex(onlineThreads.size()-1); // set the index of the user's thread
+					sendData(infoPacket); // send info to client
+					
 					found = true;
-					Packet infoPacket = new Packet9Info("Login Sussessfully");
-					sendData(infoPacket); 
 					break;
 				}
 			} 
@@ -227,8 +247,7 @@ public class Server{
 		}
 		
 		private void LogoutHandler(Packet02Logout data) {
-			putUserOffline(data); // remove user from the server
-			sendData(data);// send the packet to the user  
+			putUserOffline(data); // remove user from the server 
 		} 
 		
 		private void ComplainHandler(Packet04Complain data) {
@@ -270,10 +289,11 @@ public class Server{
 
 		public void putUserOffline(Packet02Logout data) { 
 			try {
-				connectedUsers.remove(getPlayerMPIndex(data.getData()));
-				sendData(data);
+				sendData(data);// send the packet to the user 
+				sendData(new Packet9Info("Logout Successfully"));// send the packet to the user 
+				connectedUsers.remove(getUserIndex(data.getData())); // remove the user from the list of connected users
 			} catch (IndexOutOfBoundsException e) {
-				System.err.println("error " + e.getMessage());
+				sendData(new Packet10Error("Logout Error"));// send the packet to the user 
 			}
 		}
 
@@ -286,7 +306,7 @@ public class Server{
 			return null;
 		}
 
-		public int getPlayerMPIndex(String userId) throws IndexOutOfBoundsException {
+		public int getUserIndex(String userId) throws IndexOutOfBoundsException {
 			int index = 0;
 			for (User user : connectedUsers) {
 				if (user.getUserId().equals(userId)) {

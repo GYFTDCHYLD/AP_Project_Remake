@@ -31,6 +31,7 @@ import image.loadImages;
 import network.Client;
 import packet.Packet02Logout;
 import packet.Packet03Chat;
+import packet.Packet9Info;
 
 public class MainWindow extends JFrame{
 	private static JDesktopPane desktopPane;
@@ -47,6 +48,7 @@ public class MainWindow extends JFrame{
 	private static LoginWindow LoginWindow; 
 	public static Client ClientSocket;
 	private static String messageFromServer;
+	private static int threadIndex; 
 	private static String loginID;
 
 	private static List<Complain> complain;  
@@ -118,7 +120,8 @@ public class MainWindow extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				SystemTray.getSystemTray().remove(trayIcon);
-				Packet02Logout Packet = new Packet02Logout(getLoginID());
+				Packet9Info Packet = new Packet9Info("killThread");// set the command/info
+				Packet.setThreadIndex(threadIndex);//set the index of the thread to be killed
 				Packet.writeData(MainWindow.getClientSocket());
 				System.exit(MainWindow.EXIT_ON_CLOSE); 
 			} 
@@ -255,12 +258,21 @@ public class MainWindow extends JFrame{
 		complain = list;
 	}
 
-	public static void setLoginID(String id) {
-		loginID = id;
+	public static int getThreadID() {
+		return threadIndex;
+	}
+
+	public static void setThreadID(int threadID) {
+		MainWindow.threadIndex = threadID;
 	}
 
 	public static String getLoginID() {
 		return loginID;
 	}
 
+	public static void setLoginID(String loginID) {
+		MainWindow.loginID = loginID;
+	}
+
+	
 }
