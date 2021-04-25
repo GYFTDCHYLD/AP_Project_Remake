@@ -12,7 +12,6 @@ public class User  implements Serializable{
 	protected String firstName;
 	protected String lastName;
 	protected String password;
-	protected List<Complain> Complains; 
 	 
 	
 	
@@ -78,15 +77,5 @@ public class User  implements Serializable{
 
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-
-	public List<Complain> getComplains() {
-		return Complains;
-	}
-
-
-	public void setComplains(List<Complain> complains) {
-		Complains = complains;
 	}
 }

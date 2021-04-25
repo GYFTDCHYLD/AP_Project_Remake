@@ -101,6 +101,7 @@ public class LoginWindow extends JInternalFrame implements ActionListener{
 		if(e.getActionCommand().equals("Sign-Up")) {
 			MainWindow.getDesktopPane().add(new SignUpWindow());
 			this.dispose();
+			MainWindow.getDesktopPane().moveToBack(background); 
 		}
 		
 		if(e.getActionCommand().equals("Submit")) {

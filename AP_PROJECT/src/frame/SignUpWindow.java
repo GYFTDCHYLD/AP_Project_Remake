@@ -18,7 +18,6 @@ import javax.swing.border.LineBorder;
 
 import domain.Register;
 import image.loadImages;
-import network.Client;
 import packet.Packet00Register;
 
 public class SignUpWindow extends JInternalFrame implements ActionListener{
@@ -206,6 +205,7 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 			}
 		}else if(e.getActionCommand().equals("Login")) {
 			MainWindow.getDesktopPane().add(new LoginWindow());
+			MainWindow.getDesktopPane().moveToBack(background); 
 			this.dispose();
 		}
 	}

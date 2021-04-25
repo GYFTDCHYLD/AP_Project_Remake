@@ -1,10 +1,11 @@
 package domain;
 
+import java.io.Serializable;
 import java.sql.Date;
 
-public class BillingAccount {
+public class BillingAccount  implements Serializable{
 	
-	private int id;
+	private String id;
 	private String status;
 	private float amountDue;
 	private float interest;
@@ -17,19 +18,20 @@ public class BillingAccount {
 	}
 
 
-	public BillingAccount(int id, String status, float amountDue) {
+	public BillingAccount(String id, String status, float amountDue) {
 		super();
 		this.id = id;
 		this.status = status;
+		this.amountDue = amountDue;
 	}
 
 
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 
 
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 

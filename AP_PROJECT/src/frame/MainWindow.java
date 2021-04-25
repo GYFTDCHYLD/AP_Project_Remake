@@ -87,7 +87,7 @@ public class MainWindow extends JFrame{
 		background = new JLabel();
 		background.setHorizontalAlignment(SwingConstants.CENTER);
 		background.setIcon(new ImageIcon(loadImages.mainBackground)); 
-		background.setBounds(0, 0,700, 700);
+		background.setBounds(0, 0,800, 700);
 	}
 	
 	public void addMenuItemsToPopup() {
@@ -193,7 +193,7 @@ public class MainWindow extends JFrame{
 	
 	public void setWindowProperties() {
 		this.setJMenuBar(menuBar);
-		this.setSize(700, 700);
+		this.setSize(750, 700);
 		this.setResizable(false);
 		this.setVisible(true);
 		this.setLocationRelativeTo(null);

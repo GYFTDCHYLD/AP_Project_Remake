@@ -28,6 +28,7 @@ import image.loadImages;
 import packet.Packet02Logout;
 import packet.Packet04Complain;
 import domain.Complain;
+import domain.Customer;
 import domain.Employee;
 import domain.User;
 
@@ -155,7 +156,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		background = new JLabel();
 		background.setHorizontalAlignment(SwingConstants.CENTER);
 		background.setIcon(new ImageIcon(loadImages.dashboardBackground)); 
-		background.setBounds(0, 0,700, 600);
+		background.setBounds(0, 0,750, 600);
 			
 		
 	}
@@ -218,6 +219,9 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										createTable();
 										break;
 			case "View Account":
+										JOptionPane.showMessageDialog(null, "Ammount due: "+ ((Customer)user).getBillingAccount().getAmountDue()
+												+" Due date: " + ((Customer)user).getBillingAccount().getDueDate()
+												+" Status: " + ((Customer)user).getBillingAccount().getStatus(), "",JOptionPane.INFORMATION_MESSAGE);
 										break;
 			case "Pay Bill":
 										break;
@@ -237,7 +241,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 
 	
 	public void setWindowsProperties() {
-		this.setBounds(-10, 0, 720, 560);
+		this.setBounds(15, 0, 720, 560);
 		this.setVisible(true); 
 	}
 	
@@ -338,20 +342,21 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	public void setComplainText(String complainText) {
 		this.complainText.setText(complainText);
 	}
+	
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-		 String Data = null;  
-         int[] row = table.getSelectedRows();  
-         int[] columns = table.getSelectedColumns();  
-         for (int i = 0; i < row.length; i++) {  
-           for (int j = 0; j < columns.length; j++) {  
-             Data = (String) table.getValueAt(row[i], columns[j]); 
-             
-           } 
-         }  
-         System.out.println("Table element selected is: " + Data);
-         
-    }
+		String Data = null;
+		int[] row = table.getSelectedRows();
+		int[] columns = table.getSelectedColumns();
+		for (int i = 0; i < row.length; i++) {
+			for (int j = 0; j < columns.length; j++) {
+				Data = (String) table.getValueAt(row[i], columns[j]);
+
+			}
+		}
+		System.out.println("Table element selected is: " + Data);
+
+	}
 	
 	public void createTable() {
 
@@ -374,13 +379,13 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		table.setForeground(Color.BLACK);
 		table.setGridColor(Color.BLUE);
 		table.setOpaque(true); 
-		table.setFont(new Font("arial", Font.PLAIN, 14));
+		table.getTableHeader().setFont(new Font("arial", Font.PLAIN, 14));
 		table.setAutoscrolls(true); 
 		
 		cellSelect = table.getSelectionModel();  
 		cellSelect.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		cellSelect.addListSelectionListener(this);
 		
+		cellSelect.addListSelectionListener(this);
 		scrollPane = new JScrollPane(table); 
 		scrollPane.setBounds(10, 110, 680, 400); 
 		scrollPane.setOpaque(true);;

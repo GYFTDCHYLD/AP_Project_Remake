@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import domain.BillingAccount;
 import domain.Complain;
 import domain.Customer;
 import domain.Employee;
@@ -32,7 +33,8 @@ public class Server{
 	private int clientCount;
 	private List<User> Users; 
 	private List<User> connectedUsers; 
-	private List<Complain> complain; 
+	private List<Complain> complain;
+	private List<BillingAccount> billigAccount; 
 	private List<Packet03Chat> chat; 
 	
 	
@@ -42,11 +44,14 @@ public class Server{
 			Users = new ArrayList<User>(); 
 			connectedUsers = new ArrayList<User>(); 
 			complain = new ArrayList<Complain>();
+			billigAccount = new ArrayList<BillingAccount>(); 
 			chat = new ArrayList<Packet03Chat>();
 			
-			User User = new Employee("C123", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Technitian");  
+			User User = new Employee("C123", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Technitian"); 
 			Users.add(User);
-			User = new Employee("C124", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Customer"); 
+			User = new Customer("C124", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"); 
+			billigAccount.add(new BillingAccount("C124","Due", 15000));
+			
 			Users.add(User);
 			this.serverSocket = new ServerSocket(8000);
 		}
@@ -162,7 +167,8 @@ public class Server{
 		private void RegisterHandler(Packet00Register data) {
 			String id = (data.getData().getFirstName()).substring(0,1) + "34" + Users.size();//create user Id Using Fist letter of first name plus 34 plus the amount of user;
 			User User = new Customer(id,data.getData().getNameTitle(), data.getData().getFirstName(), data.getData().getLastName(), data.getData().getPassword());
-			Users.add(User);
+			Users.add(User);//add user to database
+			billigAccount.add(new BillingAccount(id,"unpaid", 15000));// add account
 			Packet infoPacket = new Packet9Info("Sussessfully Registered");
 			((Packet00Register)data).getData().setPassword(id);// replace the pasword in the object with the New User ID 
 			sendData(data);// send the the object to the user to extract the User ID
@@ -175,7 +181,7 @@ public class Server{
 			
 			for (User user : Users) {//check the database for the user
 				if(user.getUserId().equals(data.getUserId()) && user.getPassword().equals(data.getPassword())) {
-					loginData = new Packet07User(user);
+					loginData = new Packet07User(user); 
 					
 					for(User conected : connectedUsers) {// loop through the users connected to the server
 						if(conected.getUserId().equals(loginData.getData().getUserId()) && conected.getPassword().equals(loginData.getData().getPassword())) {
@@ -187,9 +193,17 @@ public class Server{
 				}
 			}
 			
+			if(loginData.getData() instanceof Customer) {// check if its a customer is loging in
+				for(BillingAccount account : billigAccount) {// search for their account in database
+					if(account.getId().equals(loginData.getData().getUserId())) {
+						((Customer)loginData.getData()).setBillingAccount(account);/// ass the account to th euser object to be sent to customer
+					}
+				}
+			}
+				
 			onlineUser(loginData.getData());// put the user online if they are not already logedin
 			sendData(loginData);// send the data for the user dashboard
-			 
+			
 			Packet Complains = new Packet10List(myComplains(loginData.getData().getUserId()));/// prepare the packet with the list that will be sent to the user
 			sendData(Complains);// send the packet to the user
 		}
@@ -209,7 +223,7 @@ public class Server{
 			
 		}
 		
-		private List<Complain> myComplains(String userId){
+		private List<Complain> myComplains(String userId){// get complain from database
 			List<Complain> list = new ArrayList<Complain>();//create an arraylist to store the complains to be sent back to the user
 			for (Complain com : complain) {// loop through the list of complain from the database
 				if (com.getUserId().equals(userId)) {// check if the user id match the user id in the database for the complain
