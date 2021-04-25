@@ -1,6 +1,7 @@
 package packet;
 
-import network.Server; 
+import network.Server;
+import network.Server.ClientHandler; 
 
 public class Packet02Logout extends Packet {
 	/**
@@ -13,9 +14,9 @@ public class Packet02Logout extends Packet {
         super(02);
         userId = data;
     }
-	@Override
-	public void writeData(Server client) {
-		client.sendData(this);
+	
+    public void writeData(ClientHandler clientHandler) {  
+		clientHandler.sendData(this);	
 	}
 
 
@@ -23,4 +24,10 @@ public class Packet02Logout extends Packet {
     public String getData() {
         return this.userId;
     }
+
+	@Override
+	public void writeData(Server Server) {
+		// TODO Auto-generated method stub
+		
+	}
 }

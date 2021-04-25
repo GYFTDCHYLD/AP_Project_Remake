@@ -1,6 +1,7 @@
 package packet;
 
 import network.Server;
+import network.Server.ClientHandler;
 
 public class Packet03Chat extends Packet{
 	
@@ -21,9 +22,9 @@ public class Packet03Chat extends Packet{
 	}
 	
 	
-	@Override
-	public void writeData(Server server) { 
-		server.sendDataToAllClients(this);	
+	
+	public void writeData(ClientHandler clientHandler) {  
+		clientHandler.sendData(this);	
 	}
 
 
@@ -44,6 +45,14 @@ public class Packet03Chat extends Packet{
 
 	public String getMessage() {
 		return message;
+	}
+
+
+
+	@Override
+	public void writeData(Server Server) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

@@ -97,7 +97,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		viewAccount.addActionListener(this);
 		
 		Chat = new JButton("Chat");
-		Chat.setBounds(410, 20,130, 30);
+		Chat.setBounds(410, 60,130, 30);
 		Chat.addActionListener(this);
 		
 		payBill = new JButton("Pay Bill");
@@ -172,13 +172,12 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		if(user.equals("Customer")) {
 			dashboard.add(makeComplain);
 			dashboard.add(viewAccount);
+			dashboard.add(Chat);
 			dashboard.add(payBill);
 		}else if(user.equals("Representative")) { 
 			dashboard.add(assignComplain);
-			dashboard.add(Chat);
 		}else {
 			dashboard.add(setVisitDate);
-			dashboard.add(Chat);
 		}
 		dashboard.add(viewComplain);
 		dashboard.add(profileImage);

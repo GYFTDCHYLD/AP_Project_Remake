@@ -1,6 +1,7 @@
 package packet;
 
 import network.Server;
+import network.Server.ClientHandler;
 
 public class Packet10Error extends Packet{
 	
@@ -17,14 +18,20 @@ public class Packet10Error extends Packet{
 	}
 	
 	
-	@Override
-	public void writeData(Server Server) {
-		Server.sendData(this);
+	public void writeData(ClientHandler clientHandler) {  
+		clientHandler.sendData(this);	
 	}
 
 	@Override
 	public String getData() {
 		return this.error;
+	}
+
+
+	@Override
+	public void writeData(Server Server) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

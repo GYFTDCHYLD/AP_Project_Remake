@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -28,7 +27,6 @@ public class Server{
 	private List<BillingAccount> billigAccount; 
 	private List<Packet03Chat> chat; 
 	private List<Thread> onlineThreads; 
-	private List<SocketAddress> online2;
 	
 	
 	public Server() {
@@ -40,7 +38,6 @@ public class Server{
 			billigAccount = new ArrayList<BillingAccount>(); 
 			chat = new ArrayList<Packet03Chat>();
 			onlineThreads = new ArrayList<Thread>();
-			online2 = new ArrayList<SocketAddress>();
 			
 			User User = new Employee("S122", "Ms", "Shericka", "Jones", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
 			Users.add(User);
@@ -56,6 +53,7 @@ public class Server{
 		}
 		catch(Exception e) {
 			System.err.println("error " + e.getMessage());
+			return;
 		}
 		this.date = Calendar.getInstance();
 		this.clientCount = 0;
@@ -66,12 +64,11 @@ public class Server{
 		while(true) {
 			try {
 				connectionSocket = serverSocket.accept();
-				online2.add(connectionSocket.getLocalSocketAddress());
 				date = Calendar.getInstance();
 				clientCount+= 1;
 				System.out.println("Starting a thread for a client at "+ date.getTime()+"\nClient Count: "+clientCount);
 				ClientHandler clientHandler = new ClientHandler(connectionSocket);
-				Thread thread = new Thread((Runnable) clientHandler);
+				Thread thread = new Thread(clientHandler);
 				thread.start();
 				onlineThreads.add(thread);
 			} catch (IOException e) {
@@ -83,7 +80,7 @@ public class Server{
 	}
 	
 	
-	public class ClientHandler implements Runnable{
+	public class ClientHandler extends Thread{ 
 
 		Socket clientHandlerSocket;
 		ObjectOutputStream objOs;
@@ -219,7 +216,7 @@ public class Server{
 					if(loginData.getData() instanceof Customer) {// check if its a customer is loging in
 						for(BillingAccount account : billigAccount) {// search for their account in database
 							if(account.getId().equals(loginData.getData().getUserId())) {
-								((Customer)loginData.getData()).setBillingAccount(account);/// ass the account to th euser object to be sent to customer
+								((Customer)loginData.getData()).setBillingAccount(account);/// ass the account to the user object to be sent to customer
 							}
 						}
 					}
@@ -271,7 +268,9 @@ public class Server{
 		}
 		
 		private void ChatHandler(Packet03Chat data) { // handle chat
-			sendData(data);
+			chat.add(data);
+			data.writeData(this);
+			sendDataToAllClients(data); 
 		}
 		
 		
@@ -318,17 +317,11 @@ public class Server{
 		}
 	}
 
-	
-	
-	public void sendData(Packet data) { 
-		data.writeData(this); 
-	}
-
 
 
 	public void sendDataToAllClients(Packet03Chat data) {
-		for (SocketAddress user : online2) {
-			((ClientHandler) online2).sendData(data);
+		for (Thread user : onlineThreads) {
+			data.writeData(((ClientHandler)user));
 		}
 	}
 }

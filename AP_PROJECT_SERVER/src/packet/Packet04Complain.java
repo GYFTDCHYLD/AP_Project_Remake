@@ -1,6 +1,7 @@
 package packet;
 
 import network.Server;
+import network.Server.ClientHandler;
 import domain.Complain;
 
 public class Packet04Complain extends Packet{
@@ -18,14 +19,20 @@ public class Packet04Complain extends Packet{
 	}
 	
 	
-	@Override
-	public void writeData(Server Server) {
-		Server.sendData(this);
+	public void writeData(ClientHandler clientHandler) {  
+		clientHandler.sendData(this);	
 	}
 
 	@Override
 	public Complain getData() {
 		return this.Complain;
+	}
+
+
+	@Override
+	public void writeData(Server Server) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

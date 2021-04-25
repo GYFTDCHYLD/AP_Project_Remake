@@ -29,7 +29,6 @@ import javax.swing.SwingConstants;
 import domain.Complain;
 import image.loadImages;
 import network.Client;
-import packet.Packet02Logout;
 import packet.Packet03Chat;
 import packet.Packet9Info;
 
@@ -130,7 +129,7 @@ public class MainWindow extends JFrame{
 		menuAbout.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(null, "Michrstar Cable Company App");
+				JOptionPane.showMessageDialog(null, "Micro Star Cable Company App");
 			}
 		});
 		

@@ -1,6 +1,7 @@
 package packet;
 
 import network.Server;
+import network.Server.ClientHandler;
 import domain.User;
 
 public class Packet07User extends Packet{
@@ -18,14 +19,20 @@ public class Packet07User extends Packet{
 	}
 	
 	
-	@Override
-	public void writeData(Server Server) {
-		Server.sendData(this);
+	public void writeData(ClientHandler clientHandler) {  
+		clientHandler.sendData(this);	
 	}
 
 	@Override
 	public User getData() {
 		return this.User;
+	}
+
+
+	@Override
+	public void writeData(Server Server) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

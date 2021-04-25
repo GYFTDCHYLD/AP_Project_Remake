@@ -2,6 +2,7 @@ package packet;
 
 import domain.Register;
 import network.Server;
+import network.Server.ClientHandler;
 
 public class Packet00Register extends Packet{
 	
@@ -16,9 +17,8 @@ public class Packet00Register extends Packet{
 		this.Register = Register; 
 	}
 
-	@Override
-	public void writeData(Server client) {
-		client.sendData(this);
+	public void writeData(ClientHandler clientHandler) {  
+		clientHandler.sendData(this);	
 	}
 
 	@Override
@@ -28,6 +28,12 @@ public class Packet00Register extends Packet{
 
 	public Register getRegister() {
 		return Register;
+	}
+
+	@Override
+	public void writeData(Server Server) {
+		// TODO Auto-generated method stub
+		
 	}	
 
 }

@@ -1,6 +1,7 @@
 package packet;
 
 import network.Server;
+import network.Server.ClientHandler;
 
 public class Packet01Login extends Packet{
 	
@@ -17,9 +18,8 @@ public class Packet01Login extends Packet{
 		this.password = password;
 	}
 
-	@Override
-	public void writeData(Server Server) {
-		Server.sendData(this); 
+	public void writeData(ClientHandler clientHandler) {  
+		clientHandler.sendData(this);	
 	}
 
 
@@ -34,6 +34,12 @@ public class Packet01Login extends Packet{
 
 	public String getPassword() {
 		return password;
+	}
+
+	@Override
+	public void writeData(Server Server) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

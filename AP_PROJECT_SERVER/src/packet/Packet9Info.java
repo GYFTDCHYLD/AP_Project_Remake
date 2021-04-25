@@ -1,6 +1,7 @@
 package packet;
 
 import network.Server;
+import network.Server.ClientHandler;
 
 public class Packet9Info extends Packet{
 	
@@ -19,9 +20,8 @@ public class Packet9Info extends Packet{
 	}
 	
 	
-	@Override
-	public void writeData(Server Server) {
-		Server.sendData(this);
+	public void writeData(ClientHandler clientHandler) {  
+		clientHandler.sendData(this);	
 	}
 
 	@Override
@@ -55,6 +55,13 @@ public class Packet9Info extends Packet{
 
 	public void setLoginId(String loginId) {
 		this.loginId = loginId;
+	}
+
+
+	@Override
+	public void writeData(Server Server) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }
