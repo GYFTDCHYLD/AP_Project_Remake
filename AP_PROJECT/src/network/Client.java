@@ -7,22 +7,12 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.List;
 
-import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 
 import domain.Complain;
-import packet.Packet;
-import packet.Packet03Chat;
-import packet.Packet07User;
-import packet.Packet10List;
-import packet.Packet9Info;
+import packet.*;
 import packet.Packet.PacketTypes;
-import packet.Packet00Register;
-import packet.Packet02Logout;
-import frame.ChatWindow;
-import frame.Dashboard;
-import frame.LoginWindow;
-import frame.MainWindow;
+import frame.*;
 
 
 public class Client implements Runnable{
@@ -113,36 +103,39 @@ public class Client implements Runnable{
 	
 	
 	private void parsePacket(Packet data) {  
-		
-		PacketTypes type = Packet.lookupPacket(data.getPacketId()); 
-		
-		switch(type) {
-			case INVALID: 	System.err.println("Invalid request!!");
-				break;
-			case INFO:
-							InfoHandler((Packet9Info) data); 	  
-				break;
-			case REGISTER:
-							RegisterHandler((Packet00Register) data);	
-				break;
-			case LOGOUT:
-							LogoutHandler((Packet02Logout) data);	 							 
-				break;
-			case CHAT: 
-							ChatHandler((Packet03Chat) data);			
-				break;
-			case USERS: 
-							UserDataHandler((Packet07User) data);			
-				break;
-			case LIST: 
-							ListHandler((Packet10List) data); 	  	
-				break;
-			default:
+		try {
+			PacketTypes type = Packet.lookupPacket(data.getPacketId()); 
+			
+			switch(type) {
+			
+				case REGISTER:
+								RegisterHandler((Packet00Register) data);	
+					break;
+				case LOGOUT:
+								LogoutHandler((Packet02Logout) data);	 							 
+					break;
+				case CHAT: 
+								ChatHandler((Packet03Chat) data);			
+					break;
+				case USERS: 
+								UserDataHandler((Packet07User) data);			
+					break;
+				case INFO:
+								InfoHandler((Packet9Info) data); 	  
+					break;
+				case ERROR:
+								ErrorHandler((Packet10Error) data);  	  
+					break;
+				case LIST: 
+								ListHandler((Packet11List) data); 	  	
+					break;
+				default:
+				
+			}
+		}catch(Exception e) {
 			
 		}
 	}
-	
-
 	
 
 
@@ -151,6 +144,11 @@ public class Client implements Runnable{
 		MainWindow.setMessageFromServer(info.getData());
 	}
 
+	private void ErrorHandler(Packet10Error error) {
+		JOptionPane.showMessageDialog(null,error.getData(), "From Server",JOptionPane.ERROR_MESSAGE);// display the message sent from server
+		MainWindow.setMessageFromServer(error.getData());	
+	}
+	
 	private void RegisterHandler(Packet00Register data) {
 		LoginWindow LoginWindow = new LoginWindow();
 		LoginWindow.getLoginIdField().setText(data.getData().getPassword());// extract the user Id that the server placed in the password field 
@@ -159,13 +157,10 @@ public class Client implements Runnable{
 	}
 	
 	private void UserDataHandler(Packet07User data) {
-		if(data.getData().getFirstName() != null) {
-			MainWindow.setLoginID(data.getData().getUserId());//logout user
-			MainWindow.getDesktopPane().removeAll();// remove  login window
-			MainWindow.getDesktopPane().add(new Dashboard(data.getData()));
-			MainWindow.getDesktopPane().add(MainWindow.background);
-		}else 
-			JOptionPane.showMessageDialog(null, "Invalid Id or Password", "",JOptionPane.ERROR_MESSAGE);
+		MainWindow.setLoginID(data.getData().getUserId());//logout user
+		MainWindow.getDesktopPane().removeAll();// remove  login window
+		MainWindow.getDesktopPane().add(new Dashboard(data.getData()));
+		MainWindow.getDesktopPane().add(MainWindow.background);
 	}
 	
 	private void LogoutHandler(Packet02Logout data) {
@@ -178,13 +173,16 @@ public class Client implements Runnable{
 	
 	private void ChatHandler(Packet03Chat data) { 
 		MainWindow.getChat().add(data.getData());
-		MainWindow.getDesktopPane().add(new ChatWindow());
+		((ChatWindow)MainWindow.getDesktopPane().getComponent(0)).getChatArea().append(data.getData().getSender() + ": " + data.getData().getMessage()+"\n");
 	}
 	
 	
-	private void ListHandler(Packet10List data) {
-		MainWindow.setComplain((List<Complain>)data.getData());
-		System.out.println("complain recieved from server");
+	private void ListHandler(Packet11List data) {
+		if(data.getData().get(0) instanceof Complain) {// check if its a list of complains being sent over 
+			MainWindow.setComplain((List<Complain>)data.getData());
+		}else {
+			System.out.println("List recieved from server");
+		}
 	}
 
 

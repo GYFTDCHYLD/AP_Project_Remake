@@ -2,20 +2,19 @@ package packet;
 
 import java.util.List;
 
-import domain.Complain;
 import network.Client;
 
-public class Packet10List extends Packet{
+public class Packet11List extends Packet{
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private List<Complain> list; 
+	private List<?> list; 
 	
-	public Packet10List(List<Complain> data) {
-		super(10);
+	public Packet11List(List<?> data) {
+		super(11);
 		list = data;
 	}
 	
@@ -26,7 +25,7 @@ public class Packet10List extends Packet{
 	}
 
 	@Override
-	public List<Complain> getData() {
+	public List<?> getData() {
 		return this.list;
 	}
 	

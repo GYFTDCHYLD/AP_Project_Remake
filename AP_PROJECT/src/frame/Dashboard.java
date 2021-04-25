@@ -50,6 +50,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	private JButton viewAccount;
 	private JButton payBill;
 	
+	private JButton Chat;
 	private JButton logOut;
 	
 	private JButton assignComplain;
@@ -95,9 +96,14 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		viewAccount.setBounds(410, 20,130, 30);
 		viewAccount.addActionListener(this);
 		
+		Chat = new JButton("Chat");
+		Chat.setBounds(410, 20,130, 30);
+		Chat.addActionListener(this);
+		
 		payBill = new JButton("Pay Bill");
 		payBill.setBounds(540, 20,120, 30);
 		payBill.addActionListener(this);
+		
 		
 		logOut = new JButton("logout");
 		logOut.setBounds(540, 60,120, 30);
@@ -148,7 +154,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		complainLabel.setFont(new Font("arial", Font.TYPE1_FONT, 16));
 		complainLabel.setVisible(false);
 		
-		submit = assignComplain = new JButton("");
+		submit = new JButton("");
 		submit.setBounds(10, 460,180, 30);
 		submit.addActionListener(this);
 		submit.setVisible(false);
@@ -169,8 +175,10 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			dashboard.add(payBill);
 		}else if(user.equals("Representative")) { 
 			dashboard.add(assignComplain);
+			dashboard.add(Chat);
 		}else {
 			dashboard.add(setVisitDate);
+			dashboard.add(Chat);
 		}
 		dashboard.add(viewComplain);
 		dashboard.add(profileImage);
@@ -185,6 +193,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		dashboard.add(complainLabel);
 		dashboard.add(submit);
 		dashboard.add(logOut);
+		
 		
 		dashboard.add(background);
 	}
@@ -229,6 +238,12 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										break;
 			case "Set visit date":
 										break;
+			case "Chat":
+										
+										ChatWindow ChatWindow = new ChatWindow();
+										MainWindow.getDesktopPane().add(ChatWindow);
+										MainWindow.getDesktopPane().moveToFront(ChatWindow);
+										break;
 			case "logout":
 										Packet02Logout Packet = new Packet02Logout(MainWindow.getLoginID());
 										Packet.writeData(MainWindow.getClientSocket());
@@ -250,7 +265,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		intializeComponent();
 		if(user instanceof Employee) { 
 			this.title = ((Employee) user).getJobTitle() + " Dashboard";
-			addComponentsToWindow(((Employee) user).getJobTitle());
+			addComponentsToWindow(((Employee)user).getJobTitle());
 		}else {
 			this.title = "Customer Dashboard";
 			addComponentsToWindow("Customer");

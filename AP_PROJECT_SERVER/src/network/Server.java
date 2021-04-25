@@ -5,24 +5,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import domain.BillingAccount;
-import domain.Complain;
-import domain.Customer;
-import domain.Employee;
-import domain.User;
-import packet.Packet;
-import packet.Packet00Register;
-import packet.Packet01Login;
-import packet.Packet02Logout;
-import packet.Packet03Chat;
-import packet.Packet04Complain;
-import packet.Packet07User;
-import packet.Packet10List;
-import packet.Packet9Info;
+import domain.*;
+import packet.*;
 import packet.Packet.PacketTypes;
 
 public class Server{
@@ -36,6 +25,8 @@ public class Server{
 	private List<Complain> complain;
 	private List<BillingAccount> billigAccount; 
 	private List<Packet03Chat> chat; 
+	private List<Thread> online;
+	private List<SocketAddress> online2;
 	
 	
 	public Server() {
@@ -46,13 +37,19 @@ public class Server{
 			complain = new ArrayList<Complain>();
 			billigAccount = new ArrayList<BillingAccount>(); 
 			chat = new ArrayList<Packet03Chat>();
+			online = new ArrayList<Thread>();
+			online2 = new ArrayList<SocketAddress>();
 			
-			User User = new Employee("C123", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Technitian"); 
+			User User = new Employee("S122", "Ms", "Shericka", "Jones", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
 			Users.add(User);
+			
+			User = new Employee("C123", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Technitian"); 
+			Users.add(User);
+			
 			User = new Customer("C124", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"); 
 			billigAccount.add(new BillingAccount("C124","Due", 15000));
-			
 			Users.add(User);
+			
 			this.serverSocket = new ServerSocket(8000);
 		}
 		catch(Exception e) {
@@ -66,12 +63,14 @@ public class Server{
 		while(true) {
 			try {
 				connectionSocket = serverSocket.accept();
+				online2.add(connectionSocket.getLocalSocketAddress());
 				date = Calendar.getInstance();
 				clientCount+= 1;
 				System.out.println("Starting a thread for a client at "+ date.getTime()+"\nClient Count: "+clientCount);
 				ClientHandler clientHandler = new ClientHandler(connectionSocket);
 				Thread thread = new Thread((Runnable) clientHandler);
 				thread.start();
+				online.add(thread);
 			} catch (IOException e) {
 				System.err.println("error " + e.getMessage());
 			}catch(Exception e) {
@@ -110,7 +109,7 @@ public class Server{
 				System.out.println("error sending data to client " + e.getMessage());
 			}
 		} 
-		
+		 
 		public Packet readData() { 
 			Packet data = null; 
 			try {
@@ -137,34 +136,41 @@ public class Server{
 		}
 		
 		private void parsePacket(Packet data) { 
-			
-			PacketTypes type = Packet.lookupPacket(data.getPacketId()); 
-			
-			switch(type) {
-				case INVALID: 	System.err.println("Invalid request!!");
-					break;
-				case REGISTER:
-								RegisterHandler((Packet00Register) data);	
-					break;
-				case LOGIN:
-								LoginHandler((Packet01Login) data) ;
-					break;
-				case LOGOUT:
-								LogoutHandler((Packet02Logout) data);								 
-					break;
-				case CHAT: 
-								ChatHandler((Packet03Chat) data);	 	
-					break;
-				case COMPLAIN: 
-								ComplainHandler((Packet04Complain) data); 	 	
-					break;
-				default:
+			try {
+				PacketTypes type = Packet.lookupPacket(data.getPacketId()); 
+				
+				switch(type) {
+					case INVALID: 	ErrorHandler(new Packet10Error("Invalid request")); 
+						break;
+					case REGISTER:
+									RegistrationHandler((Packet00Register) data);	
+						break;
+					case LOGIN:
+									LoginHandler((Packet01Login) data) ;
+						break;
+					case LOGOUT:
+									LogoutHandler((Packet02Logout) data);								 
+						break;
+					case CHAT: 
+									ChatHandler((Packet03Chat) data);	 	
+						break;
+					case COMPLAIN: 
+									ComplainHandler((Packet04Complain) data); 	 	
+						break;
+						
+					default:
+					
+				}
+			}catch(Exception e) {
 				
 			}
 		}
 
-
-		private void RegisterHandler(Packet00Register data) {
+		private void ErrorHandler(Packet10Error error) {// handle invalid request
+			sendData(error);// send error message to client
+		}
+		
+		private void RegistrationHandler(Packet00Register data) { // handle registration
 			String id = (data.getData().getFirstName()).substring(0,1) + "34" + Users.size();//create user Id Using Fist letter of first name plus 34 plus the amount of user;
 			User User = new Customer(id,data.getData().getNameTitle(), data.getData().getFirstName(), data.getData().getLastName(), data.getData().getPassword());
 			Users.add(User);//add user to database
@@ -176,8 +182,9 @@ public class Server{
 		}
 		
 
-		private void LoginHandler(Packet01Login data) { 
+		private void LoginHandler(Packet01Login data) { // handle login
 			Packet07User loginData = new Packet07User(new User());
+			boolean found = false;
 			
 			for (User user : Users) {//check the database for the user
 				if(user.getUserId().equals(data.getUserId()) && user.getPassword().equals(data.getPassword())) {
@@ -190,22 +197,33 @@ public class Server{
 							return;// stop the code here if user already logged in 
 						}
 					}
-				}
-			}
-			
-			if(loginData.getData() instanceof Customer) {// check if its a customer is loging in
-				for(BillingAccount account : billigAccount) {// search for their account in database
-					if(account.getId().equals(loginData.getData().getUserId())) {
-						((Customer)loginData.getData()).setBillingAccount(account);/// ass the account to th euser object to be sent to customer
+					
+					
+					if(loginData.getData() instanceof Customer) {// check if its a customer is loging in
+						for(BillingAccount account : billigAccount) {// search for their account in database
+							if(account.getId().equals(loginData.getData().getUserId())) {
+								((Customer)loginData.getData()).setBillingAccount(account);/// ass the account to th euser object to be sent to customer
+							}
+						}
 					}
+					
+					
+					onlineUser(loginData.getData());// put the user online if they are not already logedin
+					Packet Complains = new Packet11List(myComplains(loginData.getData().getUserId()));/// prepare the packet with the list that will be sent to the user
+					sendData(Complains);// send the packet to the user
+					sendData(loginData);// send the data for the user dashboard
+					found = true;
+					Packet infoPacket = new Packet9Info("Login Sussessfully");
+					sendData(infoPacket); 
+					break;
 				}
+			} 
+			
+			if(!found) {
+				Packet error = new Packet10Error("Invalid Id or Password");// create a message/packer/object
+				sendData(error);// send the info object/packet/message to the user
 			}
 				
-			onlineUser(loginData.getData());// put the user online if they are not already logedin
-			sendData(loginData);// send the data for the user dashboard
-			
-			Packet Complains = new Packet10List(myComplains(loginData.getData().getUserId()));/// prepare the packet with the list that will be sent to the user
-			sendData(Complains);// send the packet to the user
 		}
 		
 		private void LogoutHandler(Packet02Logout data) {
@@ -218,7 +236,7 @@ public class Server{
 			Packet infoPacket = new Packet9Info("Complain Recieved");// create a message/packer/object
 			sendData(infoPacket);// send the info object/packet/message to the user
 
-			Packet Complains = new Packet10List(myComplains(data.getData().getUserId()));/// prepare the packet with the list that will be sent to the user
+			Packet Complains = new Packet11List(myComplains(data.getData().getUserId()));/// prepare the packet with the list that will be sent to the user
 			sendData(Complains);// send the packet to the user
 			
 		}
@@ -233,8 +251,7 @@ public class Server{
 			return list;
 		}
 		
-		private void ChatHandler(Packet03Chat data) { 
-			chat.add(data.getData());
+		private void ChatHandler(Packet03Chat data) { // handle chat
 			sendData(data);
 		}
 		
@@ -290,8 +307,8 @@ public class Server{
 
 
 	public void sendDataToAllClients(Packet03Chat data) {
-		for (User user : connectedUsers) {
-			this.sendData(data); 
+		for (SocketAddress user : online2) {
+			((ClientHandler) online2).sendData(data);
 		}
 	}
 }
