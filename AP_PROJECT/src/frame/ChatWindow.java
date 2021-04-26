@@ -21,7 +21,6 @@ public class ChatWindow extends JInternalFrame implements ActionListener{
 	private static JTextArea ChatArea ; // where the chat is displayed
 	private static JScrollPane ScrollPlane; 
 	private static JTextField ChatBox;// where you type your message
-	private static String Name;
 	private static JLabel background;
 	private User ME;// user info for the chat
 	private String receiverId;
@@ -31,7 +30,7 @@ public class ChatWindow extends JInternalFrame implements ActionListener{
 		ChatArea  = new JTextArea(); // where the chat is displayed
 		ScrollPlane = new JScrollPane(ChatArea); 
 		ChatBox = new JTextField();// where you type your message
-		Name = "";
+
 		
 		ScrollPlane.setBounds(5, 2, 365, 310);// x, y, width, height
 		ChatArea.setBackground(Color.BLACK);
@@ -67,10 +66,10 @@ public class ChatWindow extends JInternalFrame implements ActionListener{
 	}
 	
 	
-	public ChatWindow(User user, String receiver) {
-		super("Chat",false,false,false,true); 
+	public ChatWindow(User user, String receiverID, String Name) { 
+		super("Connect with: " + Name,false,false,false,true); 
 		ME = user;
-		receiverId = receiver; 
+		receiverId = receiverID; 
 		intializeComponent() ;
 		addComponentsToWindow();
 		setWindowsProperties();

@@ -41,6 +41,9 @@ public class Server{
 			User User = new Employee("S122", "Ms", "Shericka", "Jones", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
 			userDatabase.add(User);
 			
+			User = new Employee("D111", "Ms", "Dahlia", "Holness", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
+			userDatabase.add(User);
+			
 			User = new Customer("A121", "Ms", "Akielia", "Willbrugh", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"); 
 			billigAccountDatabase.add(new BillingAccount("A121","Due", 15000));
 			userDatabase.add(User);

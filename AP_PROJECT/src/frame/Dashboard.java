@@ -28,7 +28,6 @@ import javax.swing.event.ListSelectionListener;
 import image.loadImages;
 import packet.Packet02Logout;
 import packet.Packet04Complain;
-import packet.Packet9Info;
 import domain.Complain;
 import domain.Customer;
 import domain.Employee;
@@ -180,9 +179,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		add(dashboard);
 		if(user.equals("Customer")) {
 			dashboard.add(makeComplain);
-			dashboard.add(viewAccount);
-			dashboard.add(startChatButton);
-			dashboard.add(onlineClientsDropdown); 
+			dashboard.add(viewAccount); 
 			dashboard.add(payBill);
 			name.setForeground(Color.BLACK);
 			background.setIcon(new ImageIcon(loadImages.CustomerDashboardBackground)); 
@@ -195,10 +192,14 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			name.setForeground(Color.WHITE);
 			background.setIcon(new ImageIcon(loadImages.TechnitianDashboardBackground)); 
 		}
+		
+		dashboard.add(onlineClientsDropdown);
+		dashboard.add(startChatButton);
 		dashboard.add(viewComplain);
 		dashboard.add(profileImage);
-		dashboard.add(name);
 		dashboard.add(separator);
+		dashboard.add(name);
+		
 		
 		
 		dashboard.add(complainCategory);
@@ -347,7 +348,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 						
 						recieverIndex = onlineClientsDropdown.getSelectedIndex()-1; // set the recieverIndex to the selected index od the gropdown menu to locate the reciever ID
 						 
-						ChatWindow = new ChatWindow(user, MainWindow.getOnlineClient().get(recieverIndex)[0][0].toString());// add the reciever id to the chat along with rge sender info
+						ChatWindow = new ChatWindow(user, MainWindow.getOnlineClient().get(recieverIndex)[0][0].toString(),MainWindow.getOnlineClient().get(recieverIndex)[0][1].toString());// add the reciever id to the chat along with rge sender info
 						MainWindow.getDesktopPane().add(ChatWindow);// add chat window to desktop
 						MainWindow.getDesktopPane().moveToFront(ChatWindow);// bring chatwindow to front
 						
