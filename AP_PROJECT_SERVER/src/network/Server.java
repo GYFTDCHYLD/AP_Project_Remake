@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import javax.management.loading.PrivateClassLoader;
 import javax.swing.JOptionPane;
 
 import domain.*;
@@ -93,10 +92,9 @@ public class Server{
 		private Socket clientHandlerSocket;
 		private ObjectOutputStream objOs;
 		private ObjectInputStream objIs;
-		private String UserId; 
+		private String UserInfo[][] = {{"",""}}; // user id and firstname 
 
 		private ClientHandler (Socket socket) {
-			this.UserId = "";
 			this.clientHandlerSocket = socket;
 			try {
 				this.objOs = new ObjectOutputStream(clientHandlerSocket.getOutputStream());
@@ -213,9 +211,8 @@ public class Server{
 			for (User user : userDatabase) {//check the database for the user
 				if(user.getUserId().equals(data.getUserId()) && user.getPassword().equals(data.getPassword())) {
 					loginData = new Packet07User(user); 
-					System.out.println("login info found");
 					for(ClientHandler client : onlineClient) {// loop through the client connected to the server
-						if(client.UserId.equals(loginData.getData().getUserId())) {
+						if(client.UserInfo[0][0].equals(loginData.getData().getUserId())) { // check first row first column where user id is stored
 							Packet infoPacket = new Packet9Info("User Already Logedin");
 							sendData(infoPacket);// send the info object/packet to the user if user is already lodged in
 							return;// stop the code here if user already logged in 
@@ -239,7 +236,11 @@ public class Server{
 					Packet9Info infoPacket = new Packet9Info("Login Sussessfully");// prepare message 
 					infoPacket.setThreadIndex(onlineThreads.size()-1); // set the index of the user's thread
 					sendData(infoPacket); // send info to client
-					this.UserId = loginData.getData().getUserId();// set the UserId of this client handler to the Id of the loggedin user
+					this.UserInfo[0][0] = loginData.getData().getUserId();// set the UserId of this client handler to the Id of the loggedin user
+					this.UserInfo[0][1] = loginData.getData().getFirstName();// add the user firstname to the handler for chat purposes
+					
+					Packet onlineClients = new Packet11List(onlineClient(this.UserInfo[0][0]));// return list of client id except this id
+					sendData(onlineClients);// send list of clients id to user
 					
 					found = true;
 					break;
@@ -264,7 +265,6 @@ public class Server{
 
 			Packet Complains = new Packet11List(myComplains(data.getData().getUserId()));/// prepare the packet with the list that will be sent to the user
 			sendData(Complains);// send the packet to the user
-			
 		}
 		
 		private List<Complain> myComplains(String userId){// get complain from database
@@ -277,10 +277,11 @@ public class Server{
 			return list;
 		}
 		
-		private List<String> onlineClient(){// a list of active client to send to server for chat
-			List<String>  list = new ArrayList<String>();
+		private List<String[][]> onlineClient(String id){// a list of active client to send to server for chat
+			List<String[][]>  list = new ArrayList<String[][]>();
 			for (ClientHandler user : onlineClient) {
-				list.add(user.UserId);
+				if(!user.UserInfo[0][0].equals(id))
+					list.add(UserInfo);
 			}
 			
 			return list;
@@ -296,16 +297,19 @@ public class Server{
 				sendData(data);// send the packet to the user 
 				sendData(new Packet9Info("Logout Successfully"));// send the packet to the user 
 				
-				onlineClient.get(getUserIndex(data.getData())).UserId = ""; // set the userID of the client handler to an empty string so that user can re-login with the same handler
+				int index = getUserIndex(data.getData());
+				
+				onlineClient.get(index).UserInfo[0][0] = ""; // set the userID of the client handler to an empty string so that user can re-login with the same handler
+				onlineClient.get(index).UserInfo[0][1] = ""; // set the firstname of the client handler to an empty string so that user can re-login with the same handler
 			} catch (IndexOutOfBoundsException e) {
-				sendData(new Packet10Error("Logout Error"));// send the packet to the user 
+				sendData(new Packet10Error("Logout Error " + e.getMessage()));// send the packet to the user 
 			}
 		}
 
 		private int getUserIndex(String userId) throws IndexOutOfBoundsException {// get the index for the user in the online list
 			int index = 0;
 			for (ClientHandler client : onlineClient) {
-				if (client.UserId.equals(userId)) {
+				if (client.UserInfo[0][0].equals(userId)) {
 					break;
 				}
 				index++;

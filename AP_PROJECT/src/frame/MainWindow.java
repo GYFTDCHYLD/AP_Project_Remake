@@ -51,7 +51,7 @@ public class MainWindow extends JFrame{
 	private static String loginID;
 
 	private static List<Complain> complain;  
-	private static List<Packet03Chat> chat;  
+	private static List<String[][]>  onlineClient; 
 	
 	
 	
@@ -71,7 +71,7 @@ public class MainWindow extends JFrame{
 
 	public void initializeComponent() {
 		setComplain(new ArrayList<Complain>());
-		setChat(new ArrayList<Packet03Chat>()); 
+		setOnlineClient(new ArrayList<String[][]>()); 
 		loadImages = new loadImages();
 		loadImages.init();
 		desktopPane = new JDesktopPane();
@@ -241,12 +241,14 @@ public class MainWindow extends JFrame{
 		return password; 
 	}
 
-	public static List<Packet03Chat> getChat() {
-		return chat;
+	
+
+	public static List<String[][]> getOnlineClient() {
+		return onlineClient;
 	}
 
-	public void setChat(List<Packet03Chat> chat) {
-		this.chat = chat;
+	public static void setOnlineClient(List<String[][]> onlineClient) {
+		MainWindow.onlineClient = onlineClient;
 	}
 
 	public static List<Complain> getComplain() {

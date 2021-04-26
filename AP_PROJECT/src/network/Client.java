@@ -176,7 +176,6 @@ public class Client implements Runnable{
 	}
 	
 	private void ChatHandler(Packet03Chat data) { 
-		MainWindow.getChat().add(data.getData());
 		((ChatWindow)MainWindow.getDesktopPane().getComponent(0)).append(data);// append the message to the chat//
 	}
 	
@@ -184,8 +183,10 @@ public class Client implements Runnable{
 	private void ListHandler(Packet11List data) {
 		if(data.getData().get(0) instanceof Complain) {// check if its a list of complains being sent over 
 			MainWindow.setComplain((List<Complain>)data.getData());
+			System.out.println("List of complain recieved from server");
 		}else {
-			System.out.println("List recieved from server");
+			MainWindow.setOnlineClient((List<String[][]>) data.getData());
+			System.out.println("List of online clients recieved from server");
 		}
 	}
 
