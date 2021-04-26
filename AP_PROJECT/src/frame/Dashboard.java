@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Date;
+import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -27,6 +28,7 @@ import javax.swing.event.ListSelectionListener;
 import image.loadImages;
 import packet.Packet02Logout;
 import packet.Packet04Complain;
+import packet.Packet9Info;
 import domain.Complain;
 import domain.Customer;
 import domain.Employee;
@@ -50,7 +52,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	private JButton viewAccount;
 	private JButton payBill;
 	
-	private JButton Chat;
+	private JButton startChatButton;
 	private JButton logOut;
 	
 	private JButton assignComplain;
@@ -71,6 +73,9 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	private JButton submit;
 	
 	private ChatWindow ChatWindow;
+	
+	private JComboBox<String> onlineClientsDropdown;  
+	private int recieverIndex; //used to map the index of the the reciever from the Mainwindow to the selection from the dropdown index
 	
 	public void intializeComponent() {
 		
@@ -96,9 +101,14 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		viewAccount.setBounds(410, 20,130, 30);
 		viewAccount.addActionListener(this);
 		
-		Chat = new JButton("Start Chat");
-		Chat.setBounds(410, 60,130, 30);
-		Chat.addActionListener(this);
+		startChatButton = new JButton("Start Chat");
+		startChatButton.setBounds(410, 60,130, 30);
+		startChatButton.addActionListener(this);
+		
+		onlineClientsDropdown = new JComboBox<String>(); 
+		onlineClientsDropdown.setBounds(410, 60,130, 30);
+		onlineClientsDropdown.addActionListener(this);
+		onlineClientsDropdown.setVisible(false);
 		
 		payBill = new JButton("Pay Bill");
 		payBill.setBounds(540, 20,120, 30);
@@ -171,7 +181,8 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		if(user.equals("Customer")) {
 			dashboard.add(makeComplain);
 			dashboard.add(viewAccount);
-			dashboard.add(Chat);
+			dashboard.add(startChatButton);
+			dashboard.add(onlineClientsDropdown); 
 			dashboard.add(payBill);
 			name.setForeground(Color.BLACK);
 			background.setIcon(new ImageIcon(loadImages.CustomerDashboardBackground)); 
@@ -243,19 +254,32 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			case "Set visit date":
 										break;
 			case "Start Chat":
-										Chat.setText("End Chat");//change the name on the button after it has been clicked
-										ChatWindow = new ChatWindow(user, "recieverId");// add the reciever id to the chat along with rge sender info
-										MainWindow.getDesktopPane().add(ChatWindow);// add chat window to desktop
-										MainWindow.getDesktopPane().moveToFront(ChatWindow);// bring chatwindow to front
+										
+										if(MainWindow.getOnlineClient().size() == 0) {
+											JOptionPane.showMessageDialog(null, "Nobody available to chat", "Micro Star",JOptionPane.INFORMATION_MESSAGE);
+										}else {
+
+											
+											onlineClientsDropdown.addItem("Select User");
+											for(String[][] clientInfo : MainWindow.getOnlineClient()) { 
+												onlineClientsDropdown.addItem(clientInfo[0][1]);// add the online user's name to the dropdown
+											}
+											
+											startChatButton.setText("End Chat");//change the name on the button after it has been clicked
+											startChatButton.setVisible(false);// hide chat button
+											onlineClientsDropdown.setVisible(true);// show dropdown in chat button's place
+										}
 										break;
 			case "End Chat":
-										Chat.setText("Start Chat");//change the name on the button after it has been clicked
+										startChatButton.setText("Start Chat");//change the name on the button after it has been clicked
 										MainWindow.getDesktopPane().remove(ChatWindow); // remove chat window
 										MainWindow.getDesktopPane().moveToFront(this);// bring dashboard to front 
+										onlineClientsDropdown.removeAllItems();// remove all items from the dropdown list
 										break;
 			case "logout":
-										Packet02Logout Packet = new Packet02Logout(MainWindow.getLoginID());
-										Packet.writeData(MainWindow.getClientSocket());
+										Packet02Logout logout = new Packet02Logout(MainWindow.getLoginID());// prepare the logout packet with the user id
+										logout.writeData(MainWindow.getClientSocket()); // send the logout packet to the server
+										MainWindow.setOnlineClient(new ArrayList<String[][]>());//remove the list of online clients from the main window after logging out
 										break;
 			
 			default:
@@ -292,56 +316,72 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
-		if(!(e.getActionCommand().equals("comboBoxChanged") || e.getActionCommand().equals("Send"))) 
-			DisplayComponent(e.getActionCommand());	
-		else {
-			
-			if(e.getActionCommand().equals("Send")){
+		try {
+			if(!(e.getActionCommand().equals("comboBoxChanged") || e.getActionCommand().equals("Send"))) 
+				DisplayComponent(e.getActionCommand());	// display component for the button that was pressed
+			else {
 				
-				if(complainCategory.getSelectedItem().equals("")) 
-					JOptionPane.showMessageDialog(null, "Choose a complain Category", "",JOptionPane.ERROR_MESSAGE);
-				else {
-					if(!complainCategory.getSelectedItem().equals("Other")) {
-						if(complainType.getSelectedItem().equals("")) {
-							JOptionPane.showMessageDialog(null, "Choose a complain type", "",JOptionPane.ERROR_MESSAGE);
+				if(e.getActionCommand().equals("Send")){
+					
+					if(complainCategory.getSelectedItem().equals("")) 
+						JOptionPane.showMessageDialog(null, "Choose a complain Category", "",JOptionPane.ERROR_MESSAGE);
+					else {
+						if(!complainCategory.getSelectedItem().equals("Other")) {
+							if(complainType.getSelectedItem().equals("")) {
+								JOptionPane.showMessageDialog(null, "Choose a complain type", "",JOptionPane.ERROR_MESSAGE);
+								return;
+							}
+						}
+						if(complainText.getText().equals("")) {
+							JOptionPane.showMessageDialog(null, "Type your Complain", "",JOptionPane.ERROR_MESSAGE);
 							return;
 						}
+						
+						sendComplain();
 					}
-					if(complainText.getText().equals("")) {
-						JOptionPane.showMessageDialog(null, "Type your Complain", "",JOptionPane.ERROR_MESSAGE);
-						return;
+						
+				}else {
+					if(!onlineClientsDropdown.getSelectedItem().equals("Select User")) {
+						onlineClientsDropdown.setVisible(false); // hide online client dropdown menu
+						startChatButton.setVisible(true);// show start chat button in its place	
+						
+						recieverIndex = onlineClientsDropdown.getSelectedIndex()-1; // set the recieverIndex to the selected index od the gropdown menu to locate the reciever ID
+						 
+						ChatWindow = new ChatWindow(user, MainWindow.getOnlineClient().get(recieverIndex)[0][0].toString());// add the reciever id to the chat along with rge sender info
+						MainWindow.getDesktopPane().add(ChatWindow);// add chat window to desktop
+						MainWindow.getDesktopPane().moveToFront(ChatWindow);// bring chatwindow to front
+						
+					}else {
+					
+						complainType.setVisible(true); 
+						switch (String.valueOf(complainCategory.getSelectedItem())) {
+							case "Network":
+												complainType.removeAllItems();
+												complainType.addItem("");
+												complainType.addItem("Cable");
+												complainType.addItem("Tellephone");
+												complainType.addItem("Internet");
+												break;
+							case "Billing":
+												complainType.removeAllItems();
+												complainType.addItem("");
+												complainType.addItem("Paid");
+												complainType.addItem("Unpaid");
+												break;
+							case "Other":
+												complainType.removeAllItems();
+												complainType.setVisible(false);  
+												break;
+							default:
+												complainType.removeAllItems();
+												complainType.setVisible(false); 
+							
+						}
 					}
-					
-					sendComplain();
-				}
-					
-			}else {
-				complainType.setVisible(true); 
-				switch (String.valueOf(complainCategory.getSelectedItem())) {
-					case "Network":
-										complainType.removeAllItems();
-										complainType.addItem("");
-										complainType.addItem("Cable");
-										complainType.addItem("Tellephone");
-										complainType.addItem("Internet");
-										break;
-					case "Billing":
-										complainType.removeAllItems();
-										complainType.addItem("");
-										complainType.addItem("Paid");
-										complainType.addItem("Unpaid");
-										break;
-					case "Other":
-										complainType.removeAllItems();
-										complainType.setVisible(false);  
-										break;
-					default:
-										complainType.removeAllItems();
-										complainType.setVisible(false); 
-					
 				}
 			}
+		}catch (Exception ex) {
+			
 		}
 	}
 	

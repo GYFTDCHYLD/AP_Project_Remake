@@ -118,10 +118,10 @@ public class Server{
 			}
 		} 
 		 
-		private Packet readData() { 
-			Packet data = null; 
+		private Object readData() { 
+			Object data = new Object(); 
 			try {
-				data = (Packet) objIs.readObject();
+				data = objIs.readObject();
 			} catch (IOException e) {
 				System.out.println("error recieving data from client " + e.getMessage());
 			}catch (ClassNotFoundException e) {
@@ -137,7 +137,7 @@ public class Server{
 		public void run() {
 			
 			while(true) {
-				Packet data = readData(); 
+				Packet data = (Packet) readData(); 
 				parsePacket(data);	
 			}
 			
@@ -179,8 +179,17 @@ public class Server{
 
 		
 		private void InfoHandler(Packet9Info info) { 
-			if(info.getInfo().equals("killThread")) 
-				killThread(info.getThreadIndex());
+			switch (info.getInfo()) { 
+				case "Send Online List":
+											
+					break;
+				case "killThread":
+											killThread(info.getThreadIndex());
+					break;
+	
+				default:
+					break;
+			}	
 		}
 		
 		private void killThread(int index) { 
@@ -239,9 +248,8 @@ public class Server{
 					this.UserInfo[0][0] = loginData.getData().getUserId();// set the UserId of this client handler to the Id of the loggedin user
 					this.UserInfo[0][1] = loginData.getData().getFirstName();// add the user firstname to the handler for chat purposes
 					
-					Packet onlineClients = new Packet11List(onlineClient(this.UserInfo[0][0]));// return list of client id except this id
-					sendData(onlineClients);// send list of clients id to user
-					
+					Packet onlineClients = new Packet11List(onlineClient());// return list of client and add it to the packet/object
+					sendOnlineClientListToAllClients((Packet11List) onlineClients);// send list of clients id to all connected user
 					found = true;
 					break;
 				}
@@ -277,30 +285,33 @@ public class Server{
 			return list;
 		}
 		
-		private List<String[][]> onlineClient(String id){// a list of active client to send to server for chat
+		private List<String[][]> onlineClient(){// a list of active client to send to server for chat
 			List<String[][]>  list = new ArrayList<String[][]>();
-			for (ClientHandler user : onlineClient) {
-				if(!user.UserInfo[0][0].equals(id))
-					list.add(UserInfo);
+			for (ClientHandler client : onlineClient) {  
+				if(!client.UserInfo[0][0].equals(""))
+					list.add(client.UserInfo);
 			}
 			
 			return list;
 		}
 		
 		private void ChatHandler(Packet03Chat data) { // handle chat
-			sendDataToAllClients(data);
+			sendChatToSendingAndReceivingClients(data);
 			
 		}
 
 		private void putUserOffline(Packet02Logout data) { // remove the user id from the client handler
 			try {
-				sendData(data);// send the packet to the user 
-				sendData(new Packet9Info("Logout Successfully"));// send the packet to the user 
 				
 				int index = getUserIndex(data.getData());
-				
 				onlineClient.get(index).UserInfo[0][0] = ""; // set the userID of the client handler to an empty string so that user can re-login with the same handler
 				onlineClient.get(index).UserInfo[0][1] = ""; // set the firstname of the client handler to an empty string so that user can re-login with the same handler
+				
+				sendData(data);// send the packet to the user for them to use it to take necesasary action
+				sendData(new Packet9Info("Logout Successfully"));// send the packet to the user 
+				Packet onlineClients = new Packet11List(onlineClient());// return list of client and add it to the packet/object
+				sendOnlineClientListToAllClients((Packet11List) onlineClients);// send list of clients id to all connected user
+				
 			} catch (IndexOutOfBoundsException e) {
 				sendData(new Packet10Error("Logout Error " + e.getMessage()));// send the packet to the user 
 			}
@@ -320,10 +331,16 @@ public class Server{
 
 
 
-	public void sendDataToAllClients(Packet03Chat data) {
+	public void sendChatToSendingAndReceivingClients(Packet03Chat data) { 
 		for (ClientHandler client : onlineClient) {
-			//if(client.UserId.equals(data.getSenderId()) || client.UserId.equals(data.getRecieverId()))
+			if(client.UserInfo[0][0].equals(data.getSenderId()) || client.UserInfo[0][0].equals(data.getRecieverId()))
 				data.writeData(client);// only send the message to the sender or the reciever
+		}
+	}
+	
+	public void sendOnlineClientListToAllClients(Packet11List data) {
+		for (ClientHandler client : onlineClient) {
+			data.writeData(client);// only send the message to the sender or the reciever
 		}
 	}
 	

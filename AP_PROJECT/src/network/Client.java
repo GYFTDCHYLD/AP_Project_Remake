@@ -82,7 +82,7 @@ public class Client implements Runnable{
 	} 
 	
 	public Packet readData() { 
-		Packet data = null;  
+		Object data = new Object();  
 		try {
 			data = (Packet) objIs.readObject();
 		} catch (IOException e) {
@@ -92,7 +92,7 @@ public class Client implements Runnable{
 		}catch(NullPointerException e) {
 			System.err.println("error recieving data from server " + e.getMessage());
 		}
-		return data;
+		return (Packet) data;
 		 
 	}	
 
@@ -168,7 +168,6 @@ public class Client implements Runnable{
 	}
 	
 	private void LogoutHandler(Packet02Logout data) {
-		//((JInternalFrame) MainWindow.getDesktopPane().getComponent(0)).dispose();// remove  dashboard window
 		MainWindow.getDesktopPane().removeAll();//remove  dashboard window
 		MainWindow.getDesktopPane().add(new LoginWindow());// add a new login window
 		MainWindow.getDesktopPane().add(MainWindow.background);

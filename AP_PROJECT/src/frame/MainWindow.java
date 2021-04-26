@@ -29,7 +29,6 @@ import javax.swing.SwingConstants;
 import domain.Complain;
 import image.loadImages;
 import network.Client;
-import packet.Packet03Chat;
 import packet.Packet9Info;
 
 public class MainWindow extends JFrame{
@@ -247,8 +246,12 @@ public class MainWindow extends JFrame{
 		return onlineClient;
 	}
 
-	public static void setOnlineClient(List<String[][]> onlineClient) {
-		MainWindow.onlineClient = onlineClient;
+	public static void setOnlineClient(List<String[][]> Client) {
+		onlineClient = Client;
+		for(String[][] clientInfo : onlineClient) { 
+			if(clientInfo[0][0].equals(loginID))
+			onlineClient.remove(clientInfo);//remove this user info from the list to prevent yourself from showing up in the chat
+		}
 	}
 
 	public static List<Complain> getComplain() {
