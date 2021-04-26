@@ -9,7 +9,9 @@ import javax.imageio.ImageIO;
 public class loadImages {
 	
 	public static BufferedImage formBackground;
-	public static BufferedImage dashboardBackground;
+	public static BufferedImage CustomerDashboardBackground;
+	public static BufferedImage RepresentativeDashboardBackground;
+	public static BufferedImage TechnitianDashboardBackground;
 	public static BufferedImage mainBackground;
 	public static BufferedImage maleAvtar; 
 	public static BufferedImage femaleAvtar;  
@@ -20,7 +22,9 @@ public class loadImages {
 	public void init() {
 		mainBackground = imageLoader("/MainBackground.png");
 		formBackground = imageLoader("/formBackground.jpg");
-		dashboardBackground = imageLoader("/DashboardBackground.jpg");
+		CustomerDashboardBackground = imageLoader("/CustomerDashboardBackground.jpg");
+		RepresentativeDashboardBackground = imageLoader("/RepresentativeDashboardBackground.jpg");
+		TechnitianDashboardBackground = imageLoader("/TechnitianDashboardBackground.jpg");
 		maleAvtar = imageLoader("/male.png");
 		femaleAvtar = imageLoader("/female.png");
 		

@@ -76,12 +76,10 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		
 		profileImage = new JLabel();
 		profileImage.setHorizontalAlignment(SwingConstants.CENTER);
-		profileImage.setIcon(new ImageIcon(loadImages.dashboardBackground)); 
 		profileImage.setBounds(40, 10,50, 50);
 		
 		name = new JLabel();
 		name.setFont(new Font("arial", Font.TYPE1_FONT, 16));
-		name.setForeground(Color.WHITE);
 		name.setBounds(10, 60,300, 30);
 		
 		makeComplain = new JButton("Make a Complain");
@@ -161,7 +159,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		
 		background = new JLabel();
 		background.setHorizontalAlignment(SwingConstants.CENTER);
-		background.setIcon(new ImageIcon(loadImages.dashboardBackground)); 
 		background.setBounds(0, 0,750, 600);
 			
 		
@@ -174,10 +171,16 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			dashboard.add(viewAccount);
 			dashboard.add(Chat);
 			dashboard.add(payBill);
+			name.setForeground(Color.BLACK);
+			background.setIcon(new ImageIcon(loadImages.CustomerDashboardBackground)); 
 		}else if(user.equals("Representative")) { 
 			dashboard.add(assignComplain);
+			name.setForeground(Color.WHITE);
+			background.setIcon(new ImageIcon(loadImages.RepresentativeDashboardBackground)); 
 		}else {
 			dashboard.add(setVisitDate);
+			name.setForeground(Color.WHITE);
+			background.setIcon(new ImageIcon(loadImages.TechnitianDashboardBackground)); 
 		}
 		dashboard.add(viewComplain);
 		dashboard.add(profileImage);
@@ -401,7 +404,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		
 		cellSelect.addListSelectionListener(this);
 		scrollPane = new JScrollPane(table); 
-		scrollPane.setBounds(10, 110, 680, 400); 
+		scrollPane.setBounds(7, 110, 680, 400); 
 		scrollPane.setOpaque(true);;
 		
 		dashboard.add(scrollPane);
