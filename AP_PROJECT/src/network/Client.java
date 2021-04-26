@@ -52,6 +52,8 @@ public class Client implements Runnable{
 		}
 		catch(IOException e) {
 			parsePacket(new Packet9Info("Not Connected to server:  " + e.getMessage()));
+		}catch(NullPointerException e) {
+			parsePacket(new Packet9Info("Not Connected to server:  " + e.getMessage()));
 		}
 	}	
 

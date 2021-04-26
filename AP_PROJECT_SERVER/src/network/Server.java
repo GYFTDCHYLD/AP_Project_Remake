@@ -25,8 +25,8 @@ public class Server{
 	private List<User> connectedUsers; 
 	private List<Complain> complain;
 	private List<BillingAccount> billigAccount; 
-	private List<Packet03Chat> chat; 
-	private List<Thread> onlineThreads; 
+	private List<ClientHandler> onlineClient; // used for live chat
+	private List<Thread> onlineThreads;// used to logout/ disconnect user/ kill client thread
 	
 	
 	public Server() {
@@ -35,8 +35,8 @@ public class Server{
 			Users = new ArrayList<User>(); 
 			connectedUsers = new ArrayList<User>(); 
 			complain = new ArrayList<Complain>();
-			billigAccount = new ArrayList<BillingAccount>(); 
-			chat = new ArrayList<Packet03Chat>();
+			billigAccount = new ArrayList<BillingAccount>();
+			onlineClient = new ArrayList<ClientHandler>();
 			onlineThreads = new ArrayList<Thread>();
 			
 			User User = new Employee("S122", "Ms", "Shericka", "Jones", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
@@ -68,6 +68,7 @@ public class Server{
 				clientCount+= 1;
 				System.out.println("Starting a thread for a client at "+ date.getTime()+"\nClient Count: "+clientCount);
 				ClientHandler clientHandler = new ClientHandler(connectionSocket);
+				onlineClient.add(clientHandler);
 				Thread thread = new Thread(clientHandler);
 				thread.start();
 				onlineThreads.add(thread);
@@ -86,7 +87,7 @@ public class Server{
 		ObjectOutputStream objOs;
 		ObjectInputStream objIs;
 
-		public ClientHandler (Socket socket) {
+		private ClientHandler (Socket socket) {
 			this.clientHandlerSocket = socket;
 			try {
 				this.objOs = new ObjectOutputStream(clientHandlerSocket.getOutputStream());
@@ -110,7 +111,7 @@ public class Server{
 			}
 		} 
 		 
-		public Packet readData() { 
+		private Packet readData() { 
 			Packet data = null; 
 			try {
 				data = (Packet) objIs.readObject();
@@ -268,13 +269,11 @@ public class Server{
 		}
 		
 		private void ChatHandler(Packet03Chat data) { // handle chat
-			chat.add(data);
-			data.writeData(this);
-			sendDataToAllClients(data); 
+			sendDataToAllClients(data);
 		}
 		
 		
-		public void onlineUser(User user) {  
+		private void onlineUser(User user) {  
 			boolean alreadyConnected = false;
 			for (User uzr : connectedUsers) { 
 				if (user.getUserId().equalsIgnoreCase(uzr.getUserId())) {
@@ -286,7 +285,7 @@ public class Server{
 			}
 		}
 
-		public void putUserOffline(Packet02Logout data) { 
+		private void putUserOffline(Packet02Logout data) { 
 			try {
 				sendData(data);// send the packet to the user 
 				sendData(new Packet9Info("Logout Successfully"));// send the packet to the user 
@@ -296,16 +295,7 @@ public class Server{
 			}
 		}
 
-		public User getPlayerMP(String userId) {
-			for (User user : connectedUsers) {
-				if (user.getUserId().equals(userId)) {
-					return user;
-				}
-			}
-			return null;
-		}
-
-		public int getUserIndex(String userId) throws IndexOutOfBoundsException {
+		private int getUserIndex(String userId) throws IndexOutOfBoundsException {
 			int index = 0;
 			for (User user : connectedUsers) {
 				if (user.getUserId().equals(userId)) {
@@ -315,13 +305,18 @@ public class Server{
 			}
 			return index;
 		}
+		
+		public ClientHandler getThisClientHandler() {
+			return this;
+		}
 	}
 
 
 
 	public void sendDataToAllClients(Packet03Chat data) {
-		for (Thread user : onlineThreads) {
-			data.writeData(((ClientHandler)user));
+		for (ClientHandler user : onlineClient) {
+			data.writeData(user);
 		}
 	}
+	
 }

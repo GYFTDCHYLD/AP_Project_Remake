@@ -51,7 +51,6 @@ public class Packet03Chat extends Packet{
 
 	@Override
 	public void writeData(Server Server) {
-		// TODO Auto-generated method stub
 		
 	}
 	

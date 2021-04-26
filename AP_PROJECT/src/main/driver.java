@@ -8,5 +8,4 @@ public class driver {
 		new MainWindow(); 
 
 	}
-
 }
