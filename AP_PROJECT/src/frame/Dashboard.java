@@ -70,6 +70,8 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	
 	private JButton submit;
 	
+	private ChatWindow ChatWindow;
+	
 	public void intializeComponent() {
 		
 		dashboard = new JDesktopPane();
@@ -94,7 +96,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		viewAccount.setBounds(410, 20,130, 30);
 		viewAccount.addActionListener(this);
 		
-		Chat = new JButton("Chat");
+		Chat = new JButton("Start Chat");
 		Chat.setBounds(410, 60,130, 30);
 		Chat.addActionListener(this);
 		
@@ -240,11 +242,16 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										break;
 			case "Set visit date":
 										break;
-			case "Chat":
-										
-										ChatWindow ChatWindow = new ChatWindow();
-										MainWindow.getDesktopPane().add(ChatWindow);
-										MainWindow.getDesktopPane().moveToFront(ChatWindow);
+			case "Start Chat":
+										Chat.setText("End Chat");//change the name on the button after it has been clicked
+										ChatWindow = new ChatWindow(user, "recieverId");// add the reciever id to the chat along with rge sender info
+										MainWindow.getDesktopPane().add(ChatWindow);// add chat window to desktop
+										MainWindow.getDesktopPane().moveToFront(ChatWindow);// bring chatwindow to front
+										break;
+			case "End Chat":
+										Chat.setText("Start Chat");//change the name on the button after it has been clicked
+										MainWindow.getDesktopPane().remove(ChatWindow); // remove chat window
+										MainWindow.getDesktopPane().moveToFront(this);// bring dashboard to front 
 										break;
 			case "logout":
 										Packet02Logout Packet = new Packet02Logout(MainWindow.getLoginID());

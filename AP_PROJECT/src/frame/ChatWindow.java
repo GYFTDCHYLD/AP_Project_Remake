@@ -12,6 +12,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import domain.User;
 import image.loadImages;
 import packet.Packet03Chat;
 
@@ -22,6 +23,8 @@ public class ChatWindow extends JInternalFrame implements ActionListener{
 	private static JTextField ChatBox;// where you type your message
 	private static String Name;
 	private static JLabel background;
+	private User ME;// user info for the chat
+	private String receiverId;
 	
 
 	public void intializeComponent() {
@@ -64,8 +67,10 @@ public class ChatWindow extends JInternalFrame implements ActionListener{
 	}
 	
 	
-	public ChatWindow() {
-		super("Chat",false,false,false,true);  
+	public ChatWindow(User user, String receiver) {
+		super("Chat",false,false,false,true); 
+		ME = user;
+		receiverId = receiver; 
 		intializeComponent() ;
 		addComponentsToWindow();
 		setWindowsProperties();
@@ -77,7 +82,7 @@ public class ChatWindow extends JInternalFrame implements ActionListener{
 		String getText = ChatBox.getText();
 		if(!getText.equals("")) {
 			ChatBox.setText("");
-			Packet03Chat Chat = new Packet03Chat("Me", "", getText);
+			Packet03Chat Chat = new Packet03Chat(ME.getUserId(), ME.getFirstName(), receiverId, getText);
 			Chat.writeData(MainWindow.getClientSocket());
 		}
 		
@@ -86,6 +91,15 @@ public class ChatWindow extends JInternalFrame implements ActionListener{
 
 	public JTextArea getChatArea() {
 		return ChatArea;
+	}
+	
+	public void append(Packet03Chat chat) {
+		String message = "";
+		if(chat.getSenderId().equals(ME.getUserId()))
+			message = "Me: " + chat.getMessage();
+		else
+			message = chat.getSenderName() + ": " + chat.getMessage();
+		ChatArea.append(message + "\n"); 
 	}
 	
 }

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.management.loading.PrivateClassLoader;
 import javax.swing.JOptionPane;
 
 import domain.*;
@@ -21,33 +22,36 @@ public class Server{
 	private Socket connectionSocket;
 	private Calendar date;
 	private int clientCount;
-	private List<User> Users; 
-	private List<User> connectedUsers; 
-	private List<Complain> complain;
-	private List<BillingAccount> billigAccount; 
+	private List<User> userDatabase;  
+	private List<Complain> complainDatabase; 
+	private List<BillingAccount> billigAccountDatabase;   
 	private List<ClientHandler> onlineClient; // used for live chat
 	private List<Thread> onlineThreads;// used to logout/ disconnect user/ kill client thread
+
 	
 	
 	public Server() {
 		
 		try {
-			Users = new ArrayList<User>(); 
-			connectedUsers = new ArrayList<User>(); 
-			complain = new ArrayList<Complain>();
-			billigAccount = new ArrayList<BillingAccount>();
+			userDatabase = new ArrayList<User>();  
+			complainDatabase = new ArrayList<Complain>();
+			billigAccountDatabase = new ArrayList<BillingAccount>();
 			onlineClient = new ArrayList<ClientHandler>();
 			onlineThreads = new ArrayList<Thread>();
 			
 			User User = new Employee("S122", "Ms", "Shericka", "Jones", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
-			Users.add(User);
+			userDatabase.add(User);
+			
+			User = new Customer("A121", "Ms", "Akielia", "Willbrugh", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"); 
+			billigAccountDatabase.add(new BillingAccount("A121","Due", 15000));
+			userDatabase.add(User);
 			
 			User = new Employee("C123", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Technitian"); 
-			Users.add(User);
+			userDatabase.add(User);
 			
 			User = new Customer("C124", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"); 
-			billigAccount.add(new BillingAccount("C124","Due", 15000));
-			Users.add(User);
+			billigAccountDatabase.add(new BillingAccount("C124","Due", 15000));
+			userDatabase.add(User);
 			
 			this.serverSocket = new ServerSocket(8000);
 		}
@@ -67,11 +71,14 @@ public class Server{
 				date = Calendar.getInstance();
 				clientCount+= 1;
 				System.out.println("Starting a thread for a client at "+ date.getTime()+"\nClient Count: "+clientCount);
-				ClientHandler clientHandler = new ClientHandler(connectionSocket);
-				onlineClient.add(clientHandler);
-				Thread thread = new Thread(clientHandler);
-				thread.start();
-				onlineThreads.add(thread);
+				
+				ClientHandler clientHandler = new ClientHandler(connectionSocket);// creating the client handler
+				onlineClient.add(clientHandler);// add the client handlers to a list in-order to send chat to all
+				
+				Thread thread = new Thread(clientHandler);// make client handler run on separate thread
+				thread.start();// start the client handler thread
+				onlineThreads.add(thread);// add the thread to the online list, stop thread in the list when logging out
+				
 			} catch (IOException e) {
 				System.err.println("error " + e.getMessage());
 			}catch(Exception e) {
@@ -83,11 +90,13 @@ public class Server{
 	
 	public class ClientHandler extends Thread{ 
 
-		Socket clientHandlerSocket;
-		ObjectOutputStream objOs;
-		ObjectInputStream objIs;
+		private Socket clientHandlerSocket;
+		private ObjectOutputStream objOs;
+		private ObjectInputStream objIs;
+		private String UserId; 
 
 		private ClientHandler (Socket socket) {
+			this.UserId = "";
 			this.clientHandlerSocket = socket;
 			try {
 				this.objOs = new ObjectOutputStream(clientHandlerSocket.getOutputStream());
@@ -186,10 +195,10 @@ public class Server{
 		}
 		
 		private void RegistrationHandler(Packet00Register data) { // handle registration
-			String id = (data.getData().getFirstName()).substring(0,1) + "34" + Users.size();//create user Id Using Fist letter of first name plus 34 plus the amount of user;
+			String id = (data.getData().getFirstName()).substring(0,1) + "34" + userDatabase.size();//create user Id Using Fist letter of first name plus 34 plus the amount of user;
 			User User = new Customer(id,data.getData().getNameTitle(), data.getData().getFirstName(), data.getData().getLastName(), data.getData().getPassword());
-			Users.add(User);//add user to database
-			billigAccount.add(new BillingAccount(id,"unpaid", 15000));// add account
+			userDatabase.add(User);//add user to database
+			billigAccountDatabase.add(new BillingAccount(id,"unpaid", 15000));// add account
 			Packet infoPacket = new Packet9Info("Sussessfully Registered");
 			((Packet00Register)data).getData().setPassword(id);// replace the pasword in the object with the New User ID 
 			sendData(data);// send the the object to the user to extract the User ID
@@ -201,12 +210,12 @@ public class Server{
 			Packet07User loginData = new Packet07User(new User());
 			boolean found = false;
 			
-			for (User user : Users) {//check the database for the user
+			for (User user : userDatabase) {//check the database for the user
 				if(user.getUserId().equals(data.getUserId()) && user.getPassword().equals(data.getPassword())) {
 					loginData = new Packet07User(user); 
-					
-					for(User conected : connectedUsers) {// loop through the users connected to the server
-						if(conected.getUserId().equals(loginData.getData().getUserId()) && conected.getPassword().equals(loginData.getData().getPassword())) {
+					System.out.println("login info found");
+					for(ClientHandler client : onlineClient) {// loop through the client connected to the server
+						if(client.UserId.equals(loginData.getData().getUserId())) {
 							Packet infoPacket = new Packet9Info("User Already Logedin");
 							sendData(infoPacket);// send the info object/packet to the user if user is already lodged in
 							return;// stop the code here if user already logged in 
@@ -215,7 +224,7 @@ public class Server{
 					
 					
 					if(loginData.getData() instanceof Customer) {// check if its a customer is loging in
-						for(BillingAccount account : billigAccount) {// search for their account in database
+						for(BillingAccount account : billigAccountDatabase) {// search for their account in database
 							if(account.getId().equals(loginData.getData().getUserId())) {
 								((Customer)loginData.getData()).setBillingAccount(account);/// ass the account to the user object to be sent to customer
 							}
@@ -223,7 +232,6 @@ public class Server{
 					}
 					
 					
-					onlineUser(loginData.getData());// put the user online if they are not already logedin
 					Packet Complains = new Packet11List(myComplains(loginData.getData().getUserId()));/// prepare the packet with the list that will be sent to the user
 					sendData(Complains);// send the packet to the user
 					sendData(loginData);// send the data for the user dashboard
@@ -231,6 +239,7 @@ public class Server{
 					Packet9Info infoPacket = new Packet9Info("Login Sussessfully");// prepare message 
 					infoPacket.setThreadIndex(onlineThreads.size()-1); // set the index of the user's thread
 					sendData(infoPacket); // send info to client
+					this.UserId = loginData.getData().getUserId();// set the UserId of this client handler to the Id of the loggedin user
 					
 					found = true;
 					break;
@@ -249,7 +258,7 @@ public class Server{
 		} 
 		
 		private void ComplainHandler(Packet04Complain data) {
-			complain.add(data.getData());//add the complain to the database
+			complainDatabase.add(data.getData());//add the complain to the database
 			Packet infoPacket = new Packet9Info("Complain Recieved");// create a message/packer/object
 			sendData(infoPacket);// send the info object/packet/message to the user
 
@@ -260,7 +269,7 @@ public class Server{
 		
 		private List<Complain> myComplains(String userId){// get complain from database
 			List<Complain> list = new ArrayList<Complain>();//create an arraylist to store the complains to be sent back to the user
-			for (Complain com : complain) {// loop through the list of complain from the database
+			for (Complain com : complainDatabase) {// loop through the list of complain from the database
 				if (com.getUserId().equals(userId)) {// check if the user id match the user id in the database for the complain
 					list.add(com);// if the id match, store the complain in the arraylist that will be sent to the user
 				}
@@ -268,54 +277,49 @@ public class Server{
 			return list;
 		}
 		
+		private List<String> onlineClient(){// a list of active client to send to server for chat
+			List<String>  list = new ArrayList<String>();
+			for (ClientHandler user : onlineClient) {
+				list.add(user.UserId);
+			}
+			
+			return list;
+		}
+		
 		private void ChatHandler(Packet03Chat data) { // handle chat
 			sendDataToAllClients(data);
-		}
-		
-		
-		private void onlineUser(User user) {  
-			boolean alreadyConnected = false;
-			for (User uzr : connectedUsers) { 
-				if (user.getUserId().equalsIgnoreCase(uzr.getUserId())) {
-					alreadyConnected = true;
-				}
-			}
-			if (!alreadyConnected) {
-				connectedUsers.add(user);
-			}
+			
 		}
 
-		private void putUserOffline(Packet02Logout data) { 
+		private void putUserOffline(Packet02Logout data) { // remove the user id from the client handler
 			try {
 				sendData(data);// send the packet to the user 
 				sendData(new Packet9Info("Logout Successfully"));// send the packet to the user 
-				connectedUsers.remove(getUserIndex(data.getData())); // remove the user from the list of connected users
+				
+				onlineClient.get(getUserIndex(data.getData())).UserId = ""; // set the userID of the client handler to an empty string so that user can re-login with the same handler
 			} catch (IndexOutOfBoundsException e) {
 				sendData(new Packet10Error("Logout Error"));// send the packet to the user 
 			}
 		}
 
-		private int getUserIndex(String userId) throws IndexOutOfBoundsException {
+		private int getUserIndex(String userId) throws IndexOutOfBoundsException {// get the index for the user in the online list
 			int index = 0;
-			for (User user : connectedUsers) {
-				if (user.getUserId().equals(userId)) {
+			for (ClientHandler client : onlineClient) {
+				if (client.UserId.equals(userId)) {
 					break;
 				}
 				index++;
 			}
 			return index;
 		}
-		
-		public ClientHandler getThisClientHandler() {
-			return this;
-		}
 	}
 
 
 
 	public void sendDataToAllClients(Packet03Chat data) {
-		for (ClientHandler user : onlineClient) {
-			data.writeData(user);
+		for (ClientHandler client : onlineClient) {
+			//if(client.UserId.equals(data.getSenderId()) || client.UserId.equals(data.getRecieverId()))
+				data.writeData(client);// only send the message to the sender or the reciever
 		}
 	}
 	

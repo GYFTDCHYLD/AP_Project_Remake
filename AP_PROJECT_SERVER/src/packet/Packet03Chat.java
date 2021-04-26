@@ -10,14 +10,16 @@ public class Packet03Chat extends Packet{
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private String sender;
-	private String reciever;
+	private String senderId; 
+	private String senderName; 
+	private String recieverId;
 	private String message;
 	
-	public Packet03Chat(String sender, String reciever, String message) { 
+	public Packet03Chat(String senderId, String senderName, String recieverId, String message) {  
 		super(03);
-		this.sender = sender;
-		this.reciever = reciever;
+		this.senderId = senderId;
+		this.senderName = senderName;
+		this.recieverId = recieverId;
 		this.message = message;
 	}
 	
@@ -33,13 +35,34 @@ public class Packet03Chat extends Packet{
 		return this; 
 	}
 
-	public String getSender() {
-		return sender;
+
+	public String getSenderId() {
+		return senderId;
 	}
 
 
-	public String getReciever() {
-		return reciever;
+	public void setSenderId(String senderId) {
+		this.senderId = senderId;
+	}
+
+
+	public String getSenderName() {
+		return senderName;
+	}
+
+
+	public void setSenderName(String senderName) {
+		this.senderName = senderName;
+	}
+
+
+	public String getRecieverId() {
+		return recieverId;
+	}
+
+
+	public void setRecieverId(String recieverId) {
+		this.recieverId = recieverId;
 	}
 
 
@@ -48,10 +71,16 @@ public class Packet03Chat extends Packet{
 	}
 
 
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
 
 	@Override
 	public void writeData(Server Server) {
+		// TODO Auto-generated method stub
 		
 	}
+
 	
 }

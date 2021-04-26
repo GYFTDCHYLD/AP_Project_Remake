@@ -177,7 +177,7 @@ public class Client implements Runnable{
 	
 	private void ChatHandler(Packet03Chat data) { 
 		MainWindow.getChat().add(data.getData());
-		((ChatWindow)MainWindow.getDesktopPane().getComponent(0)).getChatArea().append(data.getData().getSender() + ": " + data.getData().getMessage()+"\n");
+		((ChatWindow)MainWindow.getDesktopPane().getComponent(0)).append(data);// append the message to the chat//
 	}
 	
 	
