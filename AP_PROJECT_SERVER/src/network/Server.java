@@ -196,8 +196,10 @@ public class Server{
 		}
 		
 		private void killThread(int index) { 
+			onlineClient.remove(index);
 			onlineThreads.get(index).stop();// stop the users thread;
 			onlineThreads.remove(index);// remove the users thread from the list of threads
+			clientCount--;
 		}
 		
 		private void ErrorHandler(Packet10Error error) {// handle invalid request

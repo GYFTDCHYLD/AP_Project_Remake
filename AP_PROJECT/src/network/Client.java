@@ -163,8 +163,10 @@ public class Client implements Runnable{
 	private void UserDataHandler(Packet07User data) {
 		MainWindow.setLoginID(data.getData().getUserId());//logout user
 		MainWindow.getDesktopPane().removeAll();// remove  login window
-		MainWindow.getDesktopPane().add(new Dashboard(data.getData()));
+		Dashboard myDashboard = new Dashboard(data.getData());
+		MainWindow.getDesktopPane().add(myDashboard);
 		MainWindow.getDesktopPane().add(MainWindow.background);
+		MainWindow.getDesktopPane().moveToFront(myDashboard);
 	}
 	
 	private void LogoutHandler(Packet02Logout data) {
@@ -175,7 +177,9 @@ public class Client implements Runnable{
 	}
 	
 	private void ChatHandler(Packet03Chat data) { 
-		((ChatWindow)MainWindow.getDesktopPane().getComponent(0)).append(data);// append the message to the chat//
+		System.out.println("chat recieved");
+		((Dashboard)MainWindow.getDesktopPane().getComponent(0)).append(data);
+
 	}
 	
 	

@@ -27,6 +27,7 @@ import javax.swing.event.ListSelectionListener;
 
 import image.loadImages;
 import packet.Packet02Logout;
+import packet.Packet03Chat;
 import packet.Packet04Complain;
 import domain.Complain;
 import domain.Customer;
@@ -79,6 +80,8 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	public void intializeComponent() {
 		
 		dashboard = new JDesktopPane();
+		ChatWindow = new ChatWindow();
+		ChatWindow.setVisible(false); 
 		
 		profileImage = new JLabel();
 		profileImage.setHorizontalAlignment(SwingConstants.CENTER);
@@ -176,7 +179,8 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	}
 	
 	public void addComponentsToWindow(String user){
-		add(dashboard);
+		this.add(dashboard);
+		dashboard.add(ChatWindow);
 		if(user.equals("Customer")) {
 			dashboard.add(makeComplain);
 			dashboard.add(viewAccount); 
@@ -255,7 +259,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			case "Set visit date":
 										break;
 			case "Start Chat":
-										
+										dashboard.moveToFront(ChatWindow);
 										if(MainWindow.getOnlineClient().size() == 0) {
 											JOptionPane.showMessageDialog(null, "Nobody available to chat", "Micro Star",JOptionPane.INFORMATION_MESSAGE);
 										}else {
@@ -273,8 +277,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										break;
 			case "End Chat":
 										startChatButton.setText("Start Chat");//change the name on the button after it has been clicked
-										MainWindow.getDesktopPane().remove(ChatWindow); // remove chat window
-										MainWindow.getDesktopPane().moveToFront(this);// bring dashboard to front 
+										ChatWindow.setVisible(false); 
 										onlineClientsDropdown.removeAllItems();// remove all items from the dropdown list
 										break;
 			case "logout":
@@ -348,9 +351,14 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 						
 						recieverIndex = onlineClientsDropdown.getSelectedIndex()-1; // set the recieverIndex to the selected index od the gropdown menu to locate the reciever ID
 						 
-						ChatWindow = new ChatWindow(user, MainWindow.getOnlineClient().get(recieverIndex)[0][0].toString(),MainWindow.getOnlineClient().get(recieverIndex)[0][1].toString());// add the reciever id to the chat along with rge sender info
-						MainWindow.getDesktopPane().add(ChatWindow);// add chat window to desktop
-						MainWindow.getDesktopPane().moveToFront(ChatWindow);// bring chatwindow to front
+						ChatWindow.setME(user);
+						ChatWindow.setReceiverId(MainWindow.getOnlineClient().get(recieverIndex)[0][0].toString());
+						ChatWindow.setChatWindowTitle("Connect with: " + MainWindow.getOnlineClient().get(recieverIndex)[0][1].toString());
+						dashboard.moveToFront(ChatWindow);
+						ChatWindow.setVisible(true); 
+						//ChatWindow = new ChatWindow(user, MainWindow.getOnlineClient().get(recieverIndex)[0][0].toString(),MainWindow.getOnlineClient().get(recieverIndex)[0][1].toString());// add the reciever id to the chat along with rge sender info
+						//MainWindow.getDesktopPane().add(ChatWindow);// add chat window to desktop
+						//MainWindow.getDesktopPane().moveToFront(ChatWindow);// bring chatwindow to front
 						
 					}else {
 					
@@ -459,6 +467,17 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		dashboard.moveToFront(scrollPane); 
 		scrollPane.setVisible(true);
 		
+	}
+	
+	public void append(Packet03Chat chat) {
+		String message = "";
+		if(chat.getSenderId().equals(ChatWindow.getME().getUserId()))
+			message = "Me: " + chat.getMessage();
+		else {
+			message = chat.getSenderName() + ": " + chat.getMessage();
+			//789	1333fJOptionPane.showMessageDialog(null,chat.getMessage(), "Message From: "+ chat.getSenderName(),JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
+		}
+		ChatWindow.getChatArea().append(message + "\n"); 
 	}
 
 }

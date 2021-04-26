@@ -61,9 +61,10 @@ public class ChatWindow extends JInternalFrame implements ActionListener{
 	
 	public void setWindowsProperties() {
 		setLayout(null);
-		this.setBounds(125, 150, 400, 410); 
+		this.setBounds(125, 100, 400, 410); 
 		this.setVisible(true); 
 	}
+	
 	
 	
 	public ChatWindow(User user, String receiverID, String Name) { 
@@ -75,6 +76,12 @@ public class ChatWindow extends JInternalFrame implements ActionListener{
 		setWindowsProperties();
 	}
 
+	public ChatWindow() { 
+		super("",false,false,false,true);  
+		intializeComponent() ;
+		addComponentsToWindow();
+		setWindowsProperties();
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -91,14 +98,28 @@ public class ChatWindow extends JInternalFrame implements ActionListener{
 	public JTextArea getChatArea() {
 		return ChatArea;
 	}
-	
-	public void append(Packet03Chat chat) {
-		String message = "";
-		if(chat.getSenderId().equals(ME.getUserId()))
-			message = "Me: " + chat.getMessage();
-		else
-			message = chat.getSenderName() + ": " + chat.getMessage();
-		ChatArea.append(message + "\n"); 
+
+
+	public User getME() {
+		return ME;
+	}
+
+
+	public void setME(User mE) {
+		ME = mE;
+	}
+
+
+	public String getReceiverId() {
+		return receiverId;
+	}
+
+
+	public void setReceiverId(String receiverId) {
+		this.receiverId = receiverId;
 	}
 	
+	public void setChatWindowTitle(String title) {
+		this.title = title;
+	}
 }
