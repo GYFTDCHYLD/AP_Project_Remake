@@ -1,10 +1,17 @@
 package driver;
 
-import network.Server;
+import java.awt.EventQueue;
+
+import frame.ServerWindow;
 
 public class Driver {
 
 	public static void main(String[] args) {
-		new Server();
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				new ServerWindow();
+			}
+		});
+		
 	}
 }

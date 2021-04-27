@@ -45,7 +45,6 @@ public class MainWindow extends JFrame{
 	private loadImages loadImages; 
 	private static LoginWindow LoginWindow; 
 	public static Client ClientSocket;
-	private static String messageFromServer;
 	private static int threadIndex; 
 	private static String loginID;
 
@@ -120,8 +119,8 @@ public class MainWindow extends JFrame{
 				SystemTray.getSystemTray().remove(trayIcon);
 				Packet9Info Packet = new Packet9Info("killThread");// set the command/info
 				Packet.setThreadIndex(threadIndex);//set the index of the thread to be killed
-				Packet.writeData(MainWindow.getClientSocket());
-				System.exit(MainWindow.EXIT_ON_CLOSE); 
+				Packet.writeData(MainWindow.getClientSocket()); 
+				System.exit(0);// exit program
 			} 
 		});
 		
@@ -207,16 +206,6 @@ public class MainWindow extends JFrame{
 
 	public static Client getClientSocket() {
 		return ClientSocket;
-	}
-	
-	
-	
-	public static String getMessageFromServer() {
-		return messageFromServer;
-	}
-
-	public static  void setMessageFromServer(String message) {  
-		messageFromServer = message;
 	}
 
 	public static String hashPasword(String password){

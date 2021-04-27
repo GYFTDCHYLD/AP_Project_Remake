@@ -11,7 +11,9 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+
 import domain.*;
+import frame.ServerWindow;
 import packet.*;
 import packet.Packet.PacketTypes;
 
@@ -19,17 +21,16 @@ public class Server{
 
 	private ServerSocket serverSocket;
 	private Socket connectionSocket;
-	private Calendar date;
-	private int clientCount;
+	private Calendar date; 
 	private List<User> userDatabase;  
 	private List<Complain> complainDatabase; 
 	private List<BillingAccount> billigAccountDatabase;   
-	private List<ClientHandler> onlineClient; // used for live chat
+	private static List<ClientHandler> onlineClient; // used for live chat
 	private List<Thread> onlineThreads;// used to logout/ disconnect user/ kill client thread
 
 	
 	
-	public Server() {
+	public Server(int Port) {
 		
 		try {
 			userDatabase = new ArrayList<User>();  
@@ -55,24 +56,23 @@ public class Server{
 			billigAccountDatabase.add(new BillingAccount("C124","Due", 15000));
 			userDatabase.add(User);
 			
-			this.serverSocket = new ServerSocket(8000);
+			this.serverSocket = new ServerSocket(Port);
 		}
 		catch(Exception e) {
 			System.err.println("error " + e.getMessage());
 			return;
 		}
 		this.date = Calendar.getInstance();
-		this.clientCount = 0;
 		
-		JOptionPane.showMessageDialog(null,"Server has started at "+ date.getTime(), "Server Online",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
+		JOptionPane.showInternalMessageDialog(ServerWindow.getServerDash(),"Server has started at "+ date.getTime(), "Server Online",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
 		
+		ServerWindow.StartDate.setText("Server has started at "+ date.getTime()); 
+		ServerWindow.getStatus().setText("Status: ONLINE"); 
 
 		while(true) {
 			try {
 				connectionSocket = serverSocket.accept();
 				date = Calendar.getInstance();
-				clientCount+= 1;
-				System.out.println("Starting a thread for a client at "+ date.getTime()+"\nClient Count: "+clientCount);
 				
 				ClientHandler clientHandler = new ClientHandler(connectionSocket);// creating the client handler
 				onlineClient.add(clientHandler);// add the client handlers to a list in-order to send chat to all
@@ -80,6 +80,9 @@ public class Server{
 				Thread thread = new Thread(clientHandler);// make client handler run on separate thread
 				thread.start();// start the client handler thread
 				onlineThreads.add(thread);// add the thread to the online list, stop thread in the list when logging out
+				
+				ServerWindow.getConnectedClient().setText("Connected Client(s): " + onlineThreads.size()); 
+				System.out.println("Starting a thread for a client at "+ date.getTime());
 				
 			} catch (IOException e) {
 				System.err.println("error " + e.getMessage());
@@ -90,6 +93,11 @@ public class Server{
 	}
 	
 	
+	public Server() {
+		// TODO Auto-generated constructor stub
+	}
+
+
 	public class ClientHandler extends Thread{ 
 
 		private Socket clientHandlerSocket;
@@ -183,9 +191,6 @@ public class Server{
 		
 		private void InfoHandler(Packet9Info info) { 
 			switch (info.getInfo()) { 
-				case "Send Online List":
-											
-					break;
 				case "killThread":
 											killThread(info.getThreadIndex());
 					break;
@@ -196,10 +201,12 @@ public class Server{
 		}
 		
 		private void killThread(int index) { 
+			Packet infoPacket = new Packet9Info("Exit");
+			sendData(infoPacket);
 			onlineClient.remove(index);
 			onlineThreads.get(index).stop();// stop the users thread;
 			onlineThreads.remove(index);// remove the users thread from the list of threads
-			clientCount--;
+			ServerWindow.getConnectedClient().setText("Connected Client(s): " + onlineThreads.size()); 
 		}
 		
 		private void ErrorHandler(Packet10Error error) {// handle invalid request
@@ -347,6 +354,14 @@ public class Server{
 		for (ClientHandler client : onlineClient) {
 			data.writeData(client);// only send the message to the sender or the reciever
 		}
+	}
+	
+	public static void serverExit() {
+		Packet error = new Packet10Error("Server Ended");
+		for (ClientHandler client : onlineClient) {
+			client.sendData(error);// seend command to all client, this message will make all client programs windows 
+		}
+		System.exit(0);// exit / close server window
 	}
 	
 }

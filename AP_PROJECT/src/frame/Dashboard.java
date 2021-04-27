@@ -254,7 +254,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										createTable();
 										break;
 			case "View Account":
-										JOptionPane.showMessageDialog(null, "Ammount due: "+ ((Customer)user).getBillingAccount().getAmountDue()
+										JOptionPane.showMessageDialog(dashboard, "Ammount due: "+ ((Customer)user).getBillingAccount().getAmountDue()
 												+" Due date: " + ((Customer)user).getBillingAccount().getDueDate()
 												+" Status: " + ((Customer)user).getBillingAccount().getStatus(), "",JOptionPane.INFORMATION_MESSAGE);
 										break;
@@ -267,7 +267,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			case "Start Chat":
 										
 										if(MainWindow.getOnlineClient().size() == 0) {
-											JOptionPane.showMessageDialog(null, "Nobody available to chat", "Micro Star",JOptionPane.INFORMATION_MESSAGE);
+											JOptionPane.showMessageDialog(dashboard, "Nobody available to chat", "Micro Star",JOptionPane.INFORMATION_MESSAGE);
 										}else {
 
 											

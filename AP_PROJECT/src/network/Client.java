@@ -142,16 +142,34 @@ public class Client implements Runnable{
 
 
 	private void InfoHandler(Packet9Info info) { 
-		if(info.getInfo().equals("Login Sussessfully"))
-			MainWindow.setThreadID(info.getThreadIndex()); // store the index of the thread, to kill the thread when program window close properly
+		
+		JOptionPane.showInternalMessageDialog(MainWindow.getDesktopPane(),info.getInfo(), "From Server",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
+		switch (info.getInfo()) {
+			case "Exit": 
+										System.exit(0);// end the program if an exit message is recieved from the server
+				break;
+					
+			case "Login Sussessfully": 
+										MainWindow.setThreadID(info.getThreadIndex()); // store the index of the thread, to kill the thread when program window close properly
+								
+				break;
 	
-		JOptionPane.showInternalMessageDialog(MainWindow.getDesktopPane(),info.getData(), "From Server",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
-		MainWindow.setMessageFromServer(info.getData());
+			default:
+				break;
+		}
+		
 	}
 
 	private void ErrorHandler(Packet10Error error) {
 		JOptionPane.showInternalMessageDialog(MainWindow.getDesktopPane(),error.getData(), "From Server",JOptionPane.ERROR_MESSAGE);// display the message sent from server
-		MainWindow.setMessageFromServer(error.getData());	
+		switch (error.getData()) {
+			case "Server Ended": 
+								System.exit(0);// end the program if an exit message is recieved from the server
+				break;
+	
+			default:
+				break;
+		}	
 	}
 	
 	private void RegisterHandler(Packet00Register data) {
