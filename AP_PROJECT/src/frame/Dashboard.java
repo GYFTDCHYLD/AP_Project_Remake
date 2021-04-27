@@ -84,6 +84,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		
 		dashboard = new JDesktopPane();
 		ChatWindow = new ChatWindow();
+		ConnectedTo = "";
 		ChatWindow.setVisible(false);
 		
 		messages = new ArrayList<Packet03Chat>();// the will contain all chat that was recieve since being online
@@ -473,10 +474,14 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	
 	public void append(Packet03Chat chat) {// this function is used to add all incomming chat to an array list and append message to textarea
 		messages.add(chat);// store all chat reciever while online
-		filterMessage();// display only the from the user and the connect person in the current chat
 		
-		if(!(chat.getSenderId().equals(ChatWindow.getME().getUserId()) || chat.getSenderId().equals(ConnectedTo)))// if the message is not from the current user or from the user that the cutrrent user is connect to
-			JOptionPane.showMessageDialog(null,chat.getMessage(), "Message From: "+ chat.getSenderName(),JOptionPane.INFORMATION_MESSAGE);// display a popup with the message from the sender
+		
+		if(!ChatWindow.isVisible())
+			JOptionPane.showMessageDialog(null,"Message From: "+ chat.getSenderName(), user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);// display a popup with the message from the sender
+		else if(!(chat.getSenderId().equals(ChatWindow.getME().getUserId()) || chat.getSenderId().equals(ConnectedTo)))// if the message is not from the current user or from the user that the cutrrent user is connect to
+			JOptionPane.showMessageDialog(null,"Message From: "+ chat.getSenderName(), user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);// display a popup with the message from the sender
+		
+		filterMessage();// display only the from the user and the connect person in the current chat
 	}
 	
 	private void filterMessage() {
