@@ -477,9 +477,9 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		
 		
 		if(!ChatWindow.isVisible())
-			JOptionPane.showMessageDialog(null,"Message From: "+ chat.getSenderName(), user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);// display a popup with the message from the sender
+			JOptionPane.showInternalMessageDialog(dashboard,"Message From: "+ chat.getSenderName(), user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);// display a popup with the message from the sender
 		else if(!(chat.getSenderId().equals(ChatWindow.getME().getUserId()) || chat.getSenderId().equals(ConnectedTo)))// if the message is not from the current user or from the user that the cutrrent user is connect to
-			JOptionPane.showMessageDialog(null,"Message From: "+ chat.getSenderName(), user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);// display a popup with the message from the sender
+			JOptionPane.showInternalMessageDialog(dashboard,"Message From: "+ chat.getSenderName(), user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);// display a popup with the message from the sender
 		
 		filterMessage();// display only the from the user and the connect person in the current chat
 	}

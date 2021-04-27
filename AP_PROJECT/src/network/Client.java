@@ -144,12 +144,13 @@ public class Client implements Runnable{
 	private void InfoHandler(Packet9Info info) { 
 		if(info.getInfo().equals("Login Sussessfully"))
 			MainWindow.setThreadID(info.getThreadIndex()); // store the index of the thread, to kill the thread when program window close properly
-		JOptionPane.showMessageDialog(null,info.getData(), "From Server",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
+	
+		JOptionPane.showInternalMessageDialog(MainWindow.getDesktopPane(),info.getData(), "From Server",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
 		MainWindow.setMessageFromServer(info.getData());
 	}
 
 	private void ErrorHandler(Packet10Error error) {
-		JOptionPane.showMessageDialog(null,error.getData(), "From Server",JOptionPane.ERROR_MESSAGE);// display the message sent from server
+		JOptionPane.showInternalMessageDialog(MainWindow.getDesktopPane(),error.getData(), "From Server",JOptionPane.ERROR_MESSAGE);// display the message sent from server
 		MainWindow.setMessageFromServer(error.getData());	
 	}
 	
