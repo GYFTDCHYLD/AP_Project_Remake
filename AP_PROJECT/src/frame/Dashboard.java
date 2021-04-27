@@ -27,6 +27,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import image.loadImages;
+import packet.Packet;
 import packet.Packet02Logout;
 import packet.Packet03Chat;
 import packet.Packet04Complain;
@@ -276,7 +277,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 												onlineClientsDropdown.addItem(clientInfo[0][1]);// add the online user's name to the dropdown
 											}
 											onlineClientsDropdown.revalidate();
-											startChatButton.setText("End Chat");//change the name on the button after it has been clicked
 											startChatButton.setVisible(false);// hide chat button
 											onlineClientsDropdown.setVisible(true);// show dropdown in chat button's place
 										}
@@ -352,16 +352,12 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 						
 				}else {
 					if(!onlineClientsDropdown.getSelectedItem().equals("Select User")) {
-						onlineClientsDropdown.setVisible(false); // hide online client dropdown menu
-						startChatButton.setVisible(true);// show start chat button in its place	
 						
 						recieverIndex = onlineClientsDropdown.getSelectedIndex()-1; // set the recieverIndex to the selected index od the gropdown menu to locate the reciever ID
-						ConnectedTo = MainWindow.getOnlineClient().get(recieverIndex)[0][0].toString();
-						ChatWindow.setME(user);// set the user info for the chat, this user object includes the sender name and id
-						ChatWindow.setReceiverId(ConnectedTo);// add the reciever's id to the chat
-						ChatWindow.setChatWindowTitle("Connect with: " + MainWindow.getOnlineClient().get(recieverIndex)[0][1].toString());// update the title of the chat with the recievere's name, showing with whom u are connected with 
-						ChatWindow.setVisible(true); //make the chat window visible
-						filterMessage();// the conversation between the current user and the connected user
+						ConnectedTo = MainWindow.getOnlineClient().get(recieverIndex)[0][0].toString();// locate the id for the selected person from the online list and // add the id of the person u are currently having a convo winth, this is used to filter message from diferent conversation
+	
+						Packet03Chat Packet03Chat = new Packet03Chat(ConnectedTo, MainWindow.getOnlineClient().get(recieverIndex)[0][1].toString(), user.getUserId(), "");
+						initiateChat(Packet03Chat);// call the initiate chat function
 						
 					}else {
 					
@@ -475,10 +471,10 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	public void append(Packet03Chat chat) {// this function is used to add all incomming chat to an array list and append message to textarea
 		messages.add(chat);// store all chat reciever while online
 		
-		
-		if(!ChatWindow.isVisible())
+		if(!ChatWindow.isVisible()) {
 			JOptionPane.showInternalMessageDialog(dashboard,"Message From: "+ chat.getSenderName(), user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);// display a popup with the message from the sender
-		else if(!(chat.getSenderId().equals(ChatWindow.getME().getUserId()) || chat.getSenderId().equals(ConnectedTo)))// if the message is not from the current user or from the user that the cutrrent user is connect to
+			initiateChat(chat);// display the chat window with the message if u are not currently talking to someone else
+		}else if(!(chat.getSenderId().equals(ChatWindow.getME().getUserId()) || chat.getSenderId().equals(ConnectedTo)))// if the message is not from the current user or from the user that the cutrrent user is connect to
 			JOptionPane.showInternalMessageDialog(dashboard,"Message From: "+ chat.getSenderName(), user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);// display a popup with the message from the sender
 		
 		filterMessage();// display only the from the user and the connect person in the current chat
@@ -497,6 +493,20 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 				ChatWindow.getChatArea().append(message + "\n");
 			}
 		}
+	}
+	
+	
+	public void initiateChat(Packet03Chat chat) {// function used to bring up the chat window and initiant the connection with selected client/user
+		startChatButton.setText("End Chat");//change the name on the button after it has been clicked
+		startChatButton.setVisible(true);// show chat button
+		onlineClientsDropdown.setVisible(false);// hide dropdown in chat button's place
+		
+		ConnectedTo = chat.getSenderId();// add the id of the person u are currently having a convo winth, this is used to filter message from diferent conversation
+		ChatWindow.setME(user);// set the user info for the chat, this user object includes the sender name and id
+		ChatWindow.setReceiverId(chat.getSenderId());// add the reciever's id to the chat
+		ChatWindow.setChatWindowTitle("Connect with: " + chat.getSenderName());// update the title of the chat with the recievere's name, showing with whom u are connected with 
+		ChatWindow.setVisible(true); //make the chat window visible
+		filterMessage();// the conversation between the current user and the connected user
 	}
 
 }
