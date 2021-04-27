@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -73,6 +74,8 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	private JButton submit;
 	
 	private ChatWindow ChatWindow;
+	private String ConnectedTo; // this will store the user u are currently chatting/connected to in order to filter incomming messages from other users in the same chat window, this will allow us to make only the mssage on the connected user show in the chat
+	private List<Packet03Chat> messages;// a list of chats for the messages being recieved from the server
 	
 	private JComboBox<String> onlineClientsDropdown;  
 	private int recieverIndex; //used to map the index of the the reciever from the Mainwindow to the selection from the dropdown index
@@ -81,7 +84,9 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		
 		dashboard = new JDesktopPane();
 		ChatWindow = new ChatWindow();
-		ChatWindow.setVisible(false); 
+		ChatWindow.setVisible(false);
+		
+		messages = new ArrayList<Packet03Chat>();// the will contain all chat that was recieve since being online
 		
 		profileImage = new JLabel();
 		profileImage.setHorizontalAlignment(SwingConstants.CENTER);
@@ -259,7 +264,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			case "Set visit date":
 										break;
 			case "Start Chat":
-										dashboard.moveToFront(ChatWindow);
+										
 										if(MainWindow.getOnlineClient().size() == 0) {
 											JOptionPane.showMessageDialog(null, "Nobody available to chat", "Micro Star",JOptionPane.INFORMATION_MESSAGE);
 										}else {
@@ -269,7 +274,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 											for(String[][] clientInfo : MainWindow.getOnlineClient()) { 
 												onlineClientsDropdown.addItem(clientInfo[0][1]);// add the online user's name to the dropdown
 											}
-											
+											onlineClientsDropdown.revalidate();
 											startChatButton.setText("End Chat");//change the name on the button after it has been clicked
 											startChatButton.setVisible(false);// hide chat button
 											onlineClientsDropdown.setVisible(true);// show dropdown in chat button's place
@@ -350,15 +355,12 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 						startChatButton.setVisible(true);// show start chat button in its place	
 						
 						recieverIndex = onlineClientsDropdown.getSelectedIndex()-1; // set the recieverIndex to the selected index od the gropdown menu to locate the reciever ID
-						 
-						ChatWindow.setME(user);
-						ChatWindow.setReceiverId(MainWindow.getOnlineClient().get(recieverIndex)[0][0].toString());
-						ChatWindow.setChatWindowTitle("Connect with: " + MainWindow.getOnlineClient().get(recieverIndex)[0][1].toString());
-						dashboard.moveToFront(ChatWindow);
-						ChatWindow.setVisible(true); 
-						//ChatWindow = new ChatWindow(user, MainWindow.getOnlineClient().get(recieverIndex)[0][0].toString(),MainWindow.getOnlineClient().get(recieverIndex)[0][1].toString());// add the reciever id to the chat along with rge sender info
-						//MainWindow.getDesktopPane().add(ChatWindow);// add chat window to desktop
-						//MainWindow.getDesktopPane().moveToFront(ChatWindow);// bring chatwindow to front
+						ConnectedTo = MainWindow.getOnlineClient().get(recieverIndex)[0][0].toString();
+						ChatWindow.setME(user);// set the user info for the chat, this user object includes the sender name and id
+						ChatWindow.setReceiverId(ConnectedTo);// add the reciever's id to the chat
+						ChatWindow.setChatWindowTitle("Connect with: " + MainWindow.getOnlineClient().get(recieverIndex)[0][1].toString());// update the title of the chat with the recievere's name, showing with whom u are connected with 
+						ChatWindow.setVisible(true); //make the chat window visible
+						filterMessage();// the conversation between the current user and the connected user
 						
 					}else {
 					
@@ -469,15 +471,27 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		
 	}
 	
-	public void append(Packet03Chat chat) {
+	public void append(Packet03Chat chat) {// this function is used to add all incomming chat to an array list and append message to textarea
+		messages.add(chat);// store all chat reciever while online
+		filterMessage();// display only the from the user and the connect person in the current chat
+		
+		if(!(chat.getSenderId().equals(ChatWindow.getME().getUserId()) || chat.getSenderId().equals(ConnectedTo)))// if the message is not from the current user or from the user that the cutrrent user is connect to
+			JOptionPane.showMessageDialog(null,chat.getMessage(), "Message From: "+ chat.getSenderName(),JOptionPane.INFORMATION_MESSAGE);// display a popup with the message from the sender
+	}
+	
+	private void filterMessage() {
 		String message = "";
-		if(chat.getSenderId().equals(ChatWindow.getME().getUserId()))
-			message = "Me: " + chat.getMessage();
-		else {
-			message = chat.getSenderName() + ": " + chat.getMessage();
-			//789	1333fJOptionPane.showMessageDialog(null,chat.getMessage(), "Message From: "+ chat.getSenderName(),JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
+		ChatWindow.getChatArea().setText("");
+		for(Packet03Chat mesChat : messages) {// filter message for the chat
+			if( (mesChat.getSenderId().equals(ChatWindow.getME().getUserId()) && mesChat.getRecieverId().equals(ConnectedTo)) || (mesChat.getSenderId().equals(ConnectedTo) && mesChat.getRecieverId().equals(ChatWindow.getME().getUserId())) ) {
+				if(mesChat.getSenderId().equals(ChatWindow.getME().getUserId()))
+					message = "Me: " + mesChat.getMessage();
+				else {
+					message = mesChat.getSenderName() + ": " + mesChat.getMessage();
+				}
+				ChatWindow.getChatArea().append(message + "\n");
+			}
 		}
-		ChatWindow.getChatArea().append(message + "\n"); 
 	}
 
 }

@@ -167,17 +167,18 @@ public class Client implements Runnable{
 		MainWindow.getDesktopPane().add(myDashboard);
 		MainWindow.getDesktopPane().add(MainWindow.background);
 		MainWindow.getDesktopPane().moveToFront(myDashboard);
+		MainWindow.getDesktopPane().revalidate();
 	}
 	
 	private void LogoutHandler(Packet02Logout data) {
 		MainWindow.getDesktopPane().removeAll();//remove  dashboard window
 		MainWindow.getDesktopPane().add(new LoginWindow());// add a new login window
 		MainWindow.getDesktopPane().add(MainWindow.background);
+		MainWindow.getDesktopPane().revalidate();
 		
 	}
 	
 	private void ChatHandler(Packet03Chat data) { 
-		System.out.println("chat recieved");
 		((Dashboard)MainWindow.getDesktopPane().getComponent(0)).append(data);
 
 	}

@@ -121,7 +121,7 @@ public class Server{
 			}
 		} 
 		 
-		private Object readData() { 
+		private Packet readData() { 
 			Object data = new Object(); 
 			try {
 				data = objIs.readObject();
@@ -132,7 +132,7 @@ public class Server{
 			}catch(NullPointerException e) {
 				System.err.println("error recieving data from client" + e.getMessage());
 			}
-			return data;
+			return (Packet) data;
 			
 		}
 		
@@ -140,7 +140,7 @@ public class Server{
 		public void run() {
 			
 			while(true) {
-				Packet data = (Packet) readData(); 
+				Packet data =  readData(); 
 				parsePacket(data);	
 			}
 			
