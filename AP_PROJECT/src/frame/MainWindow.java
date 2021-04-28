@@ -45,7 +45,8 @@ public class MainWindow extends JFrame{
 	private loadImages loadImages; 
 	private static LoginWindow LoginWindow; 
 	public static Client ClientSocket;
-	private static int threadIndex; 
+	private static long clientHandlerId;// this id id for the client handler that is handling the connection/transaction to server and client for this instance of window 
+	private static long threadHandlerId;// this id id for the client handler thread that is handling the connection/transaction to server and client for this instance of window 
 	private static String loginID;
 
 	private static List<Complain> complain;  
@@ -118,7 +119,7 @@ public class MainWindow extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 				SystemTray.getSystemTray().remove(trayIcon);
 				Packet9Info Packet = new Packet9Info("killThread");// set the command/info
-				Packet.setThreadIndex(threadIndex);//set the index of the thread to be killed
+				Packet.setThreadID(threadHandlerId);//set the index of the thread to be killed
 				Packet.writeData(MainWindow.getClientSocket()); 
 				System.exit(0);// exit program
 			} 
@@ -200,13 +201,6 @@ public class MainWindow extends JFrame{
 		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 	}
 	
-	public static JDesktopPane getDesktopPane() {
-		return desktopPane;
-	}
-
-	public static Client getClientSocket() {
-		return ClientSocket;
-	}
 
 	public static String hashPasword(String password){
 		try {
@@ -229,7 +223,17 @@ public class MainWindow extends JFrame{
 		return password; 
 	}
 
-	
+	public static JDesktopPane getDesktopPane() {
+		return desktopPane;
+	}
+
+	public static void setDesktopPane(JDesktopPane desktopPane) {
+		MainWindow.desktopPane = desktopPane;
+	}
+
+	public static Client getClientSocket() {
+		return ClientSocket;
+	}
 
 	public static List<String[][]> getOnlineClient() {
 		return onlineClient;
@@ -251,20 +255,28 @@ public class MainWindow extends JFrame{
 		complain = list;
 	}
 
-	public static int getThreadID() {
-		return threadIndex;
-	}
-
-	public static void setThreadID(int threadID) {
-		MainWindow.threadIndex = threadID;
-	}
-
 	public static String getLoginID() {
 		return loginID;
 	}
 
 	public static void setLoginID(String loginID) {
 		MainWindow.loginID = loginID;
+	}
+
+	public static long getClientHandlerId() {
+		return clientHandlerId;
+	}
+
+	public static void setClientHandlerId(long Id) {
+		clientHandlerId = Id;
+	}
+
+	public long getThreadHandlerId() {
+		return threadHandlerId;
+	}
+
+	public static void setThreadHandlerId(long Id) {
+		threadHandlerId = Id;
 	}
 
 	

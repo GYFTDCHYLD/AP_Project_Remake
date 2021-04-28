@@ -146,12 +146,7 @@ public class Client implements Runnable{
 		JOptionPane.showInternalMessageDialog(MainWindow.getDesktopPane(),info.getInfo(), "From Server",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
 		switch (info.getInfo()) {
 			case "Exit": 
-										System.exit(0);// end the program if an exit message is recieved from the server
-				break;
-					
-			case "Login Sussessfully": 
-										MainWindow.setThreadID(info.getThreadIndex()); // store the index of the thread, to kill the thread when program window close properly
-								
+										System.exit(0);// end the program if an exit message is recieved from the server				
 				break;
 	
 			default:
@@ -186,14 +181,12 @@ public class Client implements Runnable{
 		MainWindow.getDesktopPane().add(myDashboard);
 		MainWindow.getDesktopPane().add(MainWindow.background);
 		MainWindow.getDesktopPane().moveToFront(myDashboard);
-		MainWindow.getDesktopPane().revalidate();
 	}
 	
 	private void LogoutHandler(Packet02Logout data) {
 		MainWindow.getDesktopPane().removeAll();//remove  dashboard window
 		MainWindow.getDesktopPane().add(new LoginWindow());// add a new login window
 		MainWindow.getDesktopPane().add(MainWindow.background);
-		MainWindow.getDesktopPane().revalidate();
 		
 	}
 	
@@ -207,6 +200,10 @@ public class Client implements Runnable{
 		if(data.getData().get(0) instanceof Complain) {// check if its a list of complains being sent over 
 			MainWindow.setComplain((List<Complain>)data.getData());
 			System.out.println("List of complain recieved from server");
+		}if(data.getData().get(0) instanceof Long) {
+			MainWindow.setClientHandlerId((long) data.getData().get(0)); 
+			MainWindow.setThreadHandlerId((long) data.getData().get(1));
+			System.out.println("List of Id's clients recieved from server");
 		}else {
 			MainWindow.setOnlineClient((List<String[][]>) data.getData());
 			System.out.println("List of online clients recieved from server");

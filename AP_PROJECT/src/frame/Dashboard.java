@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +26,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import image.loadImages;
-import packet.Packet;
 import packet.Packet02Logout;
 import packet.Packet03Chat;
 import packet.Packet04Complain;
@@ -268,7 +266,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			case "Start Chat":
 										
 										if(MainWindow.getOnlineClient().size() == 0) {
-											JOptionPane.showMessageDialog(dashboard, "Nobody available to chat", "Micro Star",JOptionPane.INFORMATION_MESSAGE);
+											JOptionPane.showInternalMessageDialog(dashboard, "Nobody available to chat", "Micro Star",JOptionPane.INFORMATION_MESSAGE);
 										}else {
 
 											
@@ -287,7 +285,8 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										onlineClientsDropdown.removeAllItems();// remove all items from the dropdown list
 										break;
 			case "logout":
-										Packet02Logout logout = new Packet02Logout(MainWindow.getLoginID());// prepare the logout packet with the user id
+										Packet02Logout logout = new Packet02Logout("logout");
+										logout.setHandlerID(MainWindow.getClientHandlerId());// prepare the logout packet with the client handler id
 										logout.writeData(MainWindow.getClientSocket()); // send the logout packet to the server
 										MainWindow.setOnlineClient(new ArrayList<String[][]>());//remove the list of online clients from the main window after logging out
 										break;
@@ -326,75 +325,74 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		try {
-			if(!(e.getActionCommand().equals("comboBoxChanged") || e.getActionCommand().equals("Send"))) 
-				DisplayComponent(e.getActionCommand());	// display component for the button that was pressed
-			else {
-				
-				if(e.getActionCommand().equals("Send")){
-					
-					if(complainCategory.getSelectedItem().equals("")) 
-						JOptionPane.showMessageDialog(null, "Choose a complain Category", "",JOptionPane.ERROR_MESSAGE);
-					else {
-						if(!complainCategory.getSelectedItem().equals("Other")) {
-							if(complainType.getSelectedItem().equals("")) {
-								JOptionPane.showMessageDialog(null, "Choose a complain type", "",JOptionPane.ERROR_MESSAGE);
-								return;
-							}
-						}
-						if(complainText.getText().equals("")) {
-							JOptionPane.showMessageDialog(null, "Type your Complain", "",JOptionPane.ERROR_MESSAGE);
-							return;
-						}
-						
-						sendComplain();
-					}
-						
-				}else {
-					if(!onlineClientsDropdown.getSelectedItem().equals("Select User")) {
-						
-						recieverIndex = onlineClientsDropdown.getSelectedIndex()-1; // set the recieverIndex to the selected index od the gropdown menu to locate the reciever ID
-						ConnectedTo = MainWindow.getOnlineClient().get(recieverIndex)[0][0].toString();// locate the id for the selected person from the online list and // add the id of the person u are currently having a convo winth, this is used to filter message from diferent conversation
+		if(e.getActionCommand().equals("comboBoxChanged")) { 
+			if(onlineClientsDropdown.isVisible()) {
+				if(!onlineClientsDropdown.getSelectedItem().equals("Select User")){
+					recieverIndex = onlineClientsDropdown.getSelectedIndex()-1; // set the recieverIndex to the selected index od the gropdown menu to locate the reciever ID
+					ConnectedTo = MainWindow.getOnlineClient().get(recieverIndex)[0][0].toString();// locate the id for the selected person from the online list and // add the id of the person u are currently having a convo winth, this is used to filter message from diferent conversation
 	
-						Packet03Chat Packet03Chat = new Packet03Chat(ConnectedTo, MainWindow.getOnlineClient().get(recieverIndex)[0][1].toString(), user.getUserId(), "");
-						initiateChat(Packet03Chat);// call the initiate chat function
-						
-					}else {
+					Packet03Chat Packet03Chat = new Packet03Chat(ConnectedTo, MainWindow.getOnlineClient().get(recieverIndex)[0][1].toString(), user.getUserId(), "");
+					initiateChat(Packet03Chat);// call the initiate chat function
+				}
 					
-						complainType.setVisible(true); 
-						switch (String.valueOf(complainCategory.getSelectedItem())) {
-							case "Network":
-												complainType.removeAllItems();
-												complainType.addItem("");
-												complainType.addItem("Cable");
-												complainType.addItem("Tellephone");
-												complainType.addItem("Internet");
-												break;
-							case "Billing":
-												complainType.removeAllItems();
-												complainType.addItem("");
-												complainType.addItem("Paid");
-												complainType.addItem("Unpaid");
-												break;
-							case "Other":
-												complainType.removeAllItems();
-												complainType.setVisible(false);  
-												break;
-							default:
-												complainType.removeAllItems();
-												complainType.setVisible(false); 
-							
-						}
-					}
+			}else {
+				switch (String.valueOf(complainCategory.getSelectedItem())) {
+					case "Network":
+									complainType.removeAllItems();
+									complainType.addItem("");
+									complainType.addItem("Cable");
+									complainType.addItem("Tellephone");
+									complainType.addItem("Internet");
+									complainType.setVisible(true);
+						break;
+					case "Billing":
+									complainType.removeAllItems();
+									complainType.addItem("");
+									complainType.addItem("Paid");
+									complainType.addItem("Unpaid");
+									complainType.setVisible(true);
+						break;
+					case "Other":
+									complainType.removeAllItems();
+									complainType.setVisible(false);
+						break;
+
 				}
 			}
-		}catch (Exception ex) {
-			
+		}else {
+			if (e.getActionCommand().equals("Send")) {
+
+				if (complainCategory.getSelectedItem().equals(""))
+					JOptionPane.showInternalMessageDialog(dashboard, "Choose a complain Category", "", JOptionPane.ERROR_MESSAGE);
+				else {
+					if (!complainCategory.getSelectedItem().equals("Other")) {
+						if (complainType.getSelectedItem().equals("")) {
+							JOptionPane.showInternalMessageDialog(dashboard, "Choose a complain type", "", JOptionPane.ERROR_MESSAGE);
+							return;
+						}
+					}
+					if (complainText.getText().equals("")) {
+						JOptionPane.showInternalMessageDialog(dashboard, "Type your Complain", "", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+
+					sendComplain();
+				}
+
+			} else {
+				DisplayComponent(e.getActionCommand()); // display component for the button that was pressed
+			}
 		}
 	}
 	
 	private void sendComplain() { 
-		Packet04Complain Packet = new Packet04Complain(new Complain(1, user.getUserId(), String.valueOf(complainType.getSelectedItem()), complainText.getText(), "", "", new Date(0,0,0)));
+		String categoryAndType;
+		if(complainType.isVisible())
+			categoryAndType = complainCategory.getSelectedItem() + " ("+complainType.getSelectedItem()+")";
+		else 
+			categoryAndType = complainCategory.getSelectedItem().toString();
+			
+		Packet04Complain Packet = new Packet04Complain(new Complain(1, user.getUserId(), categoryAndType, complainText.getText(), "", "", ""));
 		Packet.writeData(MainWindow.getClientSocket()); 
 		this.complainText.setText("");
 	}

@@ -1,27 +1,26 @@
 package domain;
 
 import java.io.Serializable;
-import java.sql.Date;
 
 public class Complain implements Serializable{
 	
 	private int id;
-	private String userId;
+	private String custId; 
 	private String type;
 	private String message;
 	private String repId;
 	private String tecId;
-	private Date visitDate;
+	private String visitDate; 
 	
 	
 	public Complain() {
 		super();
 	}
 	
-	public Complain(int id, String userId, String type, String message, String repId, String tecId, Date visitDate) {
+	public Complain(int id, String custId, String type, String message, String repId, String tecId, String visitDate) {
 		super();
 		this.id = id;
-		this.userId = userId;
+		this.custId = custId;
 		this.type = type;
 		this.message = message;
 		this.repId = repId;
@@ -38,12 +37,12 @@ public class Complain implements Serializable{
 	}
 	
 
-	public String getUserId() {
-		return userId;
+	public String getcustId() {
+		return custId;
 	}
 
-	public void setUserId(String userId) {
-		this.userId = userId;
+	public void setcustId(String custId) { 
+		this.custId = custId;
 	}
 
 	public String getType() {
@@ -78,11 +77,11 @@ public class Complain implements Serializable{
 		this.tecId = tecId;
 	}
 
-	public Date getVisitDate() {
+	public String getVisitDate() {
 		return visitDate;
 	}
 
-	public void setVisitDate(Date visitDate) {
+	public void setVisitDate(String visitDate) {
 		this.visitDate = visitDate;
 	}
 }

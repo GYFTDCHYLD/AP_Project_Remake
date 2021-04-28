@@ -8,6 +8,9 @@ public class Packet02Logout extends Packet {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	private long HandlerID;
+	private long ThreadID;
 	private String userId;
 
     public Packet02Logout(String data) {
@@ -29,5 +32,24 @@ public class Packet02Logout extends Packet {
 	public void writeData(Server Server) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public long getHandlerID() {
+		return HandlerID;
+	}
+
+
+	public void setHandlerID(long handlerID) {
+		HandlerID = handlerID;
+	}
+
+
+	public long getThreadID() {
+		return ThreadID;
+	}
+
+
+	public void setThreadID(long threadID) {
+		ThreadID = threadID;
 	}
 }

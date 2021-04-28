@@ -10,7 +10,8 @@ public class Packet9Info extends Packet{
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private int threadIndex;
+	private long HandlerID;
+	private long ThreadID;
 	private String loginId;
 	private String info; 
 	
@@ -38,17 +39,6 @@ public class Packet9Info extends Packet{
 		this.info = info;
 	}
 
-
-	public int getThreadIndex() {
-		return threadIndex;
-	}
-
-
-	public void setThreadIndex(int threadIndex) {
-		this.threadIndex = threadIndex;
-	}
-
-
 	public String getLoginId() {
 		return loginId;
 	}
@@ -57,6 +47,28 @@ public class Packet9Info extends Packet{
 	public void setLoginId(String loginId) {
 		this.loginId = loginId;
 	}
+
+
+	public long getHandlerID() {
+		return HandlerID;
+	}
+
+
+	public void setHandlerID(long handlerID) {
+		HandlerID = handlerID;
+	}
+
+
+	public long getThreadID() {
+		return ThreadID;
+	}
+
+
+	public void setThreadID(long threadID) {
+		ThreadID = threadID;
+	}
+
+	
 	
 	
 }

@@ -26,6 +26,8 @@ public class Server{
 	private List<Complain> complainDatabase; 
 	private List<BillingAccount> billigAccountDatabase;   
 	private static List<ClientHandler> onlineClient; // used for live chat
+	private static List<Long> clientHandlerId;
+	private static List<Long> threadHandlerId;
 	private List<Thread> onlineThreads;// used to logout/ disconnect user/ kill client thread
 
 	
@@ -38,6 +40,8 @@ public class Server{
 			billigAccountDatabase = new ArrayList<BillingAccount>();
 			onlineClient = new ArrayList<ClientHandler>();
 			onlineThreads = new ArrayList<Thread>();
+			clientHandlerId = new ArrayList<Long>(); 
+			threadHandlerId = new ArrayList<Long>(); 
 			
 			User User = new Employee("S122", "Ms", "Shericka", "Jones", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
 			userDatabase.add(User);
@@ -68,6 +72,7 @@ public class Server{
 		
 		ServerWindow.StartDate.setText("Server has started at "+ date.getTime()); 
 		ServerWindow.getStatus().setText("Status: ONLINE"); 
+		ServerWindow.getConnectedClient().setText("Connected Client(s): " + onlineThreads.size()); 
 
 		while(true) {
 			try {
@@ -76,13 +81,23 @@ public class Server{
 				
 				ClientHandler clientHandler = new ClientHandler(connectionSocket);// creating the client handler
 				onlineClient.add(clientHandler);// add the client handlers to a list in-order to send chat to all
+				clientHandlerId.add(clientHandler.getId());// The thread ID is a positive long number generated when this thread was created. The thread ID is unique and remains unchanged during its lifetime. When a thread is terminated, this thread ID may be reused.
 				
 				Thread thread = new Thread(clientHandler);// make client handler run on separate thread
-				thread.start();// start the client handler thread
 				onlineThreads.add(thread);// add the thread to the online list, stop thread in the list when logging out
+				threadHandlerId.add(thread.getId());
+				thread.start();// start the client handler thread
+				
 				
 				ServerWindow.getConnectedClient().setText("Connected Client(s): " + onlineThreads.size()); 
 				System.out.println("Starting a thread for a client at "+ date.getTime());
+				
+				 List<Long> IdList = new ArrayList<Long>();// uses to store the clientHandler and thread Id that will be sent to connected client
+				 IdList.add(clientHandler.getId());// add clientHandler id to the list
+				 IdList.add(thread.getId());// add thread id to the list
+				 
+				Packet identifiers = new Packet11List(IdList);// return list of client and add it to the packet/object
+				clientHandler.sendData((Packet11List) identifiers);// send the id list
 				
 			} catch (IOException e) {
 				System.err.println("error " + e.getMessage());
@@ -90,11 +105,6 @@ public class Server{
 				System.err.println("error " + e.getMessage());
 			}
 		}
-	}
-	
-	
-	public Server() {
-		// TODO Auto-generated constructor stub
 	}
 
 
@@ -104,7 +114,8 @@ public class Server{
 		private ObjectOutputStream objOs;
 		private ObjectInputStream objIs;
 		private String UserInfo[][] = {{"",""}}; // user id and firstname 
-
+		private String userType = "";// used to help filter complain list
+		
 		private ClientHandler (Socket socket) {
 			this.clientHandlerSocket = socket;
 			try {
@@ -192,7 +203,7 @@ public class Server{
 		private void InfoHandler(Packet9Info info) { 
 			switch (info.getInfo()) { 
 				case "killThread":
-											killThread(info.getThreadIndex());
+											killThread(info.getThreadID());
 					break;
 	
 				default:
@@ -200,14 +211,6 @@ public class Server{
 			}	
 		}
 		
-		private void killThread(int index) { 
-			Packet infoPacket = new Packet9Info("Exit");
-			sendData(infoPacket);
-			onlineClient.remove(index);
-			onlineThreads.get(index).stop();// stop the users thread;
-			onlineThreads.remove(index);// remove the users thread from the list of threads
-			ServerWindow.getConnectedClient().setText("Connected Client(s): " + onlineThreads.size()); 
-		}
 		
 		private void ErrorHandler(Packet10Error error) {// handle invalid request
 			sendData(error);// send error message to client
@@ -230,77 +233,89 @@ public class Server{
 			boolean found = false;
 			
 			for (User user : userDatabase) {//check the database for the user
-				if(user.getUserId().equals(data.getUserId()) && user.getPassword().equals(data.getPassword())) {
+				if(user.getUserId().matches(data.getUserId()) && user.getPassword().matches(data.getPassword())) {
 					loginData = new Packet07User(user); 
 					for(ClientHandler client : onlineClient) {// loop through the client connected to the server
-						if(client.UserInfo[0][0].equals(loginData.getData().getUserId())) { // check first row first column where user id is stored
+						if(client.UserInfo[0][0].matches(loginData.getData().getUserId())) { // check first row first column where user id is stored
 							Packet infoPacket = new Packet9Info("User Already Logedin");
 							sendData(infoPacket);// send the info object/packet to the user if user is already lodged in
 							return;// stop the code here if user already logged in 
 						}
 					}
 					
-					
+					String UserType;// userd to Prepared complain list for specific user
 					if(loginData.getData() instanceof Customer) {// check if its a customer is loging in
 						for(BillingAccount account : billigAccountDatabase) {// search for their account in database
 							if(account.getId().equals(loginData.getData().getUserId())) {
 								((Customer)loginData.getData()).setBillingAccount(account);/// ass the account to the user object to be sent to customer
 							}
 						}
+						UserType = "Customer";
+					}else {
+						UserType = ((Employee) loginData.getData()).getJobTitle();//Representative  Technitian
 					}
 					
+					this.UserInfo[0][0] = loginData.getData().getUserId();// set the UserId of this client handler to the Id of the loggedin user
+					this.UserInfo[0][1] = loginData.getData().getFirstName();// add the user firstname to the handler for chat purpose
+					this.userType = UserType;// usertype to help filter complain list when sending to all clients
 					
-					Packet Complains = new Packet11List(myComplains(loginData.getData().getUserId()));/// prepare the packet with the list that will be sent to the user
-					sendData(Complains);// send the packet to the user
 					sendData(loginData);// send the data for the user dashboard
 					
-					Packet9Info infoPacket = new Packet9Info("Login Sussessfully");// prepare message 
-					infoPacket.setThreadIndex(onlineThreads.size()-1); // set the index of the user's thread
-					sendData(infoPacket); // send info to client
-					this.UserInfo[0][0] = loginData.getData().getUserId();// set the UserId of this client handler to the Id of the loggedin user
-					this.UserInfo[0][1] = loginData.getData().getFirstName();// add the user firstname to the handler for chat purposes
+					sendComplainListToAllClients(Complains());// send the packet to the user
 					
-					Packet onlineClients = new Packet11List(onlineClient());// return list of client and add it to the packet/object
-					sendOnlineClientListToAllClients((Packet11List) onlineClients);// send list of clients id to all connected user
+					Packet11List onlineClients = new Packet11List(onlineClient());// return list of client and add it to the packet/object
+					sendOnlineClientListToAllClients(onlineClients);// send list of clients id to all connected user
+
+					Packet9Info infoPacket = new Packet9Info("Login Sussessfully");// prepare message 
+					sendData(infoPacket); // send info to client
+					
 					found = true;
 					break;
 				}
 			} 
 			
 			if(!found) {
-				Packet error = new Packet10Error("Invalid Id or Password");// create a message/packer/object
+				Packet10Error error = new Packet10Error("Invalid Id or Password");// create a message/packer/object
 				sendData(error);// send the info object/packet/message to the user
 			}
 				
+		}
+		
+		private void ComplainHandler(Packet04Complain data) {
+			complainDatabase.add(data.getData());//add the complain to the database
+			Packet9Info infoPacket = new Packet9Info("Complain Recieved");// create a message/packer/object
+			sendData(infoPacket);// send the info object/packet/message to the user
+			sendComplainListToAllClients(Complains());// send the packet to the user
+		}
+		
+		
+		private Packet11List Complains(){// get complain from database and store it in a list
+			List<Complain> list = new ArrayList<Complain>();
+			for (Complain complain : complainDatabase) {// loop through the list of complain from the database
+				list.add(  complain);
+			}
+			return new Packet11List(list);
 		}
 		
 		private void LogoutHandler(Packet02Logout data) {
 			putUserOffline(data); // remove user from the server 
 		} 
 		
-		private void ComplainHandler(Packet04Complain data) {
-			complainDatabase.add(data.getData());//add the complain to the database
-			Packet infoPacket = new Packet9Info("Complain Recieved");// create a message/packer/object
-			sendData(infoPacket);// send the info object/packet/message to the user
-
-			Packet Complains = new Packet11List(myComplains(data.getData().getUserId()));/// prepare the packet with the list that will be sent to the user
-			sendData(Complains);// send the packet to the user
-		}
-		
-		private List<Complain> myComplains(String userId){// get complain from database
-			List<Complain> list = new ArrayList<Complain>();//create an arraylist to store the complains to be sent back to the user
-			for (Complain com : complainDatabase) {// loop through the list of complain from the database
-				if (com.getUserId().equals(userId)) {// check if the user id match the user id in the database for the complain
-					list.add(com);// if the id match, store the complain in the arraylist that will be sent to the user
-				}
-			}
-			return list;
+		private void killThread(long id) { 
+			Packet9Info infoPacket = new Packet9Info("Exit");
+			sendData(infoPacket);
+			int index = getThreadIndex(id);
+			onlineClient.remove(index);
+			Thread treadToKill = onlineThreads.get(index);
+			onlineThreads.remove(index);// remove the users thread from the list of threads
+			ServerWindow.getConnectedClient().setText("Connected Client(s): " + onlineThreads.size()); 
+			treadToKill.stop();// stop the users thread;
 		}
 		
 		private List<String[][]> onlineClient(){// a list of active client to send to server for chat
 			List<String[][]>  list = new ArrayList<String[][]>();
 			for (ClientHandler client : onlineClient) {  
-				if(!client.UserInfo[0][0].equals(""))
+				if(!client.UserInfo[0][0].matches(""))
 					list.add(client.UserInfo);
 			}
 			
@@ -314,25 +329,39 @@ public class Server{
 
 		private void putUserOffline(Packet02Logout data) { // remove the user id from the client handler
 			try {
-				
-				int index = getUserIndex(data.getData());
+			
+				int index = getHandlerIndex(data.getHandlerID());
+				System.out.println("index: " + String.valueOf(index));
 				onlineClient.get(index).UserInfo[0][0] = ""; // set the userID of the client handler to an empty string so that user can re-login with the same handler
 				onlineClient.get(index).UserInfo[0][1] = ""; // set the firstname of the client handler to an empty string so that user can re-login with the same handler
+				onlineClient.get(index).userType = "";
 				
+				Packet11List onlineClients = new Packet11List(onlineClient());// return list of client and add it to the packet/object
+				sendOnlineClientListToAllClients(onlineClients);// send list of clients id to all connected user
+
 				sendData(data);// send the packet to the user for them to use it to take necesasary action
 				sendData(new Packet9Info("Logout Successfully"));// send the packet to the user 
-				Packet onlineClients = new Packet11List(onlineClient());// return list of client and add it to the packet/object
-				sendOnlineClientListToAllClients((Packet11List) onlineClients);// send list of clients id to all connected user
-				
 			} catch (IndexOutOfBoundsException e) {
 				sendData(new Packet10Error("Logout Error " + e.getMessage()));// send the packet to the user 
+				 e.printStackTrace();
 			}
 		}
 
-		private int getUserIndex(String userId) throws IndexOutOfBoundsException {// get the index for the user in the online list
+		private int getHandlerIndex(long handlerId) throws IndexOutOfBoundsException {// get the index for the user in the online list
 			int index = 0;
 			for (ClientHandler client : onlineClient) {
-				if (client.UserInfo[0][0].equals(userId)) {
+				if (client.getId() == handlerId) { 
+					break;
+				}
+				index++;
+			}
+			return index;
+		}
+		
+		private int getThreadIndex(long threadId) throws IndexOutOfBoundsException {// get the index for the user in the online list
+			int index = 0;
+			for (Thread thread : onlineThreads) {
+				if (thread.getId() == threadId) {
 					break;
 				}
 				index++;
@@ -352,12 +381,36 @@ public class Server{
 	
 	public void sendOnlineClientListToAllClients(Packet11List data) {
 		for (ClientHandler client : onlineClient) {
-			data.writeData(client);// only send the message to the sender or the reciever
+			data.writeData(client);// send the list of persons online to everyone online
 		}
 	}
 	
+	public void sendComplainListToAllClients(Packet11List data) {
+		for (ClientHandler client : onlineClient) {
+			client.sendData(myComplains(data, client.UserInfo[0][0], client.userType));// send the list of complain to everyone to everyone online
+		}
+	}
+	
+	private Packet11List myComplains(Packet11List Packet11List,  String userId, String userType){// filter the complain list
+		List<Complain> list = new ArrayList<Complain>();//create an arraylist to store the complains to be sent back to the user
+		for (Complain complain : (List<Complain>)Packet11List.getData()) {// loop through the list of complain that was pass through the perameter
+			if (userType.matches("Customer")) {
+				if (complain.getcustId().matches(userId)) {// check if the user id match the user id in the complain list
+					list.add(complain);// if the id match, store the complain in the arraylist that will be sent to the user
+				}
+			}else if (userType.matches("Technitian")) {
+				if (complain.getTecId().matches(userId)) {// check if a complain has been assigned to the technition
+					list.add(complain);// if the id match, store the complain in the arraylist that will be sent to the technition
+				}
+			}else { 
+				list.add(complain);// all complain should be sent to rep
+			}
+		}
+		return new Packet11List(list);
+	}
+	
 	public static void serverExit() {
-		Packet error = new Packet10Error("Server Ended");
+		Packet10Error error = new Packet10Error("Server Ended");
 		for (ClientHandler client : onlineClient) {
 			client.sendData(error);// seend command to all client, this message will make all client programs windows 
 		}
