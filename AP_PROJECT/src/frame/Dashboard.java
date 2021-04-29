@@ -81,6 +81,8 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	private JComboBox<String> onlineClientsDropdown;  
 	private int recieverIndex; //used to map the index of the the reciever from the Mainwindow to the selection from the dropdown index
 	
+	private JComboBox<String> technitionList;  
+	
 	private boolean displayComplainTable;
 	
 	public void intializeComponent() {
@@ -132,6 +134,11 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		onlineClientsDropdown.setBounds(410, 60,130, 30);
 		onlineClientsDropdown.addActionListener(this);
 		onlineClientsDropdown.setVisible(false);
+		
+		technitionList = new JComboBox<String>(); 
+		technitionList.setBounds(250, 60,160, 30);
+		technitionList.addActionListener(this);
+		technitionList.setVisible(false);
 		
 		payBill = new JButton("Pay Bill");
 		payBill.setBounds(540, 20,120, 30);
@@ -211,6 +218,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			name.setForeground(Color.BLACK);
 			background.setIcon(new ImageIcon(loadImages.CustomerDashboardBackground)); 
 		}else if(user.equals("Representative")) { 
+			dashboard.add(technitionList);
 			dashboard.add(complainCounter);
 			complainCounter.setVisible(true);
 			dashboard.add(assignComplain);
@@ -250,6 +258,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			assignComplain.setVisible(false); 
 			setVisitDate.setVisible(false);
 		}
+		technitionList.setVisible(false);
 		complainCategory.setVisible(false);
 		complainTypeLabel.setVisible(false);
 		complainText.setVisible(false);
@@ -293,6 +302,11 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			case "Pay Bill":
 										break;
 			case "Assign a complain":
+										technitionList.removeAllItems();
+										technitionList.addItem("Select Technition");
+										for(String[][] tecInfo : MainWindow.getTechnitions()) { 
+											technitionList.addItem(tecInfo[0][1]);// add the technitions name to the dropdown  
+										}
 										displayComplainTable = true;
 										createTable();
 										JOptionPane.showInternalMessageDialog(dashboard, "Select the row/complain to assign", "", JOptionPane.INFORMATION_MESSAGE);
@@ -373,6 +387,14 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 					initiateChat(Packet03Chat);// call the initiate chat function
 				}
 					
+			}else if(technitionList.isVisible()) {
+				if(technitionList.getSelectedItem().equals("Select Technition")){
+					JOptionPane.showInternalMessageDialog(dashboard, "You Have Selected: " + technitionList.getSelectedItem(), user.getFirstName(), JOptionPane.INFORMATION_MESSAGE);
+					assignComplain.setVisible(true);
+					technitionList.setVisible(false);
+				}else {
+					JOptionPane.showInternalMessageDialog(dashboard, "Selected a Technition", user.getFirstName(), JOptionPane.ERROR_MESSAGE);
+				}
 			}else {
 				switch (String.valueOf(complainCategory.getSelectedItem())) {
 					case "Network":
@@ -444,7 +466,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	
 	
 	@Override
-	public void valueChanged(ListSelectionEvent e) {
+	public void valueChanged(ListSelectionEvent e) {// use for table selection for assignng complains and setting date for technition
 		String ComplainID = ""; 
 		String Data = null;
 		int[] row = table.getSelectedRows();
@@ -456,10 +478,15 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 
 			}
 		}
-		if(user instanceof Employee)
+		if(user instanceof Employee) {
 			JOptionPane.showInternalMessageDialog(dashboard,"Complain Id Selected: "+ ComplainID, user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);
-	
-
+			if(((Employee) user).getJobTitle().matches("Representative")) {
+				assignComplain.setVisible(false);
+				technitionList.setVisible(true);
+			}else {
+				setVisitDate.setVisible(false);
+			}
+		}
 	}
 	
 	public void createTable() {

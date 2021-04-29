@@ -51,6 +51,7 @@ public class MainWindow extends JFrame{
 
 	private static List<Complain> complain;  
 	private static List<String[][]>  onlineClient; 
+	private static List<String[][]>  technitions; 
 	
 	
 	
@@ -71,6 +72,7 @@ public class MainWindow extends JFrame{
 	public void initializeComponent() {
 		setComplain(new ArrayList<Complain>());
 		setOnlineClient(new ArrayList<String[][]>()); 
+		setTechnitions(new ArrayList<String[][]>()); 
 		loadImages = new loadImages();
 		loadImages.init();
 		desktopPane = new JDesktopPane();
@@ -246,6 +248,15 @@ public class MainWindow extends JFrame{
 			onlineClient.remove(clientInfo);//remove this user info from the list to prevent yourself from showing up in the chat
 		}
 	}
+	
+	public static List<String[][]> getTechnitions() {
+		return technitions;
+	}
+
+	public static void setTechnitions(List<String[][]> techs) {
+		technitions = techs;
+	}
+
 
 	public static List<Complain> getComplain() {
 		return complain;
@@ -278,6 +289,5 @@ public class MainWindow extends JFrame{
 	public static void setThreadHandlerId(long Id) {
 		threadHandlerId = Id;
 	}
-
 	
 }

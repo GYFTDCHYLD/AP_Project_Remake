@@ -97,8 +97,9 @@ public class Server{
 				 IdList.add(clientHandler.getId());// add clientHandler id to the list
 				 IdList.add(thread.getId());// add thread id to the list
 				 
-				Packet identifiers = new Packet11List(IdList);// return list of client and add it to the packet/object
-				clientHandler.sendData((Packet11List) identifiers);// send the id list
+				 Packet11List identifiers = new Packet11List(IdList);// return list of client and add it to the packet/object
+				 identifiers.setType("ID's"); 
+				 clientHandler.sendData((Packet11List) identifiers);// send the id list
 				
 			} catch (IOException e) {
 				System.err.println("error " + e.getMessage());
@@ -264,9 +265,14 @@ public class Server{
 					
 					sendComplainListToAllClients(Complains());// send the packet to the user
 					
-					Packet11List onlineClients = new Packet11List(onlineClient());// return list of client and add it to the packet/object
-					sendOnlineClientListToAllClients(onlineClients);// send list of clients id to all connected user
-
+					Packet11List list = new Packet11List(onlineClient());// return list of client and add it to the packet/object
+					list.setType("Online Clients");
+					sendOnlineClientListToAllClients(list);// send list of clients id to all connected user
+					
+					list = new Packet11List(technitionList());// return list of technition and add it to the packet/object
+					list.setType("Technitions");
+					sendTechClientListToAllRep(list);// send list of technitions id to all rep
+					
 					Packet9Info infoPacket = new Packet9Info("Login Sussessfully");// prepare message 
 					sendData(infoPacket); // send info to client
 					
@@ -323,6 +329,24 @@ public class Server{
 			
 			return list;
 		}
+		
+		private List<String[][]> technitionList(){// a list of technition to be sent to rep in order to assign complain(s)
+			List<String[][]>  list = new ArrayList<String[][]>();
+			String techInfo[][] = new String[1][2];
+			for (User user : userDatabase) { 
+				if(user instanceof Employee) {
+					if(((Employee) user).getJobTitle().equals("Technitian")) {
+						techInfo[0][0] = user.getUserId(); 
+						techInfo[0][1] = user.getFirstName();
+						list.add(techInfo);
+						System.out.println(user.getFirstName() + " " + "added to the list \n list size: " + list.size()); 
+					}
+				}
+			}
+			return list;
+		}
+		
+		
 		
 		private void ChatHandler(Packet03Chat data) { // handle chat
 			sendChatToSendingAndReceivingClients(data);
@@ -383,6 +407,14 @@ public class Server{
 	public void sendOnlineClientListToAllClients(Packet11List data) {
 		for (ClientHandler client : onlineClient) {
 			data.writeData(client);// send the list of persons online to everyone online
+		}
+	}
+	
+	public void sendTechClientListToAllRep(Packet11List data) {
+		for (ClientHandler client : onlineClient) {
+			if(client.userType.equals("Representative")){
+				data.writeData(client);// send the list of technitions to all representative
+			}
 		}
 	}
 	
