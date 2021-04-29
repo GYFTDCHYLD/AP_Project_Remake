@@ -202,16 +202,22 @@ public class Server{
 		}
 
 		
-		private void InfoHandler(Packet9Info info) { 
-			switch (info.getInfo()) { 
+		private void InfoHandler(Packet9Info assign) {  
+			switch (assign.getAssignment()) { 
 				case "killThread":
-											killThread(info.getThreadID());
+											killThread(assign.getThreadID());
 					break;
+					
+				case "Assign a complain":
+											assignComplain(Integer.valueOf(assign.getInfo()), assign.getLoginId(), assign.getInfo2());
+											
+				break;
 	
 				default:
 					break;
 			}	
 		}
+
 		
 		
 		private void ErrorHandler(Packet10Error error) {// handle invalid request
@@ -296,6 +302,16 @@ public class Server{
 			sendComplainListToAllClients(Complains());// send the packet to the user
 		}
 		
+		private void  assignComplain(int complainId, String repId, String techId) {// use for rep to assign complain to technition
+			for(Complain complain: complainDatabase) {
+				if(complain.getId() == complainId) {
+					complain.setRepId(repId);
+					complain.setTecId(techId); 
+				}
+			}
+			sendComplainListToAllClients(Complains());// send the packet to the user
+		}
+		
 		
 		private Packet11List Complains(){// get complain from database and store it in a list
 			List<Complain> list = new ArrayList<Complain>();
@@ -339,7 +355,6 @@ public class Server{
 						techInfo[0][0] = user.getUserId(); 
 						techInfo[0][1] = user.getFirstName();
 						list.add(techInfo);
-						System.out.println(user.getFirstName() + " " + "added to the list \n list size: " + list.size()); 
 					}
 				}
 			}
@@ -427,12 +442,12 @@ public class Server{
 	private Packet11List myComplains(Packet11List Packet11List,  String userId, String userType){// filter the complain list
 		List<Complain> list = new ArrayList<Complain>();//create an arraylist to store the complains to be sent back to the user
 		for (Complain complain : (List<Complain>)Packet11List.getData()) {// loop through the list of complain that was pass through the perameter
-			if (userType.matches("Customer")) {
-				if (complain.getcustId().matches(userId)) {// check if the user id match the user id in the complain list
+			if (userType.equals("Customer")) {
+				if (complain.getcustId().equals(userId)) {// check if the user id match the user id in the complain list
 					list.add(complain);// if the id match, store the complain in the arraylist that will be sent to the user
 				}
-			}else if (userType.matches("Technitian")) {
-				if (complain.getTecId().matches(userId)) {// check if a complain has been assigned to the technition
+			}else if (userType.equals("Technitian")) {
+				if (complain.getTecId().equals(userId)) {// check if a complain has been assigned to the technition
 					list.add(complain);// if the id match, store the complain in the arraylist that will be sent to the technition
 				}
 			}else { 

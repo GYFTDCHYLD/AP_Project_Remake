@@ -29,6 +29,7 @@ import image.loadImages;
 import packet.Packet02Logout;
 import packet.Packet03Chat;
 import packet.Packet04Complain;
+import packet.Packet9Info;
 import domain.Complain;
 import domain.Customer;
 import domain.Employee;
@@ -388,10 +389,16 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 				}
 					
 			}else if(technitionList.isVisible()) {
-				if(technitionList.getSelectedItem().equals("Select Technition")){
+				if(!technitionList.getSelectedItem().equals("Select Technition")){
 					JOptionPane.showInternalMessageDialog(dashboard, "You Have Selected: " + technitionList.getSelectedItem(), user.getFirstName(), JOptionPane.INFORMATION_MESSAGE);
 					assignComplain.setVisible(true);
 					technitionList.setVisible(false);
+					Packet9Info assign = new Packet9Info("");// prepare message 
+					assign.setAssignment("Assign a complain");// command/instruction for the server 
+					assign.setLoginId(user.getUserId());// rep id to be attacched to the complain
+					assign.setInfo(ComplainID);// complain id
+					assign.setInfo2(MainWindow.getTechnitions().get(technitionList.getSelectedIndex()-1)[0][0].toString());// technition id
+					assign.writeData(MainWindow.getClientSocket());  // send info to client
 				}else {
 					JOptionPane.showInternalMessageDialog(dashboard, "Selected a Technition", user.getFirstName(), JOptionPane.ERROR_MESSAGE);
 				}
@@ -464,10 +471,10 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	
 			
 	
-	
+	String ComplainID = "";
 	@Override
 	public void valueChanged(ListSelectionEvent e) {// use for table selection for assignng complains and setting date for technition
-		String ComplainID = ""; 
+		 
 		String Data = null;
 		int[] row = table.getSelectedRows();
 		int[] columns = table.getSelectedColumns();

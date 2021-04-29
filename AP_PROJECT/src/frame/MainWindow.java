@@ -120,7 +120,8 @@ public class MainWindow extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				SystemTray.getSystemTray().remove(trayIcon);
-				Packet9Info Packet = new Packet9Info("killThread");// set the command/info
+				Packet9Info Packet = new Packet9Info("");// set the command/info
+				Packet.setAssignment("killThread"); 
 				Packet.setThreadID(threadHandlerId);//set the index of the thread to be killed
 				Packet.writeData(MainWindow.getClientSocket()); 
 				System.exit(0);// exit program

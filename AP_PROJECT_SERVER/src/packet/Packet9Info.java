@@ -13,7 +13,9 @@ public class Packet9Info extends Packet{
 	private long HandlerID;
 	private long ThreadID;
 	private String loginId;
-	private String info; 
+	private String info;
+	private String info2; 
+	private String Assignment;
 	
 	public Packet9Info(String data) {
 		super(9);
@@ -67,6 +69,24 @@ public class Packet9Info extends Packet{
 	public void setThreadID(long threadID) {
 		ThreadID = threadID;
 	}
+	
+	public String getAssignment() {
+		return Assignment;
+	}
+
+
+	public void setAssignment(String assignment) {
+		Assignment = assignment;
+	}
+	
+	public String getInfo2() {
+		return info2;
+	}
+
+
+	public void setInfo2(String info2) {
+		this.info2 = info2;
+	}
 
 
 	@Override
@@ -74,5 +94,8 @@ public class Packet9Info extends Packet{
 		// TODO Auto-generated method stub
 		
 	}
+
+
+
 	
 }
