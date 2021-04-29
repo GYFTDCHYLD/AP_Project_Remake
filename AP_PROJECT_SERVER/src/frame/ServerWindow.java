@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -12,6 +14,7 @@ import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+
 
 import image.loadImages;
 import network.*;
@@ -23,6 +26,7 @@ public class ServerWindow extends JFrame implements ActionListener{
 	private static JDesktopPane serverDash;
 	private static JLabel Status;
 	private static JLabel connectedClient;
+	private static JLabel movingLabel;
 	
 	private JButton buton;
 
@@ -64,6 +68,13 @@ public class ServerWindow extends JFrame implements ActionListener{
 		getConnectedClient().setVisible(true);
 		getServerDash().add(getConnectedClient());
 		
+		setMovingLabel(new JLabel("...."));
+		getMovingLabel().setBounds(40, 100, 100, 150);
+		getMovingLabel().setForeground(Color.BLACK);
+		getMovingLabel().setFont(new Font("arial", Font.TRUETYPE_FONT, 50));
+		getMovingLabel().setVisible(false);
+		getServerDash().add(getMovingLabel());
+		
 		buton = new JButton("START"); 
 		buton.setBounds(200, 300, 100, 30);
 		buton.setForeground(Color.BLACK);
@@ -86,6 +97,7 @@ public class ServerWindow extends JFrame implements ActionListener{
 						buton.setText("STOP");
 						ServerThread  = new Thread(ServerThread);
 						ServerThread.start();
+						animate();
 						
 			break;
 		case "STOP":	
@@ -96,6 +108,33 @@ public class ServerWindow extends JFrame implements ActionListener{
 						break;
 		}
 		
+	}
+	
+	public void animate(){ 
+		Timer timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
+			String direction = "right";
+			int Timing = 0;
+			int xAxis = 40;
+			public void run() {
+					Timing ++;
+				if(Timing%2 == 0) {
+					if(direction.equals("right"))
+						xAxis++;
+					else {
+						xAxis--;
+					}
+					getMovingLabel().setBounds(xAxis, 100, 100, 150);	
+				}
+				if(xAxis == 400)
+					direction = "left";
+				if(xAxis == 40)
+					direction = "right";
+				if(Timing == 10)// control the timing variable to prevent it from reaching a very large number 
+					Timing = 0;
+				
+			}	
+		}, 0, 5);
 	}
 
 	
@@ -111,6 +150,15 @@ public class ServerWindow extends JFrame implements ActionListener{
 
 	public static JLabel getStatus() {
 		return Status;
+	}
+
+
+	public static JLabel getMovingLabel() {
+		return movingLabel;
+	}
+
+	public static void setMovingLabel(JLabel movingLabel) {
+		ServerWindow.movingLabel = movingLabel;
 	}
 
 

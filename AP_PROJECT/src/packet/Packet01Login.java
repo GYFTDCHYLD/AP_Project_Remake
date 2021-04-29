@@ -8,6 +8,8 @@ public class Packet01Login extends Packet{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	private long HandlerID;
 	private String userId;
 	private String password; 
 	
@@ -33,5 +35,14 @@ public class Packet01Login extends Packet{
 
 	public String getPassword() {
 		return password;
+	}
+	
+	public long getHandlerID() {
+		return HandlerID;
+	}
+
+
+	public void setHandlerID(long handlerID) {
+		HandlerID = handlerID;
 	}
 }

@@ -72,7 +72,8 @@ public class Server{
 		
 		ServerWindow.StartDate.setText("Server has started at "+ date.getTime()); 
 		ServerWindow.getStatus().setText("Status: ONLINE"); 
-		ServerWindow.getConnectedClient().setText("Connected Client(s): " + onlineThreads.size()); 
+		ServerWindow.getConnectedClient().setText("Connected Client(s): " + onlineThreads.size());
+		ServerWindow.getMovingLabel().setVisible(true);
 
 		while(true) {
 			try {
@@ -282,6 +283,7 @@ public class Server{
 		}
 		
 		private void ComplainHandler(Packet04Complain data) {
+			data.getData().setId(complainDatabase.size()+1);
 			complainDatabase.add(data.getData());//add the complain to the database
 			Packet9Info infoPacket = new Packet9Info("Complain Recieved");// create a message/packer/object
 			sendData(infoPacket);// send the info object/packet/message to the user
@@ -331,7 +333,6 @@ public class Server{
 			try {
 			
 				int index = getHandlerIndex(data.getHandlerID());
-				System.out.println("index: " + String.valueOf(index));
 				onlineClient.get(index).UserInfo[0][0] = ""; // set the userID of the client handler to an empty string so that user can re-login with the same handler
 				onlineClient.get(index).UserInfo[0][1] = ""; // set the firstname of the client handler to an empty string so that user can re-login with the same handler
 				onlineClient.get(index).userType = "";

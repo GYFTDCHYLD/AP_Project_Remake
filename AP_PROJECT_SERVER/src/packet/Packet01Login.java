@@ -9,6 +9,8 @@ public class Packet01Login extends Packet{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	private long HandlerID;
 	private String userId;
 	private String password; 
 	
@@ -36,6 +38,14 @@ public class Packet01Login extends Packet{
 		return password;
 	}
 
+	public long getHandlerID() {
+		return HandlerID;
+	}
+
+
+	public void setHandlerID(long handlerID) {
+		HandlerID = handlerID;
+	}
 	@Override
 	public void writeData(Server Server) {
 		// TODO Auto-generated method stub

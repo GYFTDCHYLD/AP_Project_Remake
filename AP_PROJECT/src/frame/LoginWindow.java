@@ -111,6 +111,7 @@ public class LoginWindow extends JInternalFrame implements ActionListener{
 				JOptionPane.showMessageDialog(null, "Enter your Password", "",JOptionPane.ERROR_MESSAGE);
 			else {
 				Packet01Login Packet = new Packet01Login(loginIdField.getText(), MainWindow.hashPasword(passwordField.getText()));
+				Packet.setHandlerID(MainWindow.getClientHandlerId()); 
 				Packet.writeData(MainWindow.getClientSocket());  
 			}
 			

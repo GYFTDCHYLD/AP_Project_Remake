@@ -143,16 +143,19 @@ public class Client implements Runnable{
 
 	private void InfoHandler(Packet9Info info) { 
 		
-		JOptionPane.showInternalMessageDialog(MainWindow.getDesktopPane(),info.getInfo(), "From Server",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
 		switch (info.getInfo()) {
-			case "Exit": 
-										System.exit(0);// end the program if an exit message is recieved from the server				
-				break;
-	
-			default:
-				break;
+		case "Exit": 
+									System.exit(0);// end the program if an exit message is recieved from the server				
+			break;
+		case "Complain Recieved": 
+									((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setComplainText("");//clear the text if server recieved the message	
+									((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setComplainCategoryIndex(0);	// reset the complain category if server recieve complain
+			break;
+
+		default:
+			break;
 		}
-		
+		JOptionPane.showInternalMessageDialog(MainWindow.getDesktopPane(),info.getData(), "From Server",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
 	}
 
 	private void ErrorHandler(Packet10Error error) {
@@ -192,13 +195,13 @@ public class Client implements Runnable{
 	
 	private void ChatHandler(Packet03Chat data) { 
 		((Dashboard)MainWindow.getDesktopPane().getComponent(0)).append(data);
-
 	}
 	
 	
 	private void ListHandler(Packet11List data) {
 		if(data.getData().get(0) instanceof Complain) {// check if its a list of complains being sent over 
 			MainWindow.setComplain((List<Complain>)data.getData());
+			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).createTable();// update table in realtime
 			System.out.println("List of complain recieved from server");
 		}if(data.getData().get(0) instanceof Long) {
 			MainWindow.setClientHandlerId((long) data.getData().get(0)); 
