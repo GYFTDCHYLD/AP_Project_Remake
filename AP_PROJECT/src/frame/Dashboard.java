@@ -362,6 +362,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		try {
 		if(e.getActionCommand().equals("comboBoxChanged")) { 
 			if(onlineClientsDropdown.isVisible()) {
 				if(!onlineClientsDropdown.getSelectedItem().equals("Select User")){
@@ -423,6 +424,9 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 				}
 			}
 		}
+		} catch (Exception e2) {
+			
+		}
 	}
 	
 	private void sendComplain() { 
@@ -441,19 +445,20 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-		int selectedRow = 0;
+		String ComplainID = ""; 
 		String Data = null;
 		int[] row = table.getSelectedRows();
 		int[] columns = table.getSelectedColumns();
 		for (int i = 0; i < row.length; i++) {
 			for (int j = 0; j < columns.length; j++) {
-				selectedRow = row[i];
+				ComplainID = (String) table.getValueAt(row[i], 0);
 				Data = (String) table.getValueAt(row[i], columns[j]);
 
 			}
 		}
-		System.out.println("Table selected row is: " + selectedRow); 
-		System.out.println("Table element selected is: " + Data);
+		if(user instanceof Employee)
+			JOptionPane.showInternalMessageDialog(dashboard,"Complain Id Selected: "+ ComplainID, user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);
+	
 
 	}
 	
