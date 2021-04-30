@@ -202,6 +202,15 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		submit.addActionListener(this);
 		submit.setVisible(false);
 		
+		table = new JTable();
+		table.setCellSelectionEnabled(true);
+		table.setForeground(Color.BLACK);
+		table.setGridColor(Color.BLUE);
+		
+		scrollPane = new JScrollPane(table); 
+		scrollPane.setBounds(7, 110, 680, 400); 
+		scrollPane.setVisible(false);
+		
 		background = new JLabel();
 		background.setHorizontalAlignment(SwingConstants.CENTER);
 		background.setBounds(0, 0,750, 600);
@@ -212,6 +221,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	public void addComponentsToWindow(String user){
 		this.add(dashboard);
 		dashboard.add(ChatWindow);
+		dashboard.add(scrollPane);
 		if(user.equals("Customer")) {
 			dashboard.add(makeComplain);
 			dashboard.add(viewAccount); 
@@ -267,13 +277,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		complainType.setVisible(false);
 		submit.setVisible(false);
 		displayComplainTable = false;
-		
-		try {
-			scrollPane.setVisible(false);
-			dashboard.remove(scrollPane); 
-		} catch (NullPointerException e) {
-			
-		}
+		scrollPane.setVisible(false);
 		
 		
 		switch (clicked) {
@@ -522,11 +526,13 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		if(displayComplainTable) {
 			table = new JTable(data, column);
 			table.setCellSelectionEnabled(true);
-			table.setForeground(Color.BLACK);
-			table.setGridColor(Color.BLUE);
-			table.setOpaque(true); 
-			table.getTableHeader().setFont(new Font("arial", Font.PLAIN, 14));
-			table.setAutoscrolls(true); 
+			table.setGridColor(Color.BLACK);
+			table.getTableHeader().setFont(new Font("arial", Font.PLAIN, 14)); 
+			table.setUpdateSelectionOnSort(true);
+			if (user instanceof Employee)
+				table.setEnabled(true);
+			else
+				table.setEnabled(false);
 			
 			cellSelect = table.getSelectionModel();  
 			cellSelect.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -534,10 +540,8 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			cellSelect.addListSelectionListener(this);
 			scrollPane = new JScrollPane(table); 
 			scrollPane.setBounds(7, 110, 680, 400); 
-			scrollPane.setOpaque(true);
 			
 			dashboard.add(scrollPane);
-			dashboard.moveToFront(scrollPane); 
 			dashboard.moveToFront(scrollPane); 
 		}
 		

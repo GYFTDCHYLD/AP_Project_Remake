@@ -271,14 +271,14 @@ public class Server{
 					
 					sendComplainListToAllClients(Complains());// send the packet to the user
 					
-					Packet11List list = new Packet11List(onlineClient());// return list of client and add it to the packet/object
-					list.setType("Online Clients");
-					sendOnlineClientListToAllClients(list);// send list of clients id to all connected user
+					Packet11List online = new Packet11List(onlineClient());// return list of client and add it to the packet/object
+					online.setType("Online Clients");
+					sendOnlineClientListToAllClients(online);// send list of clients id to all connected user
 					
-					list = new Packet11List(technitionList());// return list of technition and add it to the packet/object
-					list.setType("Technitions");
-					sendTechClientListToAllRep(list);// send list of technitions id to all rep
-					
+					Packet11List tech = new Packet11List(technitionList());// return list of technition and add it to the packet/object
+					tech.setType("Technitions");
+					sendTechClientListToAllRep(tech);// send list of technitions id to all rep
+					 
 					Packet9Info infoPacket = new Packet9Info("Login Sussessfully");// prepare message 
 					sendData(infoPacket); // send info to client
 					

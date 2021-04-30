@@ -201,7 +201,7 @@ public class Client implements Runnable{
 	private void ListHandler(Packet11List data) {
 		if(data.getData().get(0) instanceof Complain) {// check if its a list of complains being sent over 
 			MainWindow.setComplain((List<Complain>)data.getData());
-			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).createTable();// update table in realtime
+			//((Dashboard)MainWindow.getDesktopPane().getComponent(0)).createTable();// update table in realtime
 			System.out.println("List of complain recieved from server");
 		}else if(data.getType().matches("ID's")) {
 			MainWindow.setClientHandlerId((long) data.getData().get(0)); 
