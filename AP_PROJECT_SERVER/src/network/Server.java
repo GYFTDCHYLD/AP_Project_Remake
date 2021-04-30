@@ -201,6 +201,9 @@ public class Server{
 			}
 		}
 
+		private void ChatHandler(Packet03Chat data) { // handle chat
+			sendChatToSendingAndReceivingClients(data);
+		}
 		
 		private void InfoHandler(Packet9Info assign) {  
 			switch (assign.getAssignment()) { 
@@ -221,7 +224,6 @@ public class Server{
 					break;
 			}	
 		}
-
 		
 		
 		private void ErrorHandler(Packet10Error error) {// handle invalid request
@@ -298,6 +300,10 @@ public class Server{
 				
 		}
 		
+		private void LogoutHandler(Packet02Logout data) {
+			putUserOffline(data); // remove user from the server 
+		} 
+		
 		private void ComplainHandler(Packet04Complain data) {
 			data.getData().setId(complainDatabase.size()+1);
 			complainDatabase.add(data.getData());//add the complain to the database
@@ -338,20 +344,6 @@ public class Server{
 			return new Packet11List(list);
 		}
 		
-		private void LogoutHandler(Packet02Logout data) {
-			putUserOffline(data); // remove user from the server 
-		} 
-		
-		private void killThread(long id) { 
-			Packet9Info infoPacket = new Packet9Info("Exit");
-			sendData(infoPacket);
-			int index = getThreadIndex(id);
-			onlineClient.remove(index);
-			Thread treadToKill = onlineThreads.get(index);
-			onlineThreads.remove(index);// remove the users thread from the list of threads
-			ServerWindow.getConnectedClient().setText("Connected Client(s): " + onlineThreads.size()); 
-			treadToKill.stop();// stop the users thread;
-		}
 		
 		private List<String[][]> onlineClient(){// a list of active client to send to server for chat
 			List<String[][]>  list = new ArrayList<String[][]>();
@@ -378,12 +370,6 @@ public class Server{
 			return list;
 		}
 		
-		
-		
-		private void ChatHandler(Packet03Chat data) { // handle chat
-			sendChatToSendingAndReceivingClients(data);
-			
-		}
 
 		private void putUserOffline(Packet02Logout data) { // remove the user id from the client handler
 			try {
@@ -409,6 +395,21 @@ public class Server{
 			}
 		}
 
+		private void killThread(long id) { 
+			Packet9Info infoPacket = new Packet9Info("Exit");
+			sendData(infoPacket);
+			int index = getThreadIndex(id);
+			
+			onlineClient.get(index).UserInfo[0][0] = ""; // set the userID of the client handler to an empty string so that user can re-login with the same handler
+			onlineClient.get(index).UserInfo[0][1] = ""; // set the firstname of the client handler to an empty string so that user can re-login with the same handler
+			onlineClient.get(index).userType = "";
+			onlineClient.remove(index);
+			
+			Thread treadToKill = onlineThreads.get(index);
+			onlineThreads.remove(index);// remove the users thread from the list of threads
+			ServerWindow.getConnectedClient().setText("Connected Client(s): " + onlineThreads.size()); 
+			treadToKill.stop();// stop the users thread;
+		}
 
 		
 		private int getThreadIndex(long threadId) throws IndexOutOfBoundsException {// get the index for the user in the online list
