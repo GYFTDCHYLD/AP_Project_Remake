@@ -211,7 +211,11 @@ public class Server{
 				case "Assign a complain":
 											assignComplain(Integer.valueOf(assign.getInfo()), assign.getLoginId(), assign.getInfo2());
 											
-				break;
+					break;
+				case "Set Date":
+											setVisitDaTe(Integer.valueOf(assign.getInfo()), assign.getInfo2());
+					
+					break;
 	
 				default:
 					break;
@@ -310,6 +314,19 @@ public class Server{
 				}
 			}
 			sendComplainListToAllClients(Complains());// send the packet to the user
+			Packet9Info infoPacket = new Packet9Info("Complain Assigned");// prepare message 
+			sendData(infoPacket); // send info to client
+		}
+		
+		private void  setVisitDaTe(int complainId, String Date) {// use for rep to assign complain to technition
+			for(Complain complain: complainDatabase) {
+				if(complain.getId() == complainId) { 
+					complain.setVisitDate(Date);
+				}
+			}
+			sendComplainListToAllClients(Complains());// send the packet to the user
+			Packet9Info infoPacket = new Packet9Info("Date Set");// prepare message 
+			sendData(infoPacket); // send info to client
 		}
 		
 		
@@ -380,9 +397,10 @@ public class Server{
 					}
 				}
 				
-				Packet11List onlineClients = new Packet11List(onlineClient());// return list of client and add it to the packet/object
-				sendOnlineClientListToAllClients(onlineClients);// send list of clients id to all connected user
-
+				Packet11List online = new Packet11List(onlineClient());// return list of client and add it to the packet/object
+				online.setType("Online Clients");
+				sendOnlineClientListToAllClients(online);// send list of clients id to all connected user
+			
 				sendData(data);// send the packet to the user for them to use it to take necesasary action
 				sendData(new Packet9Info("Logout Successfully"));// send the packet to the user 
 			} catch (IndexOutOfBoundsException e) {

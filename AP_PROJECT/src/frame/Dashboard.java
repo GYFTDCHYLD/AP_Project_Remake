@@ -19,6 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
@@ -37,9 +38,6 @@ import domain.User;
 
 
 public class Dashboard extends JInternalFrame implements ActionListener, ListSelectionListener{
-	private JScrollPane scrollPane;
-	private JTable table; 
-	private ListSelectionModel cellSelect;
 	private User user;
 	private JDesktopPane dashboard;
 	
@@ -47,6 +45,10 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	private JLabel name;
 	private JSeparator separator;
 	private JLabel background;
+	
+	private JScrollPane scrollPane;
+	private JTable table; 
+	private ListSelectionModel cellSelect;
 	
 	private JButton makeComplain;
 	private JButton viewComplain;
@@ -56,35 +58,57 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	private JButton startChatButton;
 	private JButton logOut;
 	
-	private JButton assignComplain;
+	private JButton submitButton;
 	
-	private JButton setVisitDate; 
+	private JButton assignComplainButton;
+	private JButton setVisitDateButton; 
 	
 	private String[] category; 
-	private JComboBox<String> complainCategory;  
-	private JLabel complainTypeLabel;
-	
+	private JComboBox<String> complainDropdownCategory;
 	
 	private String[] type; 
-	private JComboBox<String> complainType; 
+	private JComboBox<String> complainDropdownType; 
 	
-	private JTextArea complainText;
-	private JLabel complainLabel;
+	private JComboBox<String> onlineClientsDropdown;  
+	private int recieverIndex; //used to map the index of the the reciever from the Mainwindow to the selection from the dropdown index
 	
+	private JComboBox<String> technitionDropdownList;  
+	
+	private JTextArea complainTextField;
 	private JTextArea complainCounter; 
 	
-	private JButton submit;
+	private JTextField setdateTextField; 
 	
 	private ChatWindow ChatWindow;
 	private String ConnectedTo; // this will store the user u are currently chatting/connected to in order to filter incomming messages from other users in the same chat window, this will allow us to make only the mssage on the connected user show in the chat
 	private List<Packet03Chat> messages;// a list of chats for the messages being recieved from the server
 	
-	private JComboBox<String> onlineClientsDropdown;  
-	private int recieverIndex; //used to map the index of the the reciever from the Mainwindow to the selection from the dropdown index
-	
-	private JComboBox<String> technitionList;  
-	
 	private boolean displayComplainTable;
+	
+	
+	public Dashboard(User user) {  
+		super("",false,false,false,true);
+		intializeComponent();
+		if(user instanceof Employee) { 
+			this.title = ((Employee) user).getJobTitle() + " Dashboard";
+			addComponentsToWindow(((Employee)user).getJobTitle());
+		}else {
+			this.title = "Customer Dashboard";
+			addComponentsToWindow("Customer");
+		}
+		
+		this.setBounds(15, 0, 720, 560);
+		this.setVisible(true); 
+		
+		this.user = user;
+		if(this.user.getNameTitle().equals("Mr"))
+			profileImage.setIcon(new ImageIcon(loadImages.maleAvtar));
+		else 
+			profileImage.setIcon(new ImageIcon(loadImages.femaleAvtar));
+		
+		name.setText(this.user.getNameTitle() + ". " +   this.user.getFirstName() + " " + this.user.getLastName()); 
+	}
+	
 	
 	public void intializeComponent() {
 		
@@ -136,10 +160,16 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		onlineClientsDropdown.addActionListener(this);
 		onlineClientsDropdown.setVisible(false);
 		
-		technitionList = new JComboBox<String>(); 
-		technitionList.setBounds(250, 60,160, 30);
-		technitionList.addActionListener(this);
-		technitionList.setVisible(false);
+		technitionDropdownList = new JComboBox<String>(); 
+		technitionDropdownList.setBounds(250, 60,160, 30);
+		technitionDropdownList.addActionListener(this);
+		technitionDropdownList.setVisible(false);
+		
+		setdateTextField = new JTextField(); 
+		setdateTextField.setBounds(250, 60,160, 30);
+		setdateTextField.addActionListener(this);
+		setdateTextField.setVisible(false);
+		setdateTextField.setToolTipText("Type date here"); 
 		
 		payBill = new JButton("Pay Bill");
 		payBill.setBounds(540, 20,120, 30);
@@ -150,57 +180,45 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		logOut.setBounds(540, 60,120, 30);
 		logOut.addActionListener(this);
 		
-		assignComplain = new JButton("Assign a complain");
-		assignComplain.setBounds(120, 20,150, 30);
-		assignComplain.addActionListener(this);
-		assignComplain.setVisible(false);
+		assignComplainButton = new JButton("Assign a complain");
+		assignComplainButton.setBounds(120, 20,150, 30);
+		assignComplainButton.addActionListener(this);
+		assignComplainButton.setVisible(false);
 		
-		setVisitDate = new JButton("Set visit date");
-		setVisitDate.setBounds(120, 20,150, 30);
-		setVisitDate.addActionListener(this);
-		setVisitDate.setVisible(false);
+		setVisitDateButton = new JButton("Set visit date");
+		setVisitDateButton.setBounds(120, 20,150, 30);
+		setVisitDateButton.addActionListener(this);
+		setVisitDateButton.setVisible(false);
 		
 		separator = new JSeparator();
 		separator.setBounds(0, 90,720, 50);
 		separator.setBackground(Color.WHITE);
 		
 		category = new String[]{"", "Network", "Billing", "Other"};
-		complainCategory = new JComboBox<String>(category);
-		complainCategory.setBounds(10, 110, 180, 25);
-		complainCategory.addActionListener(this);
-		complainCategory.setVisible(false); 
+		complainDropdownCategory = new JComboBox<String>(category);
+		complainDropdownCategory.setBounds(10, 110, 180, 25);
+		complainDropdownCategory.addActionListener(this);
+		complainDropdownCategory.setVisible(false); 
 		
 		type = new String[]{""};
-		complainType = new JComboBox<String>(type);
-		complainType.setBounds(10, 150, 180, 25);
-		complainType.setVisible(false);
+		complainDropdownType = new JComboBox<String>(type);
+		complainDropdownType.setBounds(10, 150, 180, 25);
+		complainDropdownType.setVisible(false);
 		
-		complainTypeLabel = new JLabel("");
-		complainTypeLabel.setFont(new Font("arial", Font.TYPE1_FONT, 16));
-		complainTypeLabel.setForeground(Color.WHITE);
-		complainTypeLabel.setBounds(190, 110,300, 30);
-		complainTypeLabel.setVisible(false);
+		complainTextField = new JTextArea(); 
+		complainTextField.setBounds(10, 200, 180, 250); 
+		complainTextField.setBackground(Color.WHITE);
+		complainTextField.setForeground(Color.BLACK);
+		complainTextField.setBorder(new LineBorder(java.awt.Color.RED, 1));
+		complainTextField.setFont(new Font("arial", Font.PLAIN, 12)); 
+		complainTextField.setLineWrap(true);
+		complainTextField.setWrapStyleWord(true);
+		complainTextField.setVisible(false);
 		
-		complainText = new JTextArea(); 
-		complainText.setBounds(10, 200, 180, 250); 
-		complainText.setBackground(Color.WHITE);
-		complainText.setForeground(Color.BLACK);
-		complainText.setBorder(new LineBorder(java.awt.Color.RED, 1));
-		complainText.setFont(new Font("arial", Font.PLAIN, 12)); 
-		complainText.setLineWrap(true);
-		complainText.setWrapStyleWord(true);
-		complainText.setVisible(false);
-		
-		complainLabel = new JLabel(""); 
-		complainLabel.setBounds(200, 200, 150, 25);
-		complainLabel.setForeground(Color.WHITE);
-		complainLabel.setFont(new Font("arial", Font.TYPE1_FONT, 16));
-		complainLabel.setVisible(false);
-		
-		submit = new JButton("");
-		submit.setBounds(10, 460,180, 30);
-		submit.addActionListener(this);
-		submit.setVisible(false);
+		submitButton = new JButton("");
+		submitButton.setBounds(10, 460,180, 30);
+		submitButton.addActionListener(this);
+		submitButton.setVisible(false);
 		
 		table = new JTable();
 		table.setCellSelectionEnabled(true);
@@ -229,16 +247,17 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			name.setForeground(Color.BLACK);
 			background.setIcon(new ImageIcon(loadImages.CustomerDashboardBackground)); 
 		}else if(user.equals("Representative")) { 
-			dashboard.add(technitionList);
+			dashboard.add(technitionDropdownList);
 			dashboard.add(complainCounter);
 			complainCounter.setVisible(true);
-			dashboard.add(assignComplain);
+			dashboard.add(assignComplainButton);
 			name.setForeground(Color.WHITE);
 			background.setIcon(new ImageIcon(loadImages.RepresentativeDashboardBackground)); 
 		}else {
+			dashboard.add(setdateTextField);
 			dashboard.add(complainCounter);
 			complainCounter.setVisible(true);
-			dashboard.add(setVisitDate);
+			dashboard.add(setVisitDateButton);
 			name.setForeground(Color.WHITE);
 			background.setIcon(new ImageIcon(loadImages.TechnitianDashboardBackground)); 
 		}
@@ -252,43 +271,16 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		
 		
 		
-		dashboard.add(complainCategory);
-		dashboard.add(complainTypeLabel);
-		dashboard.add(complainType);
-		dashboard.add(complainText);
-		dashboard.add(complainLabel);
-		dashboard.add(submit);
+		dashboard.add(complainDropdownCategory);
+		dashboard.add(complainDropdownType);
+		dashboard.add(complainTextField);
+		dashboard.add(submitButton);
 		dashboard.add(logOut);
 		
 		
 		dashboard.add(background);
 	}
-	
-	public void setWindowsProperties() {
-		this.setBounds(15, 0, 720, 560);
-		this.setVisible(true); 
-	}
-	
-	public Dashboard(User user) {  
-		super("",false,false,false,true);
-		intializeComponent();
-		if(user instanceof Employee) { 
-			this.title = ((Employee) user).getJobTitle() + " Dashboard";
-			addComponentsToWindow(((Employee)user).getJobTitle());
-		}else {
-			this.title = "Customer Dashboard";
-			addComponentsToWindow("Customer");
-		}
-		
-		setWindowsProperties();
-		this.user = user;
-		if(this.user.getNameTitle().equals("Mr"))
-			profileImage.setIcon(new ImageIcon(loadImages.maleAvtar));
-		else 
-			profileImage.setIcon(new ImageIcon(loadImages.femaleAvtar));
-		
-		name.setText(this.user.getNameTitle() + ". " +   this.user.getFirstName() + " " + this.user.getLastName()); 
-	}
+
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -303,56 +295,56 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 					initiateChat(Packet03Chat);// call the initiate chat function
 				}
 					
-			}else if(technitionList.isVisible()) {
-				if(!technitionList.getSelectedItem().equals("Select Technition")){
-					JOptionPane.showInternalMessageDialog(dashboard, "You Have Selected: " + technitionList.getSelectedItem(), user.getFirstName(), JOptionPane.INFORMATION_MESSAGE);
-					assignComplain.setVisible(true);
-					technitionList.setVisible(false);
+			}else if(technitionDropdownList.isVisible()) {
+				if(!technitionDropdownList.getSelectedItem().equals("Select Technition")){
+					JOptionPane.showInternalMessageDialog(dashboard, "You Have Selected: " + technitionDropdownList.getSelectedItem(), user.getFirstName(), JOptionPane.INFORMATION_MESSAGE);
+					assignComplainButton.setVisible(true);
+					technitionDropdownList.setVisible(false);
 					Packet9Info assign = new Packet9Info("");// prepare message 
 					assign.setAssignment("Assign a complain");// command/instruction for the server 
 					assign.setLoginId(user.getUserId());// rep id to be attacched to the complain
 					assign.setInfo(ComplainID);// complain id
-					assign.setInfo2(MainWindow.getTechnitions().get(technitionList.getSelectedIndex()-1)[0][0].toString());// technition id
+					assign.setInfo2(MainWindow.getTechnitions().get(technitionDropdownList.getSelectedIndex()-1)[0][0].toString());// technition id
 					assign.writeData(MainWindow.getClientSocket());  // send info to client
 				}else {
 					JOptionPane.showInternalMessageDialog(dashboard, "Selected a Technition", user.getFirstName(), JOptionPane.ERROR_MESSAGE);
 				}
 			}else {
-				switch (String.valueOf(complainCategory.getSelectedItem())) {
+				switch (String.valueOf(complainDropdownCategory.getSelectedItem())) {
 					case "Network":
-									complainType.removeAllItems();
-									complainType.addItem("");
-									complainType.addItem("Cable");
-									complainType.addItem("Tellephone");
-									complainType.addItem("Internet");
-									complainType.setVisible(true);
+									complainDropdownType.removeAllItems();
+									complainDropdownType.addItem("");
+									complainDropdownType.addItem("Cable");
+									complainDropdownType.addItem("Tellephone");
+									complainDropdownType.addItem("Internet");
+									complainDropdownType.setVisible(true);
 						break;
 					case "Billing":
-									complainType.removeAllItems();
-									complainType.addItem("");
-									complainType.addItem("Paid");
-									complainType.addItem("Unpaid");
-									complainType.setVisible(true);
+									complainDropdownType.removeAllItems();
+									complainDropdownType.addItem("");
+									complainDropdownType.addItem("Paid");
+									complainDropdownType.addItem("Unpaid");
+									complainDropdownType.setVisible(true);
 						break;
 					default:
-									complainType.removeAllItems();
-									complainType.setVisible(false);
+									complainDropdownType.removeAllItems();
+									complainDropdownType.setVisible(false);
 
 				}
 			}
 		}else {
 			if (e.getActionCommand().equals("Send")) {
 
-				if (complainCategory.getSelectedItem().equals(""))
+				if (complainDropdownCategory.getSelectedItem().equals(""))
 					JOptionPane.showInternalMessageDialog(dashboard, "Choose a complain Category", "", JOptionPane.ERROR_MESSAGE);
 				else {
-					if (!complainCategory.getSelectedItem().equals("Other")) {
-						if (complainType.getSelectedItem().equals("")) {
+					if (!complainDropdownCategory.getSelectedItem().equals("Other")) {
+						if (complainDropdownType.getSelectedItem().equals("")) {
 							JOptionPane.showInternalMessageDialog(dashboard, "Choose a complain type", "", JOptionPane.ERROR_MESSAGE);
 							return;
 						}
 					}
-					if (complainText.getText().equals("")) {
+					if (complainTextField.getText().equals("")) {
 						JOptionPane.showInternalMessageDialog(dashboard, "Type your Complain", "", JOptionPane.ERROR_MESSAGE);
 						return;
 					}
@@ -362,6 +354,8 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 
 			} else {
 				try {
+					if(!setdateTextField.getText().equals(""))
+						setVisitDateButton.setVisible(true);
 					DisplayComponent(e.getActionCommand()); // display component for the button that was pressed
 				}catch (ClassCastException ex) {
 					
@@ -375,18 +369,17 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	
 	public void DisplayComponent(String clicked){
 		if(!displayComplainTable) {// dnt show these items if the table is not visible
-			assignComplain.setVisible(false); 
-			setVisitDate.setVisible(false);
+			assignComplainButton.setVisible(false);  
+			setVisitDateButton.setVisible(false);
 		}
 		onlineClientsDropdown.setVisible(false);
 		startChatButton.setVisible(true); 
-		technitionList.setVisible(false);
-		complainCategory.setVisible(false);
-		complainTypeLabel.setVisible(false);
-		complainText.setVisible(false);
-		complainLabel.setVisible(false);
-		complainType.setVisible(false);
-		submit.setVisible(false);
+		technitionDropdownList.setVisible(false);
+		setdateTextField.setVisible(false);
+		complainDropdownCategory.setVisible(false);
+		complainTextField.setVisible(false);
+		complainDropdownType.setVisible(false); 
+		submitButton.setVisible(false);
 		displayComplainTable = false;
 		scrollPane.setVisible(false);
 		
@@ -394,17 +387,15 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		switch (clicked) {
 		
 			case "Make a Complain":
-										complainCategory.setVisible(true);
-										complainTypeLabel.setVisible(true);
-										complainText.setVisible(true);
-										complainLabel.setVisible(true);
-										submit.setVisible(true);
-										submit.setText("Send"); 
+										complainDropdownCategory.setVisible(true); 
+										complainTextField.setVisible(true); 
+										submitButton.setVisible(true); 
+										submitButton.setText("Send"); 
 										break;
 			case "View Complains":
 										if(user instanceof Employee) { 
-											assignComplain.setVisible(true);// for rep 
-											setVisitDate.setVisible(true);// for tech
+											assignComplainButton.setVisible(true);// for rep 
+											setVisitDateButton.setVisible(true);// for tech
 										}
 										
 										displayComplainTable = true;
@@ -418,16 +409,18 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			case "Pay Bill":
 										break;
 			case "Assign a complain":
-										technitionList.removeAllItems();
-										technitionList.addItem("Select Technition");
+										technitionDropdownList.removeAllItems(); 
+										technitionDropdownList.addItem("Select Technition");
 										for(String[][] tecInfo : MainWindow.getTechnitions()) { 
-											technitionList.addItem(tecInfo[0][1]);// add the technitions name to the dropdown  
+											technitionDropdownList.addItem(tecInfo[0][1]);// add the technitions name to the dropdown  
 										}
 										displayComplainTable = true;
 										createTable();
 										JOptionPane.showInternalMessageDialog(dashboard, "Select the row/complain to assign", "", JOptionPane.INFORMATION_MESSAGE);
 										break;
 			case "Set visit date":		
+										setVisitDateButton.setText("Finalize Date");
+										setdateTextField.setVisible(true);
 										displayComplainTable = true;
 										createTable();
 										JOptionPane.showInternalMessageDialog(dashboard, "Select the row/complain to set date", "", JOptionPane.INFORMATION_MESSAGE);
@@ -456,54 +449,37 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										logout.setHandlerID(MainWindow.getClientHandlerId());// prepare the logout packet with the client handler id
 										logout.writeData(MainWindow.getClientSocket()); // send the logout packet to the server
 										break;
-			
+			case "Finalize Date":
+										if(setdateTextField.getText().equals("")) {
+											setdateTextField.setVisible(true); 
+											JOptionPane.showInternalMessageDialog(dashboard, "Type date in the date field", "", JOptionPane.ERROR_MESSAGE);
+										}else {
+											Packet9Info assign = new Packet9Info("");// prepare message 
+											assign.setAssignment("Set Date");// command/instruction for the server 
+											assign.setInfo(ComplainID);// complain id
+											assign.setInfo2(setdateTextField.getText());// Date
+											assign.writeData(MainWindow.getClientSocket());  // send info to client
+											setVisitDateButton.setText("Set visit date"); 
+										}
+										break;
 			default:
 			
 		}
 	}
 
 	
-
-
-
-	
 	private void sendComplain() { 
 		String categoryAndType;
-		if(complainType.isVisible())
-			categoryAndType = complainCategory.getSelectedItem() + " ("+complainType.getSelectedItem()+")";
+		if(complainDropdownType.isVisible())
+			categoryAndType = complainDropdownCategory.getSelectedItem() + " ("+complainDropdownType.getSelectedItem()+")";
 		else 
-			categoryAndType = complainCategory.getSelectedItem().toString();
+			categoryAndType = complainDropdownCategory.getSelectedItem().toString();
 			
-		Packet04Complain Packet = new Packet04Complain(new Complain(1, user.getUserId(), categoryAndType, complainText.getText(), "", "", ""));
+		Packet04Complain Packet = new Packet04Complain(new Complain(1, user.getUserId(), categoryAndType, complainTextField.getText(), "", "", ""));
 		Packet.writeData(MainWindow.getClientSocket()); 
 	}
 	
 			
-	
-	String ComplainID = "";
-	@Override
-	public void valueChanged(ListSelectionEvent e) {// use for table selection for assignng complains and setting date for technition
-		 
-		String Data = null;
-		int[] row = table.getSelectedRows();
-		int[] columns = table.getSelectedColumns();
-		for (int i = 0; i < row.length; i++) {
-			for (int j = 0; j < columns.length; j++) {
-				ComplainID = (String) table.getValueAt(row[i], 0);
-				Data = (String) table.getValueAt(row[i], columns[j]);
-
-			}
-		}
-		if(user instanceof Employee) {
-			JOptionPane.showInternalMessageDialog(dashboard,"Complain Id Selected: "+ ComplainID, user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);
-			if(((Employee) user).getJobTitle().matches("Representative")) {
-				assignComplain.setVisible(false);
-				technitionList.setVisible(true);
-			}else {
-				setVisitDate.setVisible(false);
-			}
-		}
-	}
 	
 	public void createTable() {
 
@@ -552,6 +528,32 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		
 	}
 	
+	String ComplainID = "";
+	@Override
+	public void valueChanged(ListSelectionEvent e) {// use for table selection for assignng complains and setting date for technition
+		 
+		String Data = null;
+		int[] row = table.getSelectedRows();
+		int[] columns = table.getSelectedColumns();
+		for (int i = 0; i < row.length; i++) {
+			for (int j = 0; j < columns.length; j++) {
+				ComplainID = (String) table.getValueAt(row[i], 0);
+				Data = (String) table.getValueAt(row[i], columns[j]);
+
+			}
+		}
+		if(user instanceof Employee) {
+			if(((Employee) user).getJobTitle().matches("Representative")) {
+				assignComplainButton.setVisible(false);
+				technitionDropdownList.setVisible(true);
+			}else {
+				setVisitDateButton.setVisible(false);
+			}
+			JOptionPane.showInternalMessageDialog(dashboard,"Complain Id Selected: "+ ComplainID, user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);
+			
+		}
+	}
+	
 	public void append(Packet03Chat chat) {// this function is used to add all incomming chat to an array list and append message to textarea
 		messages.add(chat);// store all chat reciever while online
 		
@@ -597,7 +599,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 
 
 	public void setComplainCategoryIndex(int index) {
-		this.complainCategory.setSelectedIndex(index);
+		this.complainDropdownCategory.setSelectedIndex(index);
 	}
 	
 	public JDesktopPane getDashboard() {
@@ -607,7 +609,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	
 	
 	public void setComplainText(String complainText) {
-		this.complainText.setText(complainText);
+		this.complainTextField.setText(complainText);
 	}
 
 }
