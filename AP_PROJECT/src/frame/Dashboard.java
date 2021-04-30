@@ -269,6 +269,8 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			assignComplain.setVisible(false); 
 			setVisitDate.setVisible(false);
 		}
+		onlineClientsDropdown.setVisible(false);
+		startChatButton.setVisible(true); 
 		technitionList.setVisible(false);
 		complainCategory.setVisible(false);
 		complainTypeLabel.setVisible(false);
@@ -344,7 +346,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										Packet02Logout logout = new Packet02Logout("logout");
 										logout.setHandlerID(MainWindow.getClientHandlerId());// prepare the logout packet with the client handler id
 										logout.writeData(MainWindow.getClientSocket()); // send the logout packet to the server
-										MainWindow.setOnlineClient(new ArrayList<String[][]>());//remove the list of online clients from the main window after logging out
 										break;
 			
 			default:
