@@ -263,9 +263,9 @@ public class Server{
 						UserType = ((Employee) loginData.getData()).getJobTitle();//Representative  Technitian
 					}
 					
-					this.UserInfo[0][0] = loginData.getData().getUserId();// set the UserId of this client handler to the Id of the loggedin user
-					this.UserInfo[0][1] = loginData.getData().getFirstName();// add the user firstname to the handler for chat purpose
-					this.userType = UserType;// usertype to help filter complain list when sending to all clients
+					UserInfo[0][0] = loginData.getData().getUserId();// set the UserId of this client handler to the Id of the loggedin user
+					UserInfo[0][1] = loginData.getData().getFirstName();// add the user firstname to the handler for chat purpose
+					userType = UserType;// usertype to help filter complain list when sending to all clients
 					
 					sendData(loginData);// send the data for the user dashboard
 					

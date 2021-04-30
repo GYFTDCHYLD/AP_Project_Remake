@@ -150,6 +150,10 @@ public class Client implements Runnable{
 		case "Complain Recieved": 
 									((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setComplainText("");//clear the text if server recieved the message	
 									((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setComplainCategoryIndex(0);	// reset the complain category if server recieve complain
+									((Dashboard)MainWindow.getDesktopPane().getComponent(0)).revalidate();
+									((Dashboard)MainWindow.getDesktopPane().getComponent(0)).repaint();
+									((Dashboard)MainWindow.getDesktopPane().getComponent(0)).updateUI();
+									
 			break;
 
 		default:
@@ -178,15 +182,19 @@ public class Client implements Runnable{
 	}
 	
 	private void UserDataHandler(Packet07User data) {
-		MainWindow.setLoginID(data.getData().getUserId());//logout user
+		MainWindow.setLoginID(data.getData().getUserId());
 		MainWindow.getDesktopPane().removeAll();// remove  login window
 		Dashboard myDashboard = new Dashboard(data.getData());
 		MainWindow.getDesktopPane().add(myDashboard);
 		MainWindow.getDesktopPane().add(MainWindow.background);
 		MainWindow.getDesktopPane().moveToFront(myDashboard);
+		MainWindow.getDesktopPane().revalidate();
+		MainWindow.getDesktopPane().repaint();
+		MainWindow.getDesktopPane().updateUI();
 	}
 	
 	private void LogoutHandler(Packet02Logout data) {
+		MainWindow.setLoginID("");
 		MainWindow.getDesktopPane().removeAll();//remove  dashboard window
 		MainWindow.getDesktopPane().add(new LoginWindow());// add a new login window
 		MainWindow.getDesktopPane().add(MainWindow.background);
@@ -214,6 +222,13 @@ public class Client implements Runnable{
 			MainWindow.setTechnitions((List<String[][]>) data.getData()) ;
 			System.out.println("List of Technitions recieved from server");
 		}
+		MainWindow.getDesktopPane().revalidate();
+		MainWindow.getDesktopPane().repaint();
+		MainWindow.getDesktopPane().updateUI();
+		
+		((Dashboard)MainWindow.getDesktopPane().getComponent(0)).revalidate();
+		((Dashboard)MainWindow.getDesktopPane().getComponent(0)).repaint();
+		((Dashboard)MainWindow.getDesktopPane().getComponent(0)).updateUI();
 	}
 
 
