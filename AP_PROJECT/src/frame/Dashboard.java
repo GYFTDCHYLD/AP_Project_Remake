@@ -264,96 +264,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		dashboard.add(background);
 	}
 	
-	public void DisplayComponent(String clicked){
-		if(!displayComplainTable) {// dnt show these items if the table is not visible
-			assignComplain.setVisible(false); 
-			setVisitDate.setVisible(false);
-		}
-		onlineClientsDropdown.setVisible(false);
-		startChatButton.setVisible(true); 
-		technitionList.setVisible(false);
-		complainCategory.setVisible(false);
-		complainTypeLabel.setVisible(false);
-		complainText.setVisible(false);
-		complainLabel.setVisible(false);
-		complainType.setVisible(false);
-		submit.setVisible(false);
-		displayComplainTable = false;
-		scrollPane.setVisible(false);
-		
-		
-		switch (clicked) {
-		
-			case "Make a Complain":
-										complainCategory.setVisible(true);
-										complainTypeLabel.setVisible(true);
-										complainText.setVisible(true);
-										complainLabel.setVisible(true);
-										submit.setVisible(true);
-										submit.setText("Send"); 
-										break;
-			case "View Complains":
-										if(user instanceof Employee) { 
-											assignComplain.setVisible(true);// for rep 
-											setVisitDate.setVisible(true);// for tech
-										}
-										
-										displayComplainTable = true;
-										createTable(); 
-										break;
-			case "View Account":
-										JOptionPane.showMessageDialog(dashboard, "Ammount due: "+ ((Customer)user).getBillingAccount().getAmountDue()
-												+" Due date: " + ((Customer)user).getBillingAccount().getDueDate()
-												+" Status: " + ((Customer)user).getBillingAccount().getStatus(), "",JOptionPane.INFORMATION_MESSAGE);
-										break;
-			case "Pay Bill":
-										break;
-			case "Assign a complain":
-										technitionList.removeAllItems();
-										technitionList.addItem("Select Technition");
-										for(String[][] tecInfo : MainWindow.getTechnitions()) { 
-											technitionList.addItem(tecInfo[0][1]);// add the technitions name to the dropdown  
-										}
-										displayComplainTable = true;
-										createTable();
-										JOptionPane.showInternalMessageDialog(dashboard, "Select the row/complain to assign", "", JOptionPane.INFORMATION_MESSAGE);
-										break;
-			case "Set visit date":		
-										displayComplainTable = true;
-										createTable();
-										JOptionPane.showInternalMessageDialog(dashboard, "Select the row/complain to set date", "", JOptionPane.INFORMATION_MESSAGE);
-										break;
-			case "Start Chat":
-										
-										if(MainWindow.getOnlineClient().size() == 0) {
-											JOptionPane.showInternalMessageDialog(dashboard, "Nobody available to chat", "Micro Star",JOptionPane.INFORMATION_MESSAGE);
-										}else {
-											onlineClientsDropdown.addItem("Select User");
-											for(String[][] clientInfo : MainWindow.getOnlineClient()) { 
-												onlineClientsDropdown.addItem(clientInfo[0][1]);// add the online user's name to the dropdown
-											}
-											onlineClientsDropdown.revalidate();
-											startChatButton.setVisible(false);// hide chat button
-											onlineClientsDropdown.setVisible(true);// show dropdown in chat button's place
-										}
-										break;
-			case "End Chat":
-										startChatButton.setText("Start Chat");//change the name on the button after it has been clicked
-										ChatWindow.setVisible(false); 
-										onlineClientsDropdown.removeAllItems();// remove all items from the dropdown list
-										break;
-			case "logout":
-										Packet02Logout logout = new Packet02Logout("logout");
-										logout.setHandlerID(MainWindow.getClientHandlerId());// prepare the logout packet with the client handler id
-										logout.writeData(MainWindow.getClientSocket()); // send the logout packet to the server
-										break;
-			
-			default:
-			
-		}
-	}
-
-	
 	public void setWindowsProperties() {
 		this.setBounds(15, 0, 720, 560);
 		this.setVisible(true); 
@@ -379,7 +289,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		
 		name.setText(this.user.getNameTitle() + ". " +   this.user.getFirstName() + " " + this.user.getLastName()); 
 	}
-
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		try {
@@ -462,6 +372,100 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			
 		}
 	}
+	
+	public void DisplayComponent(String clicked){
+		if(!displayComplainTable) {// dnt show these items if the table is not visible
+			assignComplain.setVisible(false); 
+			setVisitDate.setVisible(false);
+		}
+		onlineClientsDropdown.setVisible(false);
+		startChatButton.setVisible(true); 
+		technitionList.setVisible(false);
+		complainCategory.setVisible(false);
+		complainTypeLabel.setVisible(false);
+		complainText.setVisible(false);
+		complainLabel.setVisible(false);
+		complainType.setVisible(false);
+		submit.setVisible(false);
+		displayComplainTable = false;
+		scrollPane.setVisible(false);
+		
+		
+		switch (clicked) {
+		
+			case "Make a Complain":
+										complainCategory.setVisible(true);
+										complainTypeLabel.setVisible(true);
+										complainText.setVisible(true);
+										complainLabel.setVisible(true);
+										submit.setVisible(true);
+										submit.setText("Send"); 
+										break;
+			case "View Complains":
+										if(user instanceof Employee) { 
+											assignComplain.setVisible(true);// for rep 
+											setVisitDate.setVisible(true);// for tech
+										}
+										
+										displayComplainTable = true;
+										createTable(); 
+										break;
+			case "View Account":
+										JOptionPane.showMessageDialog(dashboard, "Ammount due: "+ ((Customer)user).getBillingAccount().getAmountDue()
+												+" Due date: " + ((Customer)user).getBillingAccount().getDueDate()
+												+" Status: " + ((Customer)user).getBillingAccount().getStatus(), "",JOptionPane.INFORMATION_MESSAGE);
+										break;
+			case "Pay Bill":
+										break;
+			case "Assign a complain":
+										technitionList.removeAllItems();
+										technitionList.addItem("Select Technition");
+										for(String[][] tecInfo : MainWindow.getTechnitions()) { 
+											technitionList.addItem(tecInfo[0][1]);// add the technitions name to the dropdown  
+										}
+										displayComplainTable = true;
+										createTable();
+										JOptionPane.showInternalMessageDialog(dashboard, "Select the row/complain to assign", "", JOptionPane.INFORMATION_MESSAGE);
+										break;
+			case "Set visit date":		
+										displayComplainTable = true;
+										createTable();
+										JOptionPane.showInternalMessageDialog(dashboard, "Select the row/complain to set date", "", JOptionPane.INFORMATION_MESSAGE);
+										break;
+			case "Start Chat":
+										onlineClientsDropdown.removeAllItems();
+										if(MainWindow.getOnlineClient().size() == 0) {
+											JOptionPane.showInternalMessageDialog(dashboard, "Nobody available to chat", "Micro Star",JOptionPane.INFORMATION_MESSAGE);
+										}else {
+											onlineClientsDropdown.addItem("Select User");
+											for(String[][] clientInfo : MainWindow.getOnlineClient()) { 
+												onlineClientsDropdown.addItem(clientInfo[0][1]);// add the online user's name to the dropdown
+											}
+											onlineClientsDropdown.revalidate();
+											startChatButton.setVisible(false);// hide chat button
+											onlineClientsDropdown.setVisible(true);// show dropdown in chat button's place
+										}
+										break;
+			case "End Chat":
+										startChatButton.setText("Start Chat");//change the name on the button after it has been clicked
+										ChatWindow.setVisible(false); 
+										onlineClientsDropdown.removeAllItems();// remove all items from the dropdown list
+										break;
+			case "logout":
+										Packet02Logout logout = new Packet02Logout("logout");
+										logout.setHandlerID(MainWindow.getClientHandlerId());// prepare the logout packet with the client handler id
+										logout.writeData(MainWindow.getClientSocket()); // send the logout packet to the server
+										break;
+			
+			default:
+			
+		}
+	}
+
+	
+
+
+
 	
 	private void sendComplain() { 
 		String categoryAndType;

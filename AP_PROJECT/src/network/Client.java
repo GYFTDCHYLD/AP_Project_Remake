@@ -151,8 +151,6 @@ public class Client implements Runnable{
 									((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setComplainText("");//clear the text if server recieved the message	
 									((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setComplainCategoryIndex(0);	// reset the complain category if server recieve complain
 									((Dashboard)MainWindow.getDesktopPane().getComponent(0)).revalidate();
-									((Dashboard)MainWindow.getDesktopPane().getComponent(0)).repaint();
-									((Dashboard)MainWindow.getDesktopPane().getComponent(0)).updateUI();
 									
 			break;
 
@@ -179,6 +177,7 @@ public class Client implements Runnable{
 		LoginWindow.getLoginIdField().setText(data.getData().getPassword());// extract the user Id that the server placed in the password field 
 		MainWindow.getDesktopPane().add(LoginWindow);
 		MainWindow.getDesktopPane().moveToFront(LoginWindow); //move the login window to the front of all component, without doing this, it would ended up behind the background image the was added b4 it  
+		MainWindow.getDesktopPane().revalidate();
 	}
 	
 	private void UserDataHandler(Packet07User data) {
@@ -189,8 +188,6 @@ public class Client implements Runnable{
 		MainWindow.getDesktopPane().add(MainWindow.background);
 		MainWindow.getDesktopPane().moveToFront(myDashboard);
 		MainWindow.getDesktopPane().revalidate();
-		MainWindow.getDesktopPane().repaint();
-		MainWindow.getDesktopPane().updateUI();
 	}
 	
 	private void LogoutHandler(Packet02Logout data) {
@@ -198,6 +195,7 @@ public class Client implements Runnable{
 		MainWindow.getDesktopPane().removeAll();//remove  dashboard window
 		MainWindow.getDesktopPane().add(new LoginWindow());// add a new login window
 		MainWindow.getDesktopPane().add(MainWindow.background);
+		MainWindow.getDesktopPane().revalidate();
 		
 	}
 	
@@ -209,7 +207,7 @@ public class Client implements Runnable{
 	private void ListHandler(Packet11List data) {
 		if(data.getData().get(0) instanceof Complain) {// check if its a list of complains being sent over 
 			MainWindow.setComplain((List<Complain>)data.getData());
-			//((Dashboard)MainWindow.getDesktopPane().getComponent(0)).createTable();// update table in realtime
+			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).createTable();// update table in realtime
 			System.out.println("List of complain recieved from server");
 		}else if(data.getType().matches("ID's")) {
 			MainWindow.setClientHandlerId((long) data.getData().get(0)); 
@@ -222,13 +220,6 @@ public class Client implements Runnable{
 			MainWindow.setTechnitions((List<String[][]>) data.getData()) ;
 			System.out.println("List of Technitions recieved from server");
 		}
-		MainWindow.getDesktopPane().revalidate();
-		MainWindow.getDesktopPane().repaint();
-		MainWindow.getDesktopPane().updateUI();
-		
-		((Dashboard)MainWindow.getDesktopPane().getComponent(0)).revalidate();
-		((Dashboard)MainWindow.getDesktopPane().getComponent(0)).repaint();
-		((Dashboard)MainWindow.getDesktopPane().getComponent(0)).updateUI();
 	}
 
 
