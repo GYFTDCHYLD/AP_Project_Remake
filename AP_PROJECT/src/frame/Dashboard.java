@@ -25,6 +25,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 
 import image.loadImages;
 import packet.Packet02Logout;
@@ -48,7 +49,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	
 	private JScrollPane scrollPane;
 	private JTable table; 
-	private ListSelectionModel cellSelect;
+	
 	
 	private JButton makeComplain;
 	private JButton viewComplain;
@@ -220,13 +221,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		submitButton.setVisible(false);
 		
 		table = new JTable();
-		table.setCellSelectionEnabled(true);
-		table.setForeground(Color.BLACK);
-		table.setGridColor(Color.BLUE);
-		
-		scrollPane = new JScrollPane(table); 
-		scrollPane.setBounds(7, 110, 680, 400); 
-		scrollPane.setVisible(false);
+		scrollPane = new JScrollPane(table);
 		
 		background = new JLabel();
 		background.setHorizontalAlignment(SwingConstants.CENTER);
@@ -391,13 +386,14 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										submitButton.setText("Send"); 
 										break;
 			case "View Complains":
-										if(user instanceof Employee) { 
+										if(user instanceof Employee) {
+											setVisitDateButton.setText("Set visit date"); 
 											assignComplainButton.setVisible(true);// for rep 
 											setVisitDateButton.setVisible(true);// for tech
 										}
 										
 										displayComplainTable = true;
-										createTable(); 
+										populateTable(); 
 										break;
 			case "View Account":
 										JOptionPane.showMessageDialog(dashboard, "Ammount due: "+ ((Customer)user).getBillingAccount().getAmountDue()
@@ -414,7 +410,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										}
 										editTable = true;
 										displayComplainTable = true;
-										createTable();
+										populateTable();
 										JOptionPane.showInternalMessageDialog(dashboard, "Select the row/complain to assign", "", JOptionPane.INFORMATION_MESSAGE);
 										break;
 			case "Set visit date":		
@@ -422,7 +418,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										setdateTextField.setVisible(true);
 										displayComplainTable = true;
 										editTable = true;
-										createTable();
+										populateTable();
 										JOptionPane.showInternalMessageDialog(dashboard, "Select the row/complain to set date", "", JOptionPane.INFORMATION_MESSAGE);
 										break;
 			case "Start Chat":
@@ -460,6 +456,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 											assign.setInfo2(setdateTextField.getText());// Date
 											assign.writeData(MainWindow.getClientSocket());  // send info to client
 											setVisitDateButton.setText("Set visit date"); 
+											setdateTextField.setText("");
 										}
 										break;
 			default:
@@ -481,63 +478,70 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	
 			
 	boolean editTable = false;
-	public void createTable() {
-
+	public void populateTable() { 
+		dashboard.remove(scrollPane);
 		int total = 0, resolved = 0, unResolved = 0;
+		
 		String column[]={"ID","TYPE","MESSAGE","REPRESENTATIVE","ASSIGNED TECHNICIAN","VISIT DATE"};
-		String data[][];
-		data = new String[MainWindow.getComplain().size()][7];
+		DefaultTableModel tableModel = new DefaultTableModel(column, 0);  // The 0 argument is number rows.
+		JTable table = new JTable(tableModel);
+		table.setCellSelectionEnabled(true);
+		table.setGridColor(Color.BLACK);
+		table.getTableHeader().setFont(new Font("arial", Font.PLAIN, 14)); 
+		table.setUpdateSelectionOnSort(true);
+		ListSelectionModel cellSelect = table.getSelectionModel();  
+		cellSelect.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		cellSelect.addListSelectionListener(this);
+	
+		this.table = table;
+		scrollPane = new JScrollPane(this.table);  
+		scrollPane.setBounds(7, 110, 680, 400);
+		dashboard.add(scrollPane);
+		dashboard.moveToFront(scrollPane);
+		
 		for(int row = 0; row < MainWindow.getComplain().size(); row ++) {
-			data[row][0] = MainWindow.getComplain().get(row).getId()+"";
-			data[row][1] = MainWindow.getComplain().get(row).getType();
-			data[row][2] = MainWindow.getComplain().get(row).getMessage();
-			data[row][3] = MainWindow.getComplain().get(row).getRepId();
-			data[row][4] = MainWindow.getComplain().get(row).getTecId();
-			data[row][5] = MainWindow.getComplain().get(row).getVisitDate();
+			Object[] objs = { 
+					MainWindow.getComplain().get(row).getId(),
+					MainWindow.getComplain().get(row).getType(),
+					MainWindow.getComplain().get(row).getMessage(),
+					MainWindow.getComplain().get(row).getRepId(),
+					MainWindow.getComplain().get(row).getTecId(),
+					MainWindow.getComplain().get(row).getVisitDate()
+			};
+			tableModel.addRow(objs);
 			
 			total ++;
-			if(!data[row][5].equals(""))
+			if(!MainWindow.getComplain().get(row).getVisitDate().equals(""))
 				resolved++;
 			unResolved = (total - resolved);
 			complainCounter.setText("  Total Complain(s) : " + total 
 							    + "\n  Resolved               : " + resolved
 							    + "\n  Un-Resolved:        : " + unResolved); 
 		}
-			
+		
 		if(displayComplainTable) {
-			table = new JTable(data, column);
-			table.setCellSelectionEnabled(true);
-			table.setGridColor(Color.BLACK);
-			table.getTableHeader().setFont(new Font("arial", Font.PLAIN, 14)); 
-			table.setUpdateSelectionOnSort(true);
 			if (editTable)
 				table.setEnabled(true);
 			else
 				table.setEnabled(false);
 			
-			cellSelect = table.getSelectionModel();  
-			cellSelect.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			
-			cellSelect.addListSelectionListener(this);
-			scrollPane = new JScrollPane(table); 
-			scrollPane.setBounds(7, 110, 680, 400); 
-			
-			dashboard.add(scrollPane);
-			dashboard.moveToFront(scrollPane); 
+			scrollPane.setVisible(true); 
+		}else {
+			scrollPane.setVisible(false); 
 		}
-		
 	}
 	
 	String ComplainID = "";
 	@Override
 	public void valueChanged(ListSelectionEvent e) {// use for table selection for assignng complains and setting date for technition
 		 
+		
 		String Data = null;
 		int[] row = table.getSelectedRows();
 		int[] columns = table.getSelectedColumns();
 		for (int i = 0; i < row.length; i++) {
 			for (int j = 0; j < columns.length; j++) {
-				ComplainID = (String) table.getValueAt(row[i], 0);
+				ComplainID = String.valueOf(table.getValueAt(row[i], 0));
 				Data = (String) table.getValueAt(row[i], columns[j]);
 
 			}
@@ -550,7 +554,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 				setVisitDateButton.setVisible(true); 
 			}
 			JOptionPane.showInternalMessageDialog(dashboard,"Complain Id Selected: "+ ComplainID, user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);
-			
 		}
 	}
 	

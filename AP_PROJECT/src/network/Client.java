@@ -41,7 +41,7 @@ public class Client implements Runnable{
 			connectionSocket = new Socket(InetAddress.getLocalHost(), PORTNUMBER);
 		}
 		catch(IOException e) {
-			parsePacket(new Packet9Info("Not Connected to server:  " + e.getMessage()));
+			parsePacket(new Packet10Error("Not Connected to server:  " + e.getMessage()));
 		}
 	}
 	
@@ -51,9 +51,9 @@ public class Client implements Runnable{
 			objOs = new ObjectOutputStream(connectionSocket.getOutputStream());
 		}
 		catch(IOException e) {
-			parsePacket(new Packet9Info("Not Connected to server:  " + e.getMessage()));
+			parsePacket(new Packet10Error("Not Connected to server:  " + e.getMessage()));
 		}catch(NullPointerException e) {
-			parsePacket(new Packet9Info("Not Connected to server:  " + e.getMessage()));
+			parsePacket(new Packet10Error("Not Connected to server:  " + e.getMessage()));
 		}
 	}	
 
@@ -166,6 +166,9 @@ public class Client implements Runnable{
 			case "Server Ended": 
 								System.exit(0);// end the program if an exit message is recieved from the server
 				break;
+			case "Not Connected to server:  Connection refused": 
+								System.exit(0);// end the program if an conection refused from the server
+				break;
 	
 			default:
 				break;
@@ -207,7 +210,7 @@ public class Client implements Runnable{
 	private void ListHandler(Packet11List data) {
 		if(data.getData().get(0) instanceof Complain) {// check if its a list of complains being sent over 
 			MainWindow.setComplain((List<Complain>)data.getData());
-			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).createTable();// update table in realtime
+			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).populateTable();// update table in realtime
 			System.out.println("List of complain recieved from server");
 		}else if(data.getType().matches("ID's")) {
 			MainWindow.setClientHandlerId((long) data.getData().get(0)); 
