@@ -371,10 +371,14 @@ public class Server{
 		private void putUserOffline(Packet02Logout data) { // remove the user id from the client handler
 			try {
 			
-				int index = getHandlerIndex(data.getHandlerID());
-				onlineClient.get(index).UserInfo[0][0] = ""; // set the userID of the client handler to an empty string so that user can re-login with the same handler
-				onlineClient.get(index).UserInfo[0][1] = ""; // set the firstname of the client handler to an empty string so that user can re-login with the same handler
-				onlineClient.get(index).userType = "";
+				for (ClientHandler client : onlineClient) {
+					if (client.getId() == data.getHandlerID()) { 
+						client.UserInfo[0][0] = ""; // set the userID of the client handler to an empty string so that user can re-login with the same handler
+						client.UserInfo[0][1] = ""; // set the firstname of the client handler to an empty string so that user can re-login with the same handler
+						client.userType = "";
+						break;
+					}
+				}
 				
 				Packet11List onlineClients = new Packet11List(onlineClient());// return list of client and add it to the packet/object
 				sendOnlineClientListToAllClients(onlineClients);// send list of clients id to all connected user
@@ -387,16 +391,7 @@ public class Server{
 			}
 		}
 
-		private int getHandlerIndex(long handlerId) throws IndexOutOfBoundsException {// get the index for the user in the online list
-			int index = 0;
-			for (ClientHandler client : onlineClient) {
-				if (client.getId() == handlerId) { 
-					break;
-				}
-				index++;
-			}
-			return index;
-		}
+
 		
 		private int getThreadIndex(long threadId) throws IndexOutOfBoundsException {// get the index for the user in the online list
 			int index = 0;
