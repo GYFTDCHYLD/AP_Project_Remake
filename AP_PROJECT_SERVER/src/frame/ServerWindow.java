@@ -84,8 +84,8 @@ public class ServerWindow extends JFrame implements ActionListener{
 		getServerDash().add(buton);
 		
 		background = new JLabel(new ImageIcon(loadImages.CustomerDashboardBackground));
-		background.setHorizontalAlignment(SwingConstants.CENTER);
-		background.setBounds(0, 0,800, 700);
+		background.setHorizontalAlignment(SwingConstants.TRAILING);
+		background.setBounds(0, 0,500, 400);
 		getServerDash().add(background);
 		
 	}
