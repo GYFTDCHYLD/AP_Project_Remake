@@ -48,6 +48,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	private JLabel background;
 	
 	private JScrollPane scrollPane;
+	private DefaultTableModel tableModel;
 	private JTable table; 
 	
 	
@@ -480,11 +481,12 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	boolean editTable = false;
 	public void populateTable() { 
 		dashboard.remove(scrollPane);
+		dashboard.revalidate();
 		int total = 0, resolved = 0, unResolved = 0;
 		
 		String column[]={"ID","TYPE","MESSAGE","REPRESENTATIVE","ASSIGNED TECHNICIAN","VISIT DATE"};
-		DefaultTableModel tableModel = new DefaultTableModel(column, 0);  // The 0 argument is number rows.
-		JTable table = new JTable(tableModel);
+		tableModel = new DefaultTableModel(column, 0);  // The 0 argument is number rows.
+		table = new JTable(tableModel);
 		table.setCellSelectionEnabled(true);
 		table.setGridColor(Color.BLACK);
 		table.getTableHeader().setFont(new Font("arial", Font.PLAIN, 14)); 
@@ -493,11 +495,12 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		cellSelect.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		cellSelect.addListSelectionListener(this);
 	
-		this.table = table;
-		scrollPane = new JScrollPane(this.table);  
+		
+		scrollPane = new JScrollPane(table);  
 		scrollPane.setBounds(7, 110, 680, 400);
 		dashboard.add(scrollPane);
 		dashboard.moveToFront(scrollPane);
+		dashboard.revalidate();
 		
 		for(int row = 0; row < MainWindow.getComplain().size(); row ++) {
 			Object[] objs = { 
