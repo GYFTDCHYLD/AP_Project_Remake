@@ -167,7 +167,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		
 		setdateTextField = new JTextField(); 
 		setdateTextField.setBounds(250, 60,160, 30);
-		setdateTextField.addActionListener(this);
 		setdateTextField.setVisible(false);
 		setdateTextField.setToolTipText("Type date here"); 
 		
@@ -354,8 +353,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 
 			} else {
 				try {
-					if(!setdateTextField.getText().equals(""))
-						setVisitDateButton.setVisible(true);
 					DisplayComponent(e.getActionCommand()); // display component for the button that was pressed
 				}catch (ClassCastException ex) {
 					
@@ -382,6 +379,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		submitButton.setVisible(false);
 		displayComplainTable = false;
 		scrollPane.setVisible(false);
+		editTable = false;
 		
 		
 		switch (clicked) {
@@ -414,6 +412,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										for(String[][] tecInfo : MainWindow.getTechnitions()) { 
 											technitionDropdownList.addItem(tecInfo[0][1]);// add the technitions name to the dropdown  
 										}
+										editTable = true;
 										displayComplainTable = true;
 										createTable();
 										JOptionPane.showInternalMessageDialog(dashboard, "Select the row/complain to assign", "", JOptionPane.INFORMATION_MESSAGE);
@@ -422,6 +421,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										setVisitDateButton.setText("Finalize Date");
 										setdateTextField.setVisible(true);
 										displayComplainTable = true;
+										editTable = true;
 										createTable();
 										JOptionPane.showInternalMessageDialog(dashboard, "Select the row/complain to set date", "", JOptionPane.INFORMATION_MESSAGE);
 										break;
@@ -480,7 +480,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	}
 	
 			
-	
+	boolean editTable = false;
 	public void createTable() {
 
 		int total = 0, resolved = 0, unResolved = 0;
@@ -510,7 +510,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			table.setGridColor(Color.BLACK);
 			table.getTableHeader().setFont(new Font("arial", Font.PLAIN, 14)); 
 			table.setUpdateSelectionOnSort(true);
-			if (user instanceof Employee)
+			if (editTable)
 				table.setEnabled(true);
 			else
 				table.setEnabled(false);
@@ -547,7 +547,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 				assignComplainButton.setVisible(false);
 				technitionDropdownList.setVisible(true);
 			}else {
-				setVisitDateButton.setVisible(false);
+				setVisitDateButton.setVisible(true); 
 			}
 			JOptionPane.showInternalMessageDialog(dashboard,"Complain Id Selected: "+ ComplainID, user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);
 			
