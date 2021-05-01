@@ -48,7 +48,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	private JLabel background;
 	
 	private JScrollPane scrollPane;
-	private DefaultTableModel tableModel;
 	private JTable table; 
 	
 	
@@ -84,7 +83,9 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	private ChatWindow ChatWindow;
 	private String ConnectedTo; // this will store the user u are currently chatting/connected to in order to filter incomming messages from other users in the same chat window, this will allow us to make only the mssage on the connected user show in the chat
 	private List<Packet03Chat> messages;// a list of chats for the messages being recieved from the server
-	
+	private List<Complain> complains; 
+	private List<String[][]>  onlineClient;
+	private List<String[][]>  technitions; 
 	private boolean displayComplainTable;
 	
 	
@@ -122,7 +123,9 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		displayComplainTable = false;
 		
 		messages = new ArrayList<Packet03Chat>();// the will contain all chat that was recieve since being online
-		
+		complains = new ArrayList<Complain>(); 
+		onlineClient = new ArrayList<String[][]>();
+		technitions = new ArrayList<String[][]>();
 		profileImage = new JLabel();
 		profileImage.setHorizontalAlignment(SwingConstants.CENTER);
 		profileImage.setBounds(40, 10,50, 50);
@@ -222,7 +225,19 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		submitButton.setVisible(false);
 		
 		table = new JTable();
-		scrollPane = new JScrollPane(table);
+		table.setCellSelectionEnabled(true);
+		table.setGridColor(Color.BLACK);
+		table.getTableHeader().setFont(new Font("arial", Font.PLAIN, 14));
+		table.getTableHeader().setBackground(Color.BLACK); 
+		table.getTableHeader().setForeground(Color.WHITE); 
+		ListSelectionModel cellSelect = table.getSelectionModel();  
+		cellSelect.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		cellSelect.addListSelectionListener(this);
+	
+		
+		scrollPane = new JScrollPane(table);  
+		scrollPane.setBounds(7, 110, 680, 400);
+		scrollPane.setVisible(false);
 		
 		background = new JLabel();
 		background.setHorizontalAlignment(SwingConstants.CENTER);
@@ -284,9 +299,9 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			if(onlineClientsDropdown.isVisible()) {
 				if(!onlineClientsDropdown.getSelectedItem().equals("Select User")){
 					recieverIndex = onlineClientsDropdown.getSelectedIndex()-1; // set the recieverIndex to the selected index od the gropdown menu to locate the reciever ID
-					ConnectedTo = MainWindow.getOnlineClient().get(recieverIndex)[0][0].toString();// locate the id for the selected person from the online list and // add the id of the person u are currently having a convo winth, this is used to filter message from diferent conversation
+					ConnectedTo = onlineClient.get(recieverIndex)[0][0].toString();// locate the id for the selected person from the online list and // add the id of the person u are currently having a convo winth, this is used to filter message from diferent conversation
 	
-					Packet03Chat Packet03Chat = new Packet03Chat(ConnectedTo, MainWindow.getOnlineClient().get(recieverIndex)[0][1].toString(), user.getUserId(), "");
+					Packet03Chat Packet03Chat = new Packet03Chat(ConnectedTo, onlineClient.get(recieverIndex)[0][1].toString(), user.getUserId(), "");
 					initiateChat(Packet03Chat);// call the initiate chat function
 				}
 					
@@ -299,7 +314,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 					assign.setAssignment("Assign a complain");// command/instruction for the server 
 					assign.setLoginId(user.getUserId());// rep id to be attacched to the complain
 					assign.setInfo(ComplainID);// complain id
-					assign.setInfo2(MainWindow.getTechnitions().get(technitionDropdownList.getSelectedIndex()-1)[0][0].toString());// technition id
+					assign.setInfo2(technitions.get(technitionDropdownList.getSelectedIndex()-1)[0][0].toString());// technition id
 					assign.writeData(MainWindow.getClientSocket());  // send info to client
 				}else {
 					JOptionPane.showInternalMessageDialog(dashboard, "Selected a Technition", user.getFirstName(), JOptionPane.ERROR_MESSAGE);
@@ -396,17 +411,10 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										displayComplainTable = true;
 										populateTable(); 
 										break;
-			case "View Account":
-										JOptionPane.showMessageDialog(dashboard, "Ammount due: "+ ((Customer)user).getBillingAccount().getAmountDue()
-												+" Due date: " + ((Customer)user).getBillingAccount().getDueDate()
-												+" Status: " + ((Customer)user).getBillingAccount().getStatus(), "",JOptionPane.INFORMATION_MESSAGE);
-										break;
-			case "Pay Bill":
-										break;
 			case "Assign a complain":
 										technitionDropdownList.removeAllItems(); 
 										technitionDropdownList.addItem("Select Technition");
-										for(String[][] tecInfo : MainWindow.getTechnitions()) { 
+										for(String[][] tecInfo : technitions) { 
 											technitionDropdownList.addItem(tecInfo[0][1]);// add the technitions name to the dropdown  
 										}
 										editTable = true;
@@ -422,13 +430,34 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										populateTable();
 										JOptionPane.showInternalMessageDialog(dashboard, "Select the row/complain to set date", "", JOptionPane.INFORMATION_MESSAGE);
 										break;
+			case "Finalize Date":
+										if(setdateTextField.getText().equals("")) {
+											setVisitDateButton.setText("Set visit date"); 
+											JOptionPane.showInternalMessageDialog(dashboard, "Type date in the date field", "", JOptionPane.ERROR_MESSAGE);
+										}else {
+											Packet9Info assign = new Packet9Info("");// prepare message 
+											assign.setAssignment("Set Date");// command/instruction for the server 
+											assign.setInfo(ComplainID);// complain id
+											assign.setInfo2(setdateTextField.getText());// Date
+											assign.writeData(MainWindow.getClientSocket());  // send info to client
+											setVisitDateButton.setText("Set visit date"); 
+											setdateTextField.setText("");
+										}
+										break;
+			case "View Account":
+										JOptionPane.showMessageDialog(dashboard, "Ammount due: "+ ((Customer)user).getBillingAccount().getAmountDue()
+												+" Due date: " + ((Customer)user).getBillingAccount().getDueDate()
+												+" Status: " + ((Customer)user).getBillingAccount().getStatus(), "",JOptionPane.INFORMATION_MESSAGE);
+										break;
+			case "Pay Bill":
+										break;
 			case "Start Chat":
 										onlineClientsDropdown.removeAllItems();
-										if(MainWindow.getOnlineClient().size() == 0) {
+										if(onlineClient.size() == 0) {
 											JOptionPane.showInternalMessageDialog(dashboard, "Nobody available to chat", "Micro Star",JOptionPane.INFORMATION_MESSAGE);
 										}else {
 											onlineClientsDropdown.addItem("Select User");
-											for(String[][] clientInfo : MainWindow.getOnlineClient()) { 
+											for(String[][] clientInfo : onlineClient) { 
 												onlineClientsDropdown.addItem(clientInfo[0][1]);// add the online user's name to the dropdown
 											}
 											onlineClientsDropdown.revalidate();
@@ -445,20 +474,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										Packet02Logout logout = new Packet02Logout("logout");
 										logout.setHandlerID(MainWindow.getClientHandlerId());// prepare the logout packet with the client handler id
 										logout.writeData(MainWindow.getClientSocket()); // send the logout packet to the server
-										break;
-			case "Finalize Date":
-										if(setdateTextField.getText().equals("")) {
-											setdateTextField.setVisible(true); 
-											JOptionPane.showInternalMessageDialog(dashboard, "Type date in the date field", "", JOptionPane.ERROR_MESSAGE);
-										}else {
-											Packet9Info assign = new Packet9Info("");// prepare message 
-											assign.setAssignment("Set Date");// command/instruction for the server 
-											assign.setInfo(ComplainID);// complain id
-											assign.setInfo2(setdateTextField.getText());// Date
-											assign.writeData(MainWindow.getClientSocket());  // send info to client
-											setVisitDateButton.setText("Set visit date"); 
-											setdateTextField.setText("");
-										}
 										break;
 			default:
 			
@@ -482,37 +497,19 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	public void populateTable() {
 		int total = 0, resolved = 0, unResolved = 0;
 		
-		String column[]={"ID","TYPE","MESSAGE","REPRESENTATIVE","ASSIGNED TECHNICIAN","VISIT DATE"};
-		tableModel = new DefaultTableModel(column, 0);  // The 0 argument is number rows.
-		table = new JTable(tableModel);
-		table.setCellSelectionEnabled(true);
-		table.setGridColor(Color.BLACK);
-		table.getTableHeader().setFont(new Font("arial", Font.PLAIN, 14));
-		table.getTableHeader().setBackground(Color.BLACK); 
-		table.getTableHeader().setForeground(Color.WHITE); 
-		table.setUpdateSelectionOnSort(true);
-		ListSelectionModel cellSelect = table.getSelectionModel();  
-		cellSelect.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		cellSelect.addListSelectionListener(this);
-	
+		String columnNames[]={"ID","TYPE","MESSAGE","REPRESENTATIVE","ASSIGNED TECHNICIAN","VISIT DATE"};
+		Object[][] rowData = new Object[complains.size()][columnNames.length];
 		
-		scrollPane = new JScrollPane(table);  
-		scrollPane.setBounds(7, 110, 680, 400);
-		dashboard.add(scrollPane);
-		dashboard.moveToFront(scrollPane);
-		
-		for(int row = 0; row < MainWindow.getComplain().size(); row ++) {
-			tableModel.addRow(new Object[]{  
-				MainWindow.getComplain().get(row).getId(),
-				MainWindow.getComplain().get(row).getType(),
-				MainWindow.getComplain().get(row).getMessage(),
-				MainWindow.getComplain().get(row).getRepId(),
-				MainWindow.getComplain().get(row).getTecId(),
-				MainWindow.getComplain().get(row).getVisitDate()
-			});
+		for(int row = 0; row < complains.size(); row ++) { 
+			rowData[row][0] = complains.get(row).getId();
+			rowData[row][1] = complains.get(row).getType();
+			rowData[row][2] = complains.get(row).getMessage();
+			rowData[row][3] = complains.get(row).getRepId();
+			rowData[row][4] = complains.get(row).getTecId();
+			rowData[row][5] = complains.get(row).getVisitDate(); 
 			
 			total ++;
-			if(!MainWindow.getComplain().get(row).getVisitDate().equals(""))
+			if(!complains.get(row).getVisitDate().equals(""))
 				resolved++;
 			unResolved = (total - resolved);
 			complainCounter.setText("  Total Complain(s) : " + total 
@@ -520,6 +517,9 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 							    + "\n  Un-Resolved:        : " + unResolved); 
 		}
 		
+		DefaultTableModel tableModel = new DefaultTableModel(rowData, columnNames);
+		table.setModel(tableModel);
+		 
 		if(displayComplainTable) {
 			if (editTable)
 				table.setEnabled(true);
@@ -552,9 +552,9 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 				assignComplainButton.setVisible(false);
 				technitionDropdownList.setVisible(true);
 			}else {
-				setVisitDateButton.setVisible(true); 
+				setVisitDateButton.setVisible(true);
+				setdateTextField.setVisible(true); 
 			}
-			JOptionPane.showInternalMessageDialog(dashboard,"Complain Id Selected: "+ ComplainID, user.getFirstName(),JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 	
@@ -608,5 +608,40 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	
 	public void setComplainText(String complainText) {
 		this.complainTextField.setText(complainText);
+	}
+
+
+	public List<Complain> getComplains() {
+		return complains;
+	}
+
+
+	public void setComplains(List<Complain> complains) { 
+		this.complains = complains;
+		populateTable();
+	}
+
+
+	public List<String[][]> getOnlineClient() { 
+		return onlineClient;
+	}
+
+
+	public void setOnlineClient(List<String[][]> onlineClient) {
+		this.onlineClient = onlineClient;
+		for(String[][] clientInfo : onlineClient) { 
+			if(clientInfo[0][0].equals(user.getUserId()))
+			onlineClient.remove(clientInfo);//remove this user info from the list to prevent yourself from showing up in the chat
+		}
+	}
+
+
+	public List<String[][]> getTechnitions() {
+		return technitions;
+	}
+
+
+	public void setTechnitions(List<String[][]> technitions) {
+		this.technitions = technitions;
 	}
 }

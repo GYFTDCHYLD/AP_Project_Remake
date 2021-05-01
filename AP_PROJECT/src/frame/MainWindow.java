@@ -14,8 +14,6 @@ import java.awt.event.WindowListener;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDesktopPane;
@@ -47,11 +45,7 @@ public class MainWindow extends JFrame{
 	public static Client ClientSocket;
 	private static long clientHandlerId;// this id id for the client handler that is handling the connection/transaction to server and client for this instance of window 
 	private static long threadHandlerId;// this id id for the client handler thread that is handling the connection/transaction to server and client for this instance of window 
-	private static String loginID;
-
-	private static List<Complain> complain;  
-	private static List<String[][]>  onlineClient; 
-	private static List<String[][]>  technitions; 
+ 
 	
 	
 	
@@ -70,9 +64,6 @@ public class MainWindow extends JFrame{
 	}
 
 	public void initializeComponent() {
-		setComplain(new ArrayList<Complain>());
-		setOnlineClient(new ArrayList<String[][]>()); 
-		setTechnitions(new ArrayList<String[][]>()); 
 		loadImages = new loadImages();
 		loadImages.init();
 		desktopPane = new JDesktopPane();
@@ -236,43 +227,6 @@ public class MainWindow extends JFrame{
 
 	public static Client getClientSocket() {
 		return ClientSocket;
-	}
-
-	public static List<String[][]> getOnlineClient() {
-		return onlineClient;
-	}
-
-	public static void setOnlineClient(List<String[][]> Client) {
-		onlineClient = Client;
-		for(String[][] clientInfo : onlineClient) { 
-			if(clientInfo[0][0].equals(loginID))
-			onlineClient.remove(clientInfo);//remove this user info from the list to prevent yourself from showing up in the chat
-		}
-	}
-	
-	public static List<String[][]> getTechnitions() {
-		return technitions;
-	}
-
-	public static void setTechnitions(List<String[][]> techs) {
-		technitions = techs;
-	}
-
-
-	public static List<Complain> getComplain() {
-		return complain;
-	}
-
-	public static void setComplain(List<Complain> list) {
-		complain = list;
-	}
-
-	public static String getLoginID() {
-		return loginID;
-	}
-
-	public static void setLoginID(String loginID) {
-		MainWindow.loginID = loginID;
 	}
 
 	public static long getClientHandlerId() {

@@ -184,7 +184,6 @@ public class Client implements Runnable{
 	}
 	
 	private void UserDataHandler(Packet07User data) {
-		MainWindow.setLoginID(data.getData().getUserId());
 		MainWindow.getDesktopPane().removeAll();// remove  login window
 		Dashboard myDashboard = new Dashboard(data.getData());
 		MainWindow.getDesktopPane().add(myDashboard);
@@ -194,7 +193,6 @@ public class Client implements Runnable{
 	}
 	
 	private void LogoutHandler(Packet02Logout data) {
-		MainWindow.setLoginID("");
 		MainWindow.getDesktopPane().removeAll();//remove  dashboard window
 		MainWindow.getDesktopPane().add(new LoginWindow());// add a new login window
 		MainWindow.getDesktopPane().add(MainWindow.background);
@@ -209,18 +207,17 @@ public class Client implements Runnable{
 	
 	private void ListHandler(Packet11List data) {
 		if(data.getData().get(0) instanceof Complain) {// check if its a list of complains being sent over 
-			MainWindow.setComplain((List<Complain>)data.getData());
-			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).populateTable();// update table in realtime
+			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setComplains((List<Complain>)data.getData());
 			System.out.println("List of complain recieved from server");
 		}else if(data.getType().matches("ID's")) {
 			MainWindow.setClientHandlerId((long) data.getData().get(0)); 
 			MainWindow.setThreadHandlerId((long) data.getData().get(1));
 			System.out.println("List of Id's clients recieved from server");
 		}else if(data.getType().matches("Online Clients")){
-			MainWindow.setOnlineClient((List<String[][]>) data.getData());
+			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setOnlineClient((List<String[][]>) data.getData());
 			System.out.println("List of online clients recieved from server");
 		}else if(data.getType().matches("Technitions")) {
-			MainWindow.setTechnitions((List<String[][]>) data.getData()) ;
+			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setTechnitions((List<String[][]>) data.getData()) ;
 			System.out.println("List of Technitions recieved from server");
 		}
 	}
