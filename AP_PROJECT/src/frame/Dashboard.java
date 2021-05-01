@@ -479,9 +479,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	
 			
 	boolean editTable = false;
-	public void populateTable() { 
-		dashboard.remove(scrollPane);
-		dashboard.revalidate();
+	public void populateTable() {
 		int total = 0, resolved = 0, unResolved = 0;
 		
 		String column[]={"ID","TYPE","MESSAGE","REPRESENTATIVE","ASSIGNED TECHNICIAN","VISIT DATE"};
@@ -489,7 +487,9 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		table = new JTable(tableModel);
 		table.setCellSelectionEnabled(true);
 		table.setGridColor(Color.BLACK);
-		table.getTableHeader().setFont(new Font("arial", Font.PLAIN, 14)); 
+		table.getTableHeader().setFont(new Font("arial", Font.PLAIN, 14));
+		table.getTableHeader().setBackground(Color.BLACK); 
+		table.getTableHeader().setForeground(Color.WHITE); 
 		table.setUpdateSelectionOnSort(true);
 		ListSelectionModel cellSelect = table.getSelectionModel();  
 		cellSelect.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -500,18 +500,16 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		scrollPane.setBounds(7, 110, 680, 400);
 		dashboard.add(scrollPane);
 		dashboard.moveToFront(scrollPane);
-		dashboard.revalidate();
 		
 		for(int row = 0; row < MainWindow.getComplain().size(); row ++) {
-			Object[] objs = { 
-					MainWindow.getComplain().get(row).getId(),
-					MainWindow.getComplain().get(row).getType(),
-					MainWindow.getComplain().get(row).getMessage(),
-					MainWindow.getComplain().get(row).getRepId(),
-					MainWindow.getComplain().get(row).getTecId(),
-					MainWindow.getComplain().get(row).getVisitDate()
-			};
-			tableModel.addRow(objs);
+			tableModel.addRow(new Object[]{  
+				MainWindow.getComplain().get(row).getId(),
+				MainWindow.getComplain().get(row).getType(),
+				MainWindow.getComplain().get(row).getMessage(),
+				MainWindow.getComplain().get(row).getRepId(),
+				MainWindow.getComplain().get(row).getTecId(),
+				MainWindow.getComplain().get(row).getVisitDate()
+			});
 			
 			total ++;
 			if(!MainWindow.getComplain().get(row).getVisitDate().equals(""))
@@ -587,9 +585,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		}
 	}
 	
-	
-	
-	
 	public void initiateChat(Packet03Chat chat) {// function used to bring up the chat window and initiant the connection with selected client/user
 		startChatButton.setText("End Chat");//change the name on the button after it has been clicked
 		startChatButton.setVisible(true);// show chat button
@@ -603,7 +598,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		filterMessage();// the conversation between the current user and the connected user
 	}
 
-
 	public void setComplainCategoryIndex(int index) {
 		this.complainDropdownCategory.setSelectedIndex(index);
 	}
@@ -612,10 +606,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		return dashboard; 
 	}
 	
-	
-	
 	public void setComplainText(String complainText) {
 		this.complainTextField.setText(complainText);
 	}
-
 }
