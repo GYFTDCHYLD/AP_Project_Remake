@@ -24,7 +24,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
-import domain.Complain;
 import image.loadImages;
 import network.Client;
 import packet.Packet9Info;
@@ -46,10 +45,6 @@ public class MainWindow extends JFrame{
 	private static long clientHandlerId;// this id id for the client handler that is handling the connection/transaction to server and client for this instance of window 
 	private static long threadHandlerId;// this id id for the client handler thread that is handling the connection/transaction to server and client for this instance of window 
  
-	
-	
-	
-	
 	
 	public MainWindow(){
 		initializeComponent();
@@ -83,10 +78,49 @@ public class MainWindow extends JFrame{
 		background.setBounds(0, 0,800, 700);
 	}
 	
+	public void setWindowProperties() {
+		this.setJMenuBar(menuBar);
+		this.setSize(750, 700);
+		this.setResizable(false);
+		this.setVisible(true);
+		this.setLocationRelativeTo(null);
+		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+	}
+	
 	public void addMenuItemsToPopup() {
 		popup.add(menuAbout);
 		popup.add(menuOpen);
 		popup.add(menuClose);
+	}
+	
+	
+	public void addComponentsToWindow() {
+		LoginWindow = new LoginWindow();
+		desktopPane.add(LoginWindow); 
+		desktopPane.add(background); 
+		this.add(desktopPane); 
+		
+	}
+
+	public static String hashPasword(String password){
+		try {
+			MessageDigest m;
+			m = MessageDigest.getInstance("SHA256");
+			m.reset();
+			m.update(password.getBytes());
+			byte[] digest = m.digest();
+			BigInteger bigInt = new BigInteger(1,digest);
+			String hashtext = bigInt.toString(16);
+			// Now we need to zero pad it if you actually want the full 62 chars.
+			while(hashtext.length() < 62 ){
+				hashtext = "0"+hashtext;
+			}
+			return hashtext; 
+		
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return password; 
 	}
 	
 	public void addMenuItemsToMenu() {
@@ -94,14 +128,6 @@ public class MainWindow extends JFrame{
 	}
 	
 	public void addMenusToMenuBar() {
-		
-	}
-	
-	public void addComponentsToWindow() {
-		LoginWindow = new LoginWindow();
-		desktopPane.add(LoginWindow); 
-		desktopPane.add(background); 
-		this.add(desktopPane); 
 		
 	}
 	
@@ -138,12 +164,25 @@ public class MainWindow extends JFrame{
 
 			@Override
 			public void windowOpened(WindowEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 
 			@Override
 			public void windowClosing(WindowEvent e) {
+				SystemTray.getSystemTray().remove(trayIcon);
+				Packet9Info Packet = new Packet9Info("");// set the command/info
+				Packet.setAssignment("killThread"); 
+				Packet.setThreadID(threadHandlerId);//set the index of the thread to be killed
+				Packet.writeData(MainWindow.getClientSocket()); 
+			}
+
+			@Override
+			public void windowClosed(WindowEvent e) {
+				System.exit(0);// exit program
+			}
+
+			@Override
+			public void windowIconified(WindowEvent e) {
 				try {
 					SystemTray.getSystemTray().add(trayIcon);
 				} catch (AWTException e1) {
@@ -153,68 +192,22 @@ public class MainWindow extends JFrame{
 			}
 
 			@Override
-			public void windowClosed(WindowEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void windowIconified(WindowEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
 			public void windowDeiconified(WindowEvent e) {
-				// TODO Auto-generated method stub
-				
+					
 			}
 
 			@Override
 			public void windowActivated(WindowEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 
 			@Override
 			public void windowDeactivated(WindowEvent e) {
-				// TODO Auto-generated method stub
-				
+					
 			}
 			
 		}); 
 		
-	}
-	
-	public void setWindowProperties() {
-		this.setJMenuBar(menuBar);
-		this.setSize(750, 700);
-		this.setResizable(false);
-		this.setVisible(true);
-		this.setLocationRelativeTo(null);
-		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-	}
-	
-
-	public static String hashPasword(String password){
-		try {
-			MessageDigest m;
-			m = MessageDigest.getInstance("SHA256");
-			m.reset();
-			m.update(password.getBytes());
-			byte[] digest = m.digest();
-			BigInteger bigInt = new BigInteger(1,digest);
-			String hashtext = bigInt.toString(16);
-			// Now we need to zero pad it if you actually want the full 62 chars.
-			while(hashtext.length() < 62 ){
-				hashtext = "0"+hashtext;
-			}
-			return hashtext; 
-		
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-		return password; 
 	}
 
 	public static JDesktopPane getDesktopPane() {
