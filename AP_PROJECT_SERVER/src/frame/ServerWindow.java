@@ -5,7 +5,10 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -33,7 +36,6 @@ public class ServerWindow extends JFrame implements ActionListener{
 	private static JLabel movingLabel;
 	
 	private JButton buton;
-	private static InetAddress inetAddress;
 	
 	public ServerWindow(){
 		super("Microstar Server");
@@ -99,13 +101,6 @@ public class ServerWindow extends JFrame implements ActionListener{
 		background.setHorizontalAlignment(SwingConstants.TRAILING);
 		background.setBounds(0, 0,500, 400);
 		getServerDash().add(background);
-		
-		try {
-			setInetAddress(InetAddress. getLocalHost());
-		} catch (UnknownHostException e) {
-			
-		}
-		
 	}
 
 	@Override
@@ -154,6 +149,23 @@ public class ServerWindow extends JFrame implements ActionListener{
 			}	
 		}, 0, 5);
 	}
+	
+	
+	public static String Ip(){ 
+		String  address = ""; 
+		try {
+			Socket Socket = new Socket();
+			Socket.connect(new InetSocketAddress("google.com", 80)); 
+			InetAddress ip = Socket.getLocalAddress();
+			address = ip.toString().replaceAll("/", "");
+		}catch(UnknownHostException e) {
+			address = "127.0.0.1";
+			return address;
+		} catch (IOException e) {
+			
+		}
+		return address;
+	}
 
 	
 	public static JDesktopPane getServerDash() {
@@ -186,15 +198,6 @@ public class ServerWindow extends JFrame implements ActionListener{
 
 	public static void setIpAddress(JLabel ipAddress) {
 		IpAddress = ipAddress;
-	}
-
-
-	public static InetAddress getInetAddress() {
-		return inetAddress;
-	}
-
-	public void setInetAddress(InetAddress inetAddress) {
-		this.inetAddress = inetAddress;
 	}
 
 
