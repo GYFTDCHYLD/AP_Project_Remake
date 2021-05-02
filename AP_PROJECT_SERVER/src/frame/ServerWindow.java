@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -25,11 +27,14 @@ public class ServerWindow extends JFrame implements ActionListener{
 	private loadImages loadImages;
 	private static JDesktopPane serverDash;
 	private static JLabel Status;
+	private static JLabel IpAddress;
 	private static JLabel connectedClient;
+	
 	private static JLabel movingLabel;
 	
 	private JButton buton;
-
+	private static InetAddress inetAddress;
+	
 	public ServerWindow(){
 		super("Microstar Server");
 		this.setSize(500, 400);
@@ -55,21 +60,28 @@ public class ServerWindow extends JFrame implements ActionListener{
 		getServerDash().add(StartDate);
 		
 		Status = new JLabel("Status: OFFLINE");
-		getStatus().setBounds(170, 60, 150, 25);
+		getStatus().setBounds(180, 50, 150, 25);
 		getStatus().setForeground(Color.BLACK);
 		getStatus().setFont(new Font("arial", Font.BOLD, 16));
 		getStatus().setVisible(true);
 		getServerDash().add(getStatus());
 		
+		setIpAddress(new JLabel(""));
+		getIpAddress().setBounds(140, 80, 300, 50);
+		getIpAddress().setForeground(Color.BLACK);
+		getIpAddress().setFont(new Font("arial", Font.BOLD, 20));
+		getIpAddress().setVisible(true);
+		getServerDash().add(getIpAddress()); 
+		
 		connectedClient = new JLabel();
-		getConnectedClient().setBounds(120, 100, 300, 50);
+		getConnectedClient().setBounds(140, 120, 300, 50);
 		getConnectedClient().setForeground(Color.BLACK);
 		getConnectedClient().setFont(new Font("arial", Font.BOLD, 20));
 		getConnectedClient().setVisible(true);
 		getServerDash().add(getConnectedClient());
 		
 		setMovingLabel(new JLabel("...."));
-		getMovingLabel().setBounds(40, 100, 100, 150);
+		getMovingLabel().setBounds(40, 130, 100, 150);
 		getMovingLabel().setForeground(Color.BLACK);
 		getMovingLabel().setFont(new Font("arial", Font.TRUETYPE_FONT, 50));
 		getMovingLabel().setVisible(false);
@@ -87,6 +99,12 @@ public class ServerWindow extends JFrame implements ActionListener{
 		background.setHorizontalAlignment(SwingConstants.TRAILING);
 		background.setBounds(0, 0,500, 400);
 		getServerDash().add(background);
+		
+		try {
+			setInetAddress(InetAddress. getLocalHost());
+		} catch (UnknownHostException e) {
+			
+		}
 		
 	}
 
@@ -159,6 +177,24 @@ public class ServerWindow extends JFrame implements ActionListener{
 
 	public static void setMovingLabel(JLabel movingLabel) {
 		ServerWindow.movingLabel = movingLabel;
+	}
+
+
+	public static JLabel getIpAddress() {
+		return IpAddress;
+	}
+
+	public static void setIpAddress(JLabel ipAddress) {
+		IpAddress = ipAddress;
+	}
+
+
+	public static InetAddress getInetAddress() {
+		return inetAddress;
+	}
+
+	public void setInetAddress(InetAddress inetAddress) {
+		this.inetAddress = inetAddress;
 	}
 
 

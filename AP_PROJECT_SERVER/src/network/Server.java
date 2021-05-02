@@ -75,6 +75,7 @@ public class Server{
 		
 		ServerWindow.StartDate.setText("Server has started at "+ date.getTime()); 
 		ServerWindow.getStatus().setText("Status: ONLINE"); 
+		ServerWindow.getIpAddress().setText("Host IP: "+ ServerWindow.getInetAddress(). getHostAddress()); 
 		ServerWindow.getConnectedClient().setText("Connected Client(s): " + onlineThreads.size());
 		ServerWindow.getMovingLabel().setVisible(true);
 
