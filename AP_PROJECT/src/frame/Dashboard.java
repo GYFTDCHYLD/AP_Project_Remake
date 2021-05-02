@@ -504,8 +504,14 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			rowData[row][0] = complains.get(row).getId();
 			rowData[row][1] = complains.get(row).getType();
 			rowData[row][2] = complains.get(row).getMessage();
-			rowData[row][3] = complains.get(row).getRepId();
-			rowData[row][4] = complains.get(row).getTecId();
+			if(complains.get(row).getRepId().matches(user.getUserId()))// if representative is loggedin
+				rowData[row][3] = "ME";
+			else
+				rowData[row][3] = complains.get(row).getRepId();
+			if(complains.get(row).getTecId().matches(user.getUserId()))// if technition is loggedin
+				rowData[row][4] = "ME";
+			else
+				rowData[row][4] = complains.get(row).getTecId();
 			rowData[row][5] = complains.get(row).getVisitDate(); 
 			
 			total ++;
