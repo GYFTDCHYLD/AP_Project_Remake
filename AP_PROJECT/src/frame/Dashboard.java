@@ -536,7 +536,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	@Override
 	public void valueChanged(ListSelectionEvent e) {// use for table selection for assignng complains and setting date for technition
 		 
-		
 		String Data = null;
 		int[] row = table.getSelectedRows();
 		int[] columns = table.getSelectedColumns();
@@ -544,7 +543,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			for (int j = 0; j < columns.length; j++) {
 				ComplainID = String.valueOf(table.getValueAt(row[i], 0));
 				Data = (String) table.getValueAt(row[i], columns[j]);
-
 			}
 		}
 		if(user instanceof Employee) {
@@ -553,7 +551,8 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 				technitionDropdownList.setVisible(true);
 			}else {
 				setVisitDateButton.setVisible(true);
-				setdateTextField.setVisible(true); 
+				if(setVisitDateButton.getText().matches("Finalize Date"))
+					setdateTextField.setVisible(true); 
 			}
 		}
 	}
