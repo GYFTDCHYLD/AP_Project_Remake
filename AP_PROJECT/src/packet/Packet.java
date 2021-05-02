@@ -5,11 +5,7 @@ import java.io.Serializable;
 import network.Client;
 
 public abstract class Packet implements Serializable{
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L; 
- 
 
 	public static enum PacketTypes{
 		INVALID(-1), REGISTER(00), LOGIN(01),LOGOUT(02), CHAT(03), COMPLAIN(04), ASSIGNCOMPLAIN(05), COMPLAINSCHEDULE(06), USERS(07), PASSWORDRESET(8), INFO(9), ERROR(10), LIST(11);

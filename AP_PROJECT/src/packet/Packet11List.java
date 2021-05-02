@@ -5,10 +5,6 @@ import java.util.List;
 import network.Client;
 
 public class Packet11List extends Packet{
-	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
 	private List<?> list;

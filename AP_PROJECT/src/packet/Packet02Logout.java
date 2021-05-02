@@ -3,9 +3,6 @@ package packet;
 import network.Client;
 
 public class Packet02Logout extends Packet {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
 	private long HandlerID;

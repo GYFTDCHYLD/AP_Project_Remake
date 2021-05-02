@@ -41,24 +41,24 @@ public class Server{
 			clientHandlerId = new ArrayList<>(); 
 			threadHandlerId = new ArrayList<>(); 
 			
-			User User = new Employee("S122", "Ms", "Shericka", "Jones", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
+			User User = new Employee("S122", "Ms", "Shericka", "Jones", 876938746, "Jones@yahoo.com", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
 			userDatabase.add(User);
 			
-			User = new Employee("D111", "Ms", "Dahlia", "Holness", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
+			User = new Employee("D111", "Ms", "Dahlia", "Holness", 876985764, "Holness@yahoo.com", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
 			userDatabase.add(User);
 			
-			User = new Employee("D112", "Ms", "Danielle", "Dixon", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
+			User = new Employee("D112", "Ms", "Danielle", "Dixon", 876985764, "Dixon@yahoo.com",  "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
 			userDatabase.add(User);
 			
-			User = new Customer("A121", "Ms", "Akielia", "Willbrugh", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"); 
-			billigAccountDatabase.add(new BillingAccount("A121","Due", 15000));
+			User = new Customer("A121", "Ms", "Akielia", "Willbrugh", 876985764, "Willbrugh@yahoo.com", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", new BillingAccount("A121","Due", 15000)); 
+			billigAccountDatabase.add(((Customer) User).getBillingAccount());
 			userDatabase.add(User);
 			
-			User = new Employee("C123", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Technitian"); 
+			User = new Employee("C123", "Mr", "Craig", "Reid", 876985764, "Reid@yahoo.com",  "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Technitian"); 
 			userDatabase.add(User);
 			
-			User = new Customer("C124", "Mr", "Craig", "Reid", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"); 
-			billigAccountDatabase.add(new BillingAccount("C124","Due", 15000));
+			User = new Customer("C124", "Mr", "Craig", "Reid", 876985764, "Reid@yahoo.com", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", new BillingAccount("A121","Due", 15000)); 
+			billigAccountDatabase.add(((Customer) User).getBillingAccount());
 			userDatabase.add(User);
 			
 			this.serverSocket = new ServerSocket(Port);
@@ -71,7 +71,7 @@ public class Server{
 		
 		JOptionPane.showInternalMessageDialog(ServerWindow.getServerDash(),"Server has started at "+ date.getTime(), "Server Online",JOptionPane.INFORMATION_MESSAGE);// display the message sent from server
 		
-		ServerWindow.StartDate.setText("Server has started at "+ date.getTime()); 
+		ServerWindow.getStartDate().setText("Server has started at "+ date.getTime()); 
 		ServerWindow.getStatus().setText("Status: ONLINE"); 
 		ServerWindow.getIpAddress().setText("Host IP: " + ServerWindow.Ip()); 
 		ServerWindow.getConnectedClient().setText("Connected Client(s): " + onlineThreads.size());
@@ -234,23 +234,23 @@ public class Server{
 		
 		private void RegistrationHandler(Packet00Register data) { // handle registration
 			String id = (data.getData().getFirstName()).substring(0,1) + "34" + userDatabase.size();//create user Id Using Fist letter of first name plus 34 plus the amount of user;
-			User User = new Customer(id,data.getData().getNameTitle(), data.getData().getFirstName(), data.getData().getLastName(), data.getData().getPassword());
-			userDatabase.add(User);//add user to database
+			User newUser = data.getData();  
+			newUser.setUserId(id); // set the user id to the new id
+			userDatabase.add(newUser);//add user to database
 			billigAccountDatabase.add(new BillingAccount(id,"unpaid", 15000));// add account
 			Packet infoPacket = new Packet9Info("Sussessfully Registered");
-			((Packet00Register)data).getData().setPassword(id);// replace the pasword in the object with the New User ID 
-			sendData(data);// send the the object to the user to extract the User ID
+			Packet00Register registered = new  Packet00Register(newUser);// prepare the object with the New User ID to be sent to the user for login
+			sendData(registered);// send the the object to the user to extract the User ID
 			sendData(infoPacket);// send the info object/packet to the user
-		}
+		} 
 		
 
 		private void LoginHandler(Packet01Login data) { // handle login
-			Packet07User loginData = new Packet07User(new User());
+			Packet01Login loginData;
 			boolean found = false;
-			
 			for (User user : userDatabase) {//check the database for the user
 				if(user.getUserId().matches(data.getUserId()) && user.getPassword().matches(data.getPassword())) {
-					loginData = new Packet07User(user); 
+					loginData = new Packet01Login(user); 
 					for(ClientHandler client : onlineClient) {// loop through the client connected to the server
 						if(client.UserInfo[0][0].matches(loginData.getData().getUserId())) { // check first row first column where user id is stored
 							Packet infoPacket = new Packet9Info("User Already Logedin");
@@ -275,7 +275,7 @@ public class Server{
 					UserInfo[0][1] = loginData.getData().getFirstName();// add the user firstname to the handler for chat purpose
 					userType = UserType;// usertype to help filter complain list when sending to all clients
 					
-					sendData(loginData);// send the data for the user dashboard
+					sendData(loginData);// send the login data for the user dashboard
 					
 					sendComplainListToAllClients(Complains());// send the packet to the user
 					

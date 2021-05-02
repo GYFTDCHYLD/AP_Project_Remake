@@ -1,20 +1,17 @@
 package packet;
 
-import domain.Register;
+import domain.User;
 import network.Server;
 import network.Server.ClientHandler;
 
 public class Packet00Register extends Packet{
-	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-	private Register Register;
 	
-	public Packet00Register(Register Register) {
+	private User User; 
+	
+	public Packet00Register(User User) {
 		super(00);
-		this.Register = Register; 
+		this.User = User; 
 	}
 
 	public void writeData(ClientHandler clientHandler) {  
@@ -22,18 +19,12 @@ public class Packet00Register extends Packet{
 	}
 
 	@Override
-	public Register getData() { 
-		return this.Register;
-	}
-
-	public Register getRegister() {
-		return Register;
+	public User getData() { 
+		return this.User;
 	}
 
 	@Override
 	public void writeData(Server Server) {
 		// TODO Auto-generated method stub
-		
 	}	
-
 }

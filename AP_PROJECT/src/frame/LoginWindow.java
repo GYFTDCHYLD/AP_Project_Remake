@@ -16,11 +16,13 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
+import domain.User;
 import image.loadImages;
 import packet.Packet01Login;
 
 
 public class LoginWindow extends JInternalFrame implements ActionListener{
+	
 	private JTextField loginIdField;
 	private JLabel loginIdLabel;
 	
@@ -110,9 +112,12 @@ public class LoginWindow extends JInternalFrame implements ActionListener{
 			else if(passwordField.getText().equals("")) 
 				JOptionPane.showMessageDialog(null, "Enter your Password", "",JOptionPane.ERROR_MESSAGE);
 			else {
-				Packet01Login Packet = new Packet01Login(loginIdField.getText(), MainWindow.hashPasword(passwordField.getText()));
-				Packet.setHandlerID(MainWindow.getClientHandlerId()); 
-				Packet.writeData(MainWindow.getClientSocket());  
+				User user = new User();// create a user object
+				user.setUserId(loginIdField.getText()); // set the user id
+				user.setPassword(MainWindow.hashPasword(passwordField.getText()));// set the password
+				Packet01Login Packet = new Packet01Login(user);// set the create the packet/object to be sent
+				Packet.setHandlerID(MainWindow.getClientHandlerId());// set the client handler id for the packet in order for the server to set the data for the right handler
+				Packet.writeData(MainWindow.getClientSocket()); // send the data to the server 
 			}
 			
 		} 
@@ -120,6 +125,5 @@ public class LoginWindow extends JInternalFrame implements ActionListener{
 	public JTextField getLoginIdField() {
 		return loginIdField;
 	}
-	
 	
 }

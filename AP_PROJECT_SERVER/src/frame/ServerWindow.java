@@ -25,8 +25,9 @@ import image.loadImages;
 import network.*;
 
 public class ServerWindow extends JFrame implements ActionListener{
-	public static JLabel background;
-	public static JLabel StartDate;
+	private static int port;
+	private static JLabel background;
+	private static JLabel StartDate;
 	private loadImages loadImages;
 	private static JDesktopPane serverDash;
 	private static JLabel Status;
@@ -37,13 +38,15 @@ public class ServerWindow extends JFrame implements ActionListener{
 	
 	private JButton buton;
 	
-	public ServerWindow(){
+	public ServerWindow(int port){
 		super("Microstar Server");
 		this.setSize(500, 400);
 		this.setResizable(false);
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setVisible(true);
+		
+		this.port = port;
 		
 		loadImages = new loadImages();
 		loadImages.init();
@@ -55,11 +58,11 @@ public class ServerWindow extends JFrame implements ActionListener{
 		add(getServerDash());
 		
 		StartDate = new JLabel("");
-		StartDate.setBounds(50, 10, 500, 25);
-		StartDate.setForeground(Color.BLUE);
-		StartDate.setFont(new Font("arial", Font.BOLD, 16));
-		StartDate.setVisible(true);
-		getServerDash().add(StartDate);
+		getStartDate().setBounds(50, 10, 500, 25);
+		getStartDate().setForeground(Color.BLUE);
+		getStartDate().setFont(new Font("arial", Font.BOLD, 16));
+		getStartDate().setVisible(true);
+		getServerDash().add(getStartDate());
 		
 		Status = new JLabel("Status: OFFLINE");
 		getStatus().setBounds(180, 50, 150, 25);
@@ -68,7 +71,7 @@ public class ServerWindow extends JFrame implements ActionListener{
 		getStatus().setVisible(true);
 		getServerDash().add(getStatus());
 		
-		setIpAddress(new JLabel(""));
+		IpAddress = new JLabel("");
 		getIpAddress().setBounds(140, 80, 300, 50);
 		getIpAddress().setForeground(Color.BLACK);
 		getIpAddress().setFont(new Font("arial", Font.BOLD, 20));
@@ -82,7 +85,7 @@ public class ServerWindow extends JFrame implements ActionListener{
 		getConnectedClient().setVisible(true);
 		getServerDash().add(getConnectedClient());
 		
-		setMovingLabel(new JLabel("...."));
+		movingLabel = new JLabel("....");
 		getMovingLabel().setBounds(40, 130, 100, 150);
 		getMovingLabel().setForeground(Color.BLACK);
 		getMovingLabel().setFont(new Font("arial", Font.TRUETYPE_FONT, 50));
@@ -187,23 +190,19 @@ public class ServerWindow extends JFrame implements ActionListener{
 		return movingLabel;
 	}
 
-	public static void setMovingLabel(JLabel movingLabel) {
-		ServerWindow.movingLabel = movingLabel;
-	}
-
 
 	public static JLabel getIpAddress() {
 		return IpAddress;
 	}
 
-	public static void setIpAddress(JLabel ipAddress) {
-		IpAddress = ipAddress;
-	}
 
+	public static JLabel getStartDate() {
+		return StartDate;
+	}
 
 	public static Thread ServerThread = new Thread() { 
 		public void run() {
-			new Server(8000);// create the server with the port number
+			new Server(port);// create the server with the port number
 		}		
 	};
 	

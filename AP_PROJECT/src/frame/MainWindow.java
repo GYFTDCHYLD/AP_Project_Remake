@@ -29,6 +29,7 @@ import network.Client;
 import packet.Packet9Info;
 
 public class MainWindow extends JFrame{
+	
 	private static JDesktopPane desktopPane;
 
 	private JMenuBar menuBar;
@@ -46,7 +47,7 @@ public class MainWindow extends JFrame{
 	private static long threadHandlerId;// this id id for the client handler thread that is handling the connection/transaction to server and client for this instance of window 
  
 	
-	public MainWindow(){
+	public MainWindow(String hostAddress, int portNumber){
 		initializeComponent();
 		addMenuItemsToPopup();
 		addMenuItemsToMenu();
@@ -54,7 +55,7 @@ public class MainWindow extends JFrame{
 		addComponentsToWindow();
 		registerListeners();
 		setWindowProperties();
-		ClientSocket = new Client(); 
+		ClientSocket = new Client(hostAddress, portNumber); 
 		ClientSocket.run(); 
 	}
 

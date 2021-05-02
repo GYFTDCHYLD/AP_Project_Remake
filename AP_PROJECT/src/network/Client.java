@@ -3,7 +3,6 @@ package network;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.List;
 
@@ -16,20 +15,18 @@ import frame.*;
 
 
 public class Client implements Runnable{
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
-	private int PORTNUMBER = 8000;
+	private String hostAddress;
+	private int portNumber;
 	private Socket connectionSocket; 
 	private  ObjectOutputStream outputStream;
 	private ObjectInputStream inputStream;
 	
 	
-
-	
-	public Client() {
+	public Client(String hostAddress, int portNumber) {
+		this.hostAddress = hostAddress;
+		this.portNumber = portNumber;
 		this.createConnection();
 		this.configureStreams();
 		
@@ -38,7 +35,7 @@ public class Client implements Runnable{
 
 	private void createConnection() {
 		try {
-			connectionSocket = new Socket("127.0.0.1" /*InetAddress.getLocalHost()*/, PORTNUMBER);
+			connectionSocket = new Socket(hostAddress, portNumber);
 		}
 		catch(IOException e) {
 			parsePacket(new Packet10Error("Not Connected to server:  " + e.getMessage()));
@@ -113,14 +110,14 @@ public class Client implements Runnable{
 				case REGISTER:
 								RegisterHandler((Packet00Register) data);	
 					break;
+				case LOGIN: 
+								LoginDataHandler((Packet01Login) data);  			
+					break;
 				case LOGOUT:
 								LogoutHandler((Packet02Logout) data);	 							 
 					break;
 				case CHAT: 
 								ChatHandler((Packet03Chat) data);			
-					break;
-				case USERS: 
-								UserDataHandler((Packet07User) data);			
 					break;
 				case INFO:
 								InfoHandler((Packet9Info) data); 	  
@@ -177,13 +174,13 @@ public class Client implements Runnable{
 	
 	private void RegisterHandler(Packet00Register data) {
 		LoginWindow LoginWindow = new LoginWindow();
-		LoginWindow.getLoginIdField().setText(data.getData().getPassword());// extract the user Id that the server placed in the password field 
+		LoginWindow.getLoginIdField().setText(data.getData().getUserId());// extract the user Id that the server placed in the password field 
 		MainWindow.getDesktopPane().add(LoginWindow);
 		MainWindow.getDesktopPane().moveToFront(LoginWindow); //move the login window to the front of all component, without doing this, it would ended up behind the background image the was added b4 it  
 		MainWindow.getDesktopPane().revalidate();
 	}
 	
-	private void UserDataHandler(Packet07User data) {
+	private void LoginDataHandler(Packet01Login data) {
 		MainWindow.getDesktopPane().removeAll();// remove  login window
 		Dashboard myDashboard = new Dashboard(data.getData());
 		MainWindow.getDesktopPane().add(myDashboard);
@@ -221,19 +218,6 @@ public class Client implements Runnable{
 			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setTechnitions((List<String[][]>) data.getData()) ;
 			System.out.println("List of Technitions recieved from server");
 		}
-	}
-
-
-	public int getPORTNUMBER() { 
-		return PORTNUMBER;
-	}
-
-	public void setPORTNUMBER(int pORTNUMBER) {
-		PORTNUMBER = pORTNUMBER;
-	}
-
-	public static long getSerialversionuid() {
-		return serialVersionUID;
 	}
 	
 }

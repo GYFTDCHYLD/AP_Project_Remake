@@ -39,6 +39,7 @@ import domain.User;
 
 
 public class Dashboard extends JInternalFrame implements ActionListener, ListSelectionListener{
+	
 	private User user;
 	private JDesktopPane dashboard;
 	
@@ -146,6 +147,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		complainCounter.setBounds(420, 3, 230, 55); 
 		complainCounter.setBackground(Color.BLACK);
 		complainCounter.setForeground(Color.WHITE);
+		complainCounter.setEditable(false);
 		complainCounter.setBorder(new LineBorder(java.awt.Color.WHITE, 1));
 		complainCounter.setFont(new Font("arial", Font.ROMAN_BASELINE, 14)); 
 		complainCounter.setLineWrap(true);

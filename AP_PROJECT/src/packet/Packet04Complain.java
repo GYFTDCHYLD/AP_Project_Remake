@@ -4,10 +4,6 @@ import network.Client;
 import domain.Complain;
 
 public class Packet04Complain extends Packet{
-	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
 	private Complain Complain; 

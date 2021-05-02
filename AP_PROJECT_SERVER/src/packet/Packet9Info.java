@@ -4,10 +4,6 @@ import network.Server;
 import network.Server.ClientHandler;
 
 public class Packet9Info extends Packet{
-	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
 	private long HandlerID;

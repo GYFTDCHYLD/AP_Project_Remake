@@ -16,14 +16,16 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
-import domain.Register;
+import domain.BillingAccount;
+import domain.Customer;
+import domain.User;
 import image.loadImages;
 import packet.Packet00Register;
 
 public class SignUpWindow extends JInternalFrame implements ActionListener{
 	
 	private String[] choices;
-	private JComboBox<String> dropdown;
+	private JComboBox<String> nameTitleDropdown;
 	private JLabel nameTitle;
 	
 	private JTextField firstName;
@@ -53,8 +55,8 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 	public void intializeComponent() {
 		
 		choices = new String[]{"", "Mr", "Ms", "Mrs"};
-		dropdown = new JComboBox<String>(choices);
-		dropdown.setBounds(10, 20, 180, 25);
+		nameTitleDropdown = new JComboBox<String>(choices);
+		nameTitleDropdown.setBounds(10, 20, 180, 25);
 		
 		nameTitle = new JLabel("Name Title");
 		nameTitle.setBounds(200, 20, 150, 25);
@@ -136,7 +138,7 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 		
 	}
 	public void addComponentsToWindow(){
-		getContentPane().add(dropdown);
+		getContentPane().add(nameTitleDropdown);
 		getContentPane().add(nameTitle);
 		
 		getContentPane().add(firstName);
@@ -181,7 +183,7 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		
 		if(e.getActionCommand().equals("Submit")) {
-			if(dropdown.getSelectedItem().equals("")) 
+			if(nameTitleDropdown.getSelectedItem().equals("")) 
 				JOptionPane.showMessageDialog(null, "Select Name Title", "",JOptionPane.ERROR_MESSAGE);
 			else if(firstName.getText().equals("")) 
 				JOptionPane.showMessageDialog(null, "Enter your First Name", "",JOptionPane.ERROR_MESSAGE);
@@ -198,7 +200,16 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 			else if(!passwordField.getText().equals(passwordConfirmField.getText())) 
 				JOptionPane.showMessageDialog(null, "Passwords Did Not Match!", "",JOptionPane.ERROR_MESSAGE);
 			else {
-				Register Register = new Register(dropdown.getSelectedItem().toString(),firstName.getText(),lastName.getText(),Long.valueOf(phoneNumber.getText()), email.getText(), MainWindow.hashPasword(passwordField.getText())); 
+				User Register = new Customer(
+						"userId"
+						,nameTitleDropdown.getSelectedItem().toString()
+						,firstName.getText()
+						,lastName.getText()
+						,Long.valueOf(phoneNumber.getText())
+						, email.getText()
+						, MainWindow.hashPasword(passwordField.getText())
+						, new BillingAccount("A121","Due", 15000)
+				); 
 				Packet00Register Packet = new Packet00Register(Register);
 				Packet.writeData(MainWindow.getClientSocket());
 				this.dispose();

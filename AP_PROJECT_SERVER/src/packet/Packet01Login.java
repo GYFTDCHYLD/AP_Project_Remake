@@ -1,43 +1,37 @@
 package packet;
 
+import domain.User;
 import network.Server;
 import network.Server.ClientHandler;
 
 public class Packet01Login extends Packet{
-	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
 	private long HandlerID;
-	private String userId;
-	private String password; 
+	private User User; 
 	
-	public Packet01Login(String userId, String password) {
+	public Packet01Login(User User) {
 		super(01);
-		this.userId = userId;
-		this.password = password;
+		this.User = User;
 	}
 
 	public void writeData(ClientHandler clientHandler) {  
 		clientHandler.sendData(this);	
 	}
 
-
 	@Override
-	public Object getData() {
-		return this;
+	public User getData() {
+		return this.User;
 	}
 
 	public String getUserId() {
-		return userId;
+		return User.getUserId();
 	}
 
 	public String getPassword() {
-		return password;
+		return User.getPassword();
 	}
-
+	
 	public long getHandlerID() {
 		return HandlerID;
 	}
@@ -46,10 +40,10 @@ public class Packet01Login extends Packet{
 	public void setHandlerID(long handlerID) {
 		HandlerID = handlerID;
 	}
+	
 	@Override
 	public void writeData(Server Server) {
 		// TODO Auto-generated method stub
 		
 	}
-
 }

@@ -9,7 +9,7 @@ public class MicroStarServerDriver {
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				new ServerWindow();
+				new ServerWindow(8000);// port number
 			}
 		});
 		

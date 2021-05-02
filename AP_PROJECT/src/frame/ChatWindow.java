@@ -18,6 +18,7 @@ import packet.Packet03Chat;
 
 public class ChatWindow extends JInternalFrame implements ActionListener{
 	private static final long serialVersionUID = 1L;
+	
 	private static JTextArea ChatArea ; // where the chat is displayed
 	private static JScrollPane ScrollPlane; 
 	private static JTextField ChatBox;// where you type your message
