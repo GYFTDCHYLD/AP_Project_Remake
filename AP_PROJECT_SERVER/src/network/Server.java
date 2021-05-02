@@ -309,6 +309,7 @@ public class Server{
 		} 
 		
 		private void ComplainHandler(Packet04Complain data) {
+			data.getData().makeComplain();// Hibernate method
 			data.getData().setId(complainDatabase.size()+1);
 			complainDatabase.add(data.getData());//add the complain to the database
 			Packet9Info infoPacket = new Packet9Info("Complain Recieved");// create a message/packer/object
@@ -321,6 +322,7 @@ public class Server{
 				if(complain.getId() == complainId) {
 					complain.setRepId(repId);
 					complain.setTecId(techId);
+					complain.assignComplain();// Hibernate method
 					break;
 				}
 			}
@@ -333,6 +335,7 @@ public class Server{
 			for(Complain complain: complainDatabase) {
 				if(complain.getId() == complainId) { 
 					complain.setVisitDate(Date);
+					complain.setDate();// Hibernate method
 					break;
 				}
 			}
