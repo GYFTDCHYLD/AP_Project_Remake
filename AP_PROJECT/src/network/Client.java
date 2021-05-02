@@ -23,8 +23,8 @@ public class Client implements Runnable{
 	
 	private int PORTNUMBER = 8000;
 	private Socket connectionSocket; 
-	private  ObjectOutputStream objOs;
-	private ObjectInputStream objIs;
+	private  ObjectOutputStream outputStream;
+	private ObjectInputStream inputStream;
 	
 	
 
@@ -38,7 +38,7 @@ public class Client implements Runnable{
 
 	private void createConnection() {
 		try {
-			connectionSocket = new Socket("192.168.86.1" /*InetAddress.getLocalHost()*/, PORTNUMBER);
+			connectionSocket = new Socket("127.0.0.1" /*InetAddress.getLocalHost()*/, PORTNUMBER);
 		}
 		catch(IOException e) {
 			parsePacket(new Packet10Error("Not Connected to server:  " + e.getMessage()));
@@ -47,8 +47,8 @@ public class Client implements Runnable{
 	
 	private void configureStreams() {
 		try {
-			objIs = new ObjectInputStream(connectionSocket.getInputStream());
-			objOs = new ObjectOutputStream(connectionSocket.getOutputStream());
+			inputStream = new ObjectInputStream(connectionSocket.getInputStream());
+			outputStream = new ObjectOutputStream(connectionSocket.getOutputStream());
 		}
 		catch(IOException e) {
 			parsePacket(new Packet10Error("Not Connected to server:  " + e.getMessage()));
@@ -60,8 +60,8 @@ public class Client implements Runnable{
 	
 	public void closeConnection() {
 		try {
-			objOs.close();
-			objIs.close();
+			outputStream.close();
+			inputStream.close();
 			connectionSocket.close();
 		}
 		catch(IOException e) {
@@ -72,8 +72,8 @@ public class Client implements Runnable{
 	
 	public void sendData(Packet data) { 
 		try {
-			objOs.writeObject(data);
-			objOs.flush();
+			outputStream.writeObject(data);
+			outputStream.flush();
 		} catch (IOException e) {
 			System.out.println(" error sending data to server " + e.getMessage());
 		}catch(NullPointerException e) {
@@ -84,7 +84,7 @@ public class Client implements Runnable{
 	public Packet readData() { 
 		Object data = new Object();  
 		try {
-			data = (Packet) objIs.readObject();
+			data = (Packet) inputStream.readObject();
 		} catch (IOException e) {
 			System.out.println("error recieving data from server " + e.getMessage());
 		} catch (ClassNotFoundException e) {
@@ -205,6 +205,7 @@ public class Client implements Runnable{
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	private void ListHandler(Packet11List data) {
 		if(data.getData().get(0) instanceof Complain) {// check if its a list of complains being sent over 
 			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setComplains((List<Complain>)data.getData());

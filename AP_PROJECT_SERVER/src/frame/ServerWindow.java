@@ -95,7 +95,7 @@ public class ServerWindow extends JFrame implements ActionListener{
 		buton.setVisible(true);
 		getServerDash().add(buton);
 		
-		background = new JLabel(new ImageIcon(loadImages.CustomerDashboardBackground));
+		background = new JLabel(new ImageIcon(loadImages.ServerWindowBackground)); 
 		background.setHorizontalAlignment(SwingConstants.TRAILING);
 		background.setBounds(0, 0,500, 400);
 		getServerDash().add(background);

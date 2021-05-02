@@ -122,10 +122,10 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		
 		displayComplainTable = false;
 		
-		messages = new ArrayList<Packet03Chat>();// the will contain all chat that was recieve since being online
-		complains = new ArrayList<Complain>(); 
-		onlineClient = new ArrayList<String[][]>();
-		technitions = new ArrayList<String[][]>();
+		messages = new ArrayList<>();// the will contain all chat that was recieve since being online
+		complains = new ArrayList<>(); 
+		onlineClient = new ArrayList<>();
+		technitions = new ArrayList<>();
 		profileImage = new JLabel();
 		profileImage.setHorizontalAlignment(SwingConstants.CENTER);
 		profileImage.setBounds(40, 10,50, 50);

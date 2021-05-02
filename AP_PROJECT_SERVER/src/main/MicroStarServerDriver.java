@@ -1,10 +1,10 @@
-package driver;
+package main;
 
 import java.awt.EventQueue;
 
 import frame.ServerWindow;
 
-public class Driver {
+public class MicroStarServerDriver {
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {

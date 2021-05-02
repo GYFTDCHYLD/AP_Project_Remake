@@ -23,11 +23,10 @@ public class Server{
 	private Socket connectionSocket;
 	private Calendar date; 
 	private List<User> userDatabase;  
-	private List<Complain> complainDatabase; 
 	private List<BillingAccount> billigAccountDatabase;   
-	private static List<ClientHandler> onlineClient; // used for live chat
-	private static List<Long> clientHandlerId;
-	private static List<Long> threadHandlerId;
+	private static List<ClientHandler> onlineClient; // used for live chat 
+	private List<Long> clientHandlerId;
+	private List<Long> threadHandlerId;
 	private List<Thread> onlineThreads;// used to logout/ disconnect user/ kill client thread
 
 	
@@ -35,13 +34,12 @@ public class Server{
 	public Server(int Port) {
 		
 		try {
-			userDatabase = new ArrayList<User>();  
-			complainDatabase = new ArrayList<Complain>();
-			billigAccountDatabase = new ArrayList<BillingAccount>();
-			onlineClient = new ArrayList<ClientHandler>();
-			onlineThreads = new ArrayList<Thread>();
-			clientHandlerId = new ArrayList<Long>(); 
-			threadHandlerId = new ArrayList<Long>(); 
+			userDatabase = new ArrayList<>();  
+			billigAccountDatabase = new ArrayList<>();
+			onlineClient = new ArrayList<>();
+			onlineThreads = new ArrayList<>();
+			clientHandlerId = new ArrayList<>(); 
+			threadHandlerId = new ArrayList<>(); 
 			
 			User User = new Employee("S122", "Ms", "Shericka", "Jones", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
 			userDatabase.add(User);
@@ -117,16 +115,16 @@ public class Server{
 	public class ClientHandler extends Thread{ 
 
 		private Socket clientHandlerSocket;
-		private ObjectOutputStream objOs;
-		private ObjectInputStream objIs;
+		private ObjectOutputStream outputStream; 
+		private ObjectInputStream inputStream; 
 		private String UserInfo[][] = {{"",""}}; // user id and firstname 
 		private String userType = "";// used to help filter complain list
 		
 		private ClientHandler (Socket socket) {
 			this.clientHandlerSocket = socket;
 			try {
-				this.objOs = new ObjectOutputStream(clientHandlerSocket.getOutputStream());
-				this.objIs = new ObjectInputStream(clientHandlerSocket.getInputStream());
+				this.outputStream = new ObjectOutputStream(clientHandlerSocket.getOutputStream());
+				this.inputStream = new ObjectInputStream(clientHandlerSocket.getInputStream());
 			}
 			catch(Exception e) {
 				System.err.println("error " + e.getMessage());
@@ -137,8 +135,8 @@ public class Server{
 		
 		public void sendData(Packet data) { 
 			try {
-				objOs.writeObject(data);
-				objOs.flush();
+				outputStream.writeObject(data); 
+				outputStream.flush();
 			} catch (IOException e) {
 				System.out.println("error sending data to client " + e.getMessage());
 			}catch(NullPointerException e) {
@@ -149,7 +147,7 @@ public class Server{
 		private Packet readData() { 
 			Object data = new Object(); 
 			try {
-				data = objIs.readObject();
+				data = inputStream.readObject(); 
 			} catch (IOException e) {
 				System.out.println("error recieving data from client " + e.getMessage());
 			}catch (ClassNotFoundException e) {
@@ -310,35 +308,29 @@ public class Server{
 		
 		private void ComplainHandler(Packet04Complain data) {
 			data.getData().makeComplain();// Hibernate method
-			data.getData().setId(complainDatabase.size()+1);
-			complainDatabase.add(data.getData());//add the complain to the database
 			Packet9Info infoPacket = new Packet9Info("Complain Recieved");// create a message/packer/object
 			sendData(infoPacket);// send the info object/packet/message to the user
 			sendComplainListToAllClients(Complains());// send the packet to the user
 		}
 		
 		private void  assignComplain(int complainId, String repId, String techId) {// use for rep to assign complain to technition
-			for(Complain complain: complainDatabase) {
-				if(complain.getId() == complainId) {
-					complain.setRepId(repId);
-					complain.setTecId(techId);
-					complain.assignComplain();// Hibernate method
-					break;
-				}
-			}
+			Complain complain = new Complain(); 
+			complain.setId(complainId);
+			complain.setRepId(repId);
+			complain.setTecId(techId);
+			complain.assignComplain();// Hibernate method
+			
 			sendComplainListToAllClients(Complains());// send the packet to the user
 			Packet9Info infoPacket = new Packet9Info("Complain Assigned");// prepare message 
 			sendData(infoPacket); // send info to client
 		}
 		
 		private void  setVisitDaTe(int complainId, String Date) {// use for rep to assign complain to technition
-			for(Complain complain: complainDatabase) {
-				if(complain.getId() == complainId) { 
-					complain.setVisitDate(Date);
-					complain.setDate();// Hibernate method
-					break;
-				}
-			}
+			Complain complain = new Complain(); 
+			complain.setId(complainId);
+			complain.setVisitDate(Date);
+			complain.setDate();// Hibernate method
+			
 			sendComplainListToAllClients(Complains());// send the packet to the user
 			Packet9Info infoPacket = new Packet9Info("Date Set");// prepare message 
 			sendData(infoPacket); // send info to client
@@ -346,16 +338,13 @@ public class Server{
 		
 		
 		private Packet11List Complains(){// get complain from database and store it in a list
-			List<Complain> list = new ArrayList<Complain>();
-			for (Complain complain : complainDatabase) {// loop through the list of complain from the database
-				list.add(  complain);
-			}
-			return new Packet11List(list);
+			Complain complain = new Complain();
+			return new Packet11List(complain.readAll());// Hibernate method
 		}
 		
 		
 		private List<String[][]> onlineClient(){// a list of active client to send to server for chat
-			List<String[][]>  list = new ArrayList<String[][]>();
+			List<String[][]>  list = new ArrayList<>();
 			for (ClientHandler client : onlineClient) {  
 				if(!client.UserInfo[0][0].matches(""))
 					list.add(client.UserInfo);
@@ -365,7 +354,7 @@ public class Server{
 		}
 		
 		private List<String[][]> technitionList(){// a list of technition to be sent to rep in order to assign complain(s)
-			List<String[][]>  list = new ArrayList<String[][]>();
+			List<String[][]>  list = new ArrayList<>();
 			String techInfo[][] = new String[1][2];
 			for (User user : userDatabase) { 
 				if(user instanceof Employee) {
@@ -463,7 +452,7 @@ public class Server{
 	}
 	
 	private Packet11List myComplains(Packet11List Packet11List,  String userId, String userType){// filter the complain list
-		List<Complain> list = new ArrayList<Complain>();//create an arraylist to store the complains to be sent back to the user
+		List<Complain> list = new ArrayList<>();//create an arraylist to store the complains to be sent back to the user
 		for (Complain complain : (List<Complain>)Packet11List.getData()) {// loop through the list of complain that was pass through the perameter
 			if (userType.equals("Customer")) {
 				if (complain.getcustId().equals(userId)) {// check if the user id match the user id in the complain list
