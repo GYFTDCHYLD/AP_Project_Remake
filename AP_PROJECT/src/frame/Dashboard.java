@@ -424,7 +424,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										break;
 			case "Set visit date":		
 										setVisitDateButton.setText("Finalize Date");
-										setdateTextField.setVisible(true);
 										displayComplainTable = true;
 										editTable = true;
 										populateTable();
@@ -442,6 +441,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 											assign.writeData(MainWindow.getClientSocket());  // send info to client
 											setVisitDateButton.setText("Set visit date"); 
 											setdateTextField.setText("");
+											setdateTextField.setVisible(false);
 										}
 										break;
 			case "View Account":

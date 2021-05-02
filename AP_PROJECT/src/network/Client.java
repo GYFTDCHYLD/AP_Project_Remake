@@ -38,7 +38,7 @@ public class Client implements Runnable{
 
 	private void createConnection() {
 		try {
-			connectionSocket = new Socket(InetAddress.getLocalHost(), PORTNUMBER);
+			connectionSocket = new Socket("127.0.0.1" /*InetAddress.getLocalHost()*/, PORTNUMBER);
 		}
 		catch(IOException e) {
 			parsePacket(new Packet10Error("Not Connected to server:  " + e.getMessage()));
