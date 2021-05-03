@@ -19,6 +19,15 @@ public class Complain implements Serializable{
 	}
 
 
+	public Complain(int id, String custId, String type, String message) {
+		super();
+		this.id = id;
+		this.custId = custId;
+		this.type = type;
+		this.message = message;
+	}
+	
+
 	public Complain(int id, String custId, String type, String message, String repId, String techId, String visitDate) {
 		super();
 		this.id = id;

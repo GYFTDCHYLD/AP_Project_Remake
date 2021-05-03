@@ -5,6 +5,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -13,16 +16,18 @@ import javax.swing.JOptionPane;
 
 
 import domain.*;
+import factories.DBConectorFactory;
 import frame.ServerWindow;
 import packet.*;
 import packet.Packet.PacketTypes;
 
 public class Server{
 
+	private java.sql.Connection connection;
+	private Statement stmt;
 	private ServerSocket serverSocket;
 	private Socket connectionSocket;
-	private Calendar date; 
-	private List<User> userDatabase;  
+	private Calendar date;  
 	private List<BillingAccount> billigAccountDatabase;   
 	private static List<ClientHandler> onlineClient; // used for live chat 
 	private List<Long> clientHandlerId;
@@ -34,36 +39,14 @@ public class Server{
 	public Server(int Port) {
 		
 		try {
-			userDatabase = new ArrayList<>();  
 			billigAccountDatabase = new ArrayList<>();
 			onlineClient = new ArrayList<>();
 			onlineThreads = new ArrayList<>();
 			clientHandlerId = new ArrayList<>(); 
 			threadHandlerId = new ArrayList<>(); 
 			
-			User User = new Employee("S122", "Ms", "Shericka", "Jones", 876938746, "Jones@yahoo.com", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
-			userDatabase.add(User);
-			
-			User = new Employee("D111", "Ms", "Dahlia", "Holness", 876985764, "Holness@yahoo.com", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
-			userDatabase.add(User);
-			
-			User = new Employee("D112", "Ms", "Danielle", "Dixon", 876985764, "Dixon@yahoo.com",  "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
-			userDatabase.add(User);
-			
-			User = new Customer("A121", "Ms", "Akielia", "Willbrugh", 876985764, "Willbrugh@yahoo.com", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"); 
-			((Customer) User).setBillingAccount(new BillingAccount("A121","Due", 15000));
-			billigAccountDatabase.add(((Customer) User).getBillingAccount());
-			userDatabase.add(User);
-			
-			User = new Employee("C123", "Mr", "Craig", "Reid", 876985764, "Reid@yahoo.com",  "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Technician"); 
-			userDatabase.add(User);
-			
-			User = new Customer("C124", "Mr", "Craig", "Reid", 876985764, "Reid@yahoo.com", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"); 
-			((Customer) User).setBillingAccount(new BillingAccount("A121","Due", 15000));
-			billigAccountDatabase.add(((Customer) User).getBillingAccount());
-			userDatabase.add(User);
-			
 			this.serverSocket = new ServerSocket(Port);
+			this.connection = DBConectorFactory.getDatabaseConnection();// connect to the data base
 		}
 		catch(Exception e) {
 			System.err.println("error " + e.getMessage());
@@ -235,67 +218,117 @@ public class Server{
 		}
 		
 		private void RegistrationHandler(Packet00Register data) { // handle registration
-			String id = (data.getData().getFirstName()).substring(0,1) + "34" + userDatabase.size();//create user Id Using Fist letter of first name plus 34 plus the amount of user;
+			String sql = "SELECT * FROM microstar. `User`";
+			int databaseSize = 0;
+			try {
+				stmt = connection.createStatement();
+				ResultSet result = stmt.executeQuery(sql);
+				while(result.next()) {//check the database for the user
+					databaseSize++;
+				} 
+			}catch (SQLException e) {
+				System.err.println("sql exception caught");
+			}
+			
+			String id = (data.getData().getFirstName()).substring(0,1) + "34" + databaseSize;//create user Id Using Fist letter of first name plus 34 plus the amount of user;
 			User newUser = data.getData();  
 			newUser.setUserId(id); // set the user id to the new id
-			userDatabase.add(newUser);//add user to database
+			create(newUser);//add user to database
 			billigAccountDatabase.add(new BillingAccount(id,"unpaid", 15000));// add account
 			Packet infoPacket = new Packet9Info("Sussessfully Registered");
 			Packet00Register registered = new  Packet00Register(newUser);// prepare the object with the New User ID to be sent to the user for login
 			sendData(registered);// send the the object to the user to extract the User ID
 			sendData(infoPacket);// send the info object/packet to the user
+			
 		} 
+		
+		private void create(User newUser) {
+			String sql = ("INSERT INTO microstar. `User` (userId, nameTitle, firstName, lastName, password, jobTitle)"
+					+ "VALUES ('" + newUser.getUserId() + "', '" + newUser.getNameTitle() + "', '" + newUser.getFirstName() + "', '" + newUser.getLastName() + "', '" + newUser.getPassword() + "', '" + "" + "');");
+			
+			try {
+				stmt = connection.createStatement();
+				stmt.executeUpdate(sql);
+			} catch (SQLException e) {
+				Packet10Error error = new Packet10Error("Cannot register at the moment, please try again Later");// create a message/packer/object
+				sendData(error);// send the info object/packet/message to the user
+			}
+		}
 		
 
 		private void LoginHandler(Packet01Login data) { // handle login
 			User loginData;
 			boolean found = false;
-			for (User user : userDatabase) {//check the database for the user
-				if(user.getUserId().matches(data.getUserId()) && user.getPassword().matches(data.getPassword())) {
-					loginData = user; 
-					for(ClientHandler client : onlineClient) {// loop through the client connected to the server
-						if(client.UserInfo[0][0].matches(loginData.getUserId())) { // check first row first column where user id is stored
-							Packet infoPacket = new Packet9Info("User Already Logedin");
-							sendData(infoPacket);// send the info object/packet to the user if user is already lodged in
-							return;// stop the code here if user already logged in 
-						}
-					}
+			
+			String sql = "SELECT * FROM microstar. `User`";
+			try {
+				stmt = connection.createStatement();
+				ResultSet result = stmt.executeQuery(sql);
+				while(result.next()) {//check the database for the user
 					
-					String UserType;// userd to Prepared complain list for specific user
-					if(loginData instanceof Customer) {// check if its a customer is loging in
-						for(BillingAccount account : billigAccountDatabase) {// search for their account in database
-							if(account.getId().equals(loginData.getUserId())) {
-								((Customer)loginData).setBillingAccount(account);/// ass the account to the user object to be sent to customer
+					if(result.getString("userId").matches(data.getUserId()) && result.getString("password").matches(data.getPassword())) {
+						if(!result.getString("jobTitle").equals("")) {
+							loginData = new Employee();
+							((Employee)loginData).setJobTitle(result.getString("jobTitle"));
+						}else {
+							loginData = new Customer();
+						}
+						loginData.setUserId(result.getString("userId"));
+						loginData.setNameTitle(result.getString("nameTitle"));
+						loginData.setFirstName(result.getString("firstName"));
+						loginData.setLastName(result.getString("lastName"));
+						
+						
+						for(ClientHandler client : onlineClient) {// loop through the client connected to the server
+							if(client.UserInfo[0][0].matches(loginData.getUserId())) { // check first row first column where user id is stored
+								Packet infoPacket = new Packet9Info("User Already Logedin");
+								sendData(infoPacket);// send the info object/packet to the user if user is already lodged in
+								return;// stop the code here if user already logged in 
 							}
 						}
-						UserType = "Customer";
-					}else {
-						UserType = ((Employee) loginData).getJobTitle();//Representative  Technician
+						
+						String UserType;// userd to Prepared complain list for specific user
+						if(loginData instanceof Customer) {// check if its a customer is loging in
+							for(BillingAccount account : billigAccountDatabase) {// search for their account in database
+								if(account.getId().equals(loginData.getUserId())) {
+									((Customer)loginData).setBillingAccount(account);/// ass the account to the user object to be sent to customer
+								}
+							}
+							UserType = "Customer";
+						}else {
+							UserType = ((Employee) loginData).getJobTitle();//Representative  Technician
+						}
+						
+						
+						UserInfo[0][0] = loginData.getUserId();// set the UserId of this client handler to the Id of the loggedin user
+						UserInfo[0][1] = loginData.getFirstName();// add the user firstname to the handler for chat purpose
+						userType = UserType;// usertype to help filter complain list when sending to all clients
+						System.out.println("update client handler info");
+						
+						sendData(new Packet01Login(loginData));// send the login data for the user dashboard
+						
+						Packet9Info infoPacket = new Packet9Info("Login Sussessfully");// prepare message 
+						sendData(infoPacket); // send info to client
+						
+						Packet11List online = new Packet11List(onlineClient());// return list of client and add it to the packet/object
+						online.setType("Online Clients");
+						sendOnlineClientListToAllClients(online);// send list of clients id to all connected user
+						
+						Packet11List tech = new Packet11List(technitionList());// return list of Technician and add it to the packet/object
+						tech.setType("Technicians");
+						sendTechClientListToAllRep(tech);// send list of Technician id to all rep
+						
+						sendComplainListToAllClients(Complains());// send the packet to the user
+						
+						found = true;
+						break;
 					}
-					
-					UserInfo[0][0] = loginData.getUserId();// set the UserId of this client handler to the Id of the loggedin user
-					UserInfo[0][1] = loginData.getFirstName();// add the user firstname to the handler for chat purpose
-					userType = UserType;// usertype to help filter complain list when sending to all clients
-					
-					sendData(new Packet01Login(loginData));// send the login data for the user dashboard
-					
-					Packet9Info infoPacket = new Packet9Info("Login Sussessfully");// prepare message 
-					sendData(infoPacket); // send info to client
-					
-					Packet11List online = new Packet11List(onlineClient());// return list of client and add it to the packet/object
-					online.setType("Online Clients");
-					sendOnlineClientListToAllClients(online);// send list of clients id to all connected user
-					
-					Packet11List tech = new Packet11List(technitionList());// return list of Technician and add it to the packet/object
-					tech.setType("Technicians");
-					sendTechClientListToAllRep(tech);// send list of Technician id to all rep
-					
-					sendComplainListToAllClients(Complains());// send the packet to the user
-					
-					found = true;
-					break;
+						
 				}
-			} 
+			} catch (SQLException e) {
+				Packet10Error error = new Packet10Error("Cannot login at the moment, please try again Later");// create a message/packer/object
+				sendData(error);// send the info object/packet/message to the user
+			}
 			
 			if(!found) {
 				Packet10Error error = new Packet10Error("Invalid Id or Password");// create a message/packer/object
@@ -376,14 +409,19 @@ public class Server{
 		private List<String[][]> technitionList(){// a list of Technician to be sent to rep in order to assign complain(s)
 			List<String[][]>  list = new ArrayList<>();
 			String techInfo[][] = new String[1][2];
-			for (User user : userDatabase) { 
-				if(user instanceof Employee) {
-					if(((Employee) user).getJobTitle().equals("Technician")) {
-						techInfo[0][0] = user.getUserId(); 
-						techInfo[0][1] = user.getFirstName();
+			String sql = "SELECT * FROM microstar. `User`";
+			try {
+				stmt = connection.createStatement();
+				ResultSet result = stmt.executeQuery(sql);
+				while(result.next()) {//check the database for the user
+					if(result.getString("jobTitle").equals("Technician")) {
+						techInfo[0][0] = result.getString("userId"); 
+						techInfo[0][1] = result.getString("firstName");
 						list.add(techInfo);
 					}
 				}
+			} catch (SQLException e) {
+				System.err.println("sql exception caught");
 			}
 			return list;
 		}

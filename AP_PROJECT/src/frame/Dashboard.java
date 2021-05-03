@@ -541,6 +541,8 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	}
 	
 	String ComplainID = "";
+	String TechIdFieldInTable;
+	String VisitDateFieldInTable;
 	@Override
 	public void valueChanged(ListSelectionEvent e) {// use for table selection for assigning complains and setting date for Technician
 		 
@@ -550,17 +552,26 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		for (int i = 0; i < row.length; i++) {
 			for (int j = 0; j < columns.length; j++) {
 				ComplainID = String.valueOf(table.getValueAt(row[i], 0));
+				TechIdFieldInTable = String.valueOf(table.getValueAt(row[i], 4));// use to check if the field is empty/ complain is already assigned
+				VisitDateFieldInTable = String.valueOf(table.getValueAt(row[i], 5));// use to check if the field is empty/ date is already set
 				Data = (String) table.getValueAt(row[i], columns[j]);
 			}
 		}
 		if(user instanceof Employee) {
 			if(((Employee) user).getJobTitle().matches("Representative")) {
-				assignComplainButton.setVisible(false);
-				technitionDropdownList.setVisible(true);
+				if(TechIdFieldInTable.equals("")) {
+					assignComplainButton.setVisible(false);
+					technitionDropdownList.setVisible(true);
+				}else
+					JOptionPane.showInternalMessageDialog(dashboard,"Complain Already Assigned", user.getFirstName(),JOptionPane.ERROR_MESSAGE);
 			}else {
-				setVisitDateButton.setVisible(true);
-				if(setVisitDateButton.getText().matches("Finalize Date"))
-					setdateTextField.setVisible(true); 
+				if(VisitDateFieldInTable.equals("")) {
+					setVisitDateButton.setVisible(true);
+					if(setVisitDateButton.getText().matches("Finalize Date"))
+						setdateTextField.setVisible(true); 
+				}else
+					JOptionPane.showInternalMessageDialog(dashboard,"Date Already Set", user.getFirstName(),JOptionPane.ERROR_MESSAGE);
+				
 			}
 		}
 	}
