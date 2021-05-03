@@ -16,7 +16,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
-import domain.BillingAccount;
 import domain.Customer;
 import domain.User;
 import image.loadImages;
@@ -184,21 +183,21 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 		
 		if(e.getActionCommand().equals("Submit")) {
 			if(nameTitleDropdown.getSelectedItem().equals("")) 
-				JOptionPane.showMessageDialog(null, "Select Name Title", "",JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(MainWindow.getDesktopPane(), "Select Name Title", "",JOptionPane.ERROR_MESSAGE);
 			else if(firstName.getText().equals("")) 
-				JOptionPane.showMessageDialog(null, "Enter your First Name", "",JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(MainWindow.getDesktopPane(), "Enter your First Name", "",JOptionPane.ERROR_MESSAGE);
 			else if(lastName.getText().equals("")) 
-				JOptionPane.showMessageDialog(null, "Enter your Last Name", "",JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(MainWindow.getDesktopPane(), "Enter your Last Name", "",JOptionPane.ERROR_MESSAGE);
 			else if(email.getText().equals("")) 
-				JOptionPane.showMessageDialog(null, "Enter your Email", "",JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(MainWindow.getDesktopPane(), "Enter your Email", "",JOptionPane.ERROR_MESSAGE);
 			else if(phoneNumber.getText().equals("")) 
-				JOptionPane.showMessageDialog(null, "Enter your Phone Number", "",JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(MainWindow.getDesktopPane(), "Enter your Phone Number", "",JOptionPane.ERROR_MESSAGE);
 			else if(passwordField.getText().equals("")) 
-				JOptionPane.showMessageDialog(null, "Enter your Password", "",JOptionPane.ERROR_MESSAGE); 
+				JOptionPane.showMessageDialog(MainWindow.getDesktopPane(), "Enter your Password", "",JOptionPane.ERROR_MESSAGE); 
 			else if(passwordConfirmField.getText().equals("")) 
-				JOptionPane.showMessageDialog(null, "ConfirmPassword", "",JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(MainWindow.getDesktopPane(), "ConfirmPassword", "",JOptionPane.ERROR_MESSAGE);
 			else if(!passwordField.getText().equals(passwordConfirmField.getText())) 
-				JOptionPane.showMessageDialog(null, "Passwords Did Not Match!", "",JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(MainWindow.getDesktopPane(), "Passwords Did Not Match!", "",JOptionPane.ERROR_MESSAGE);
 			else {
 				User Register = new Customer(
 						"userId"
@@ -208,7 +207,6 @@ public class SignUpWindow extends JInternalFrame implements ActionListener{
 						,Long.valueOf(phoneNumber.getText())
 						, email.getText()
 						, MainWindow.hashPasword(passwordField.getText())
-						, new BillingAccount("A121","Due", 15000)
 				); 
 				Packet00Register Packet = new Packet00Register(Register);
 				Packet.writeData(MainWindow.getClientSocket());

@@ -11,9 +11,8 @@ public class Customer extends User  implements Serializable{
 		super();
 	}
 	
-	public Customer(String userId, String nameTitle, String firstName, String lastName, long phoneNumber, String email, String password, BillingAccount Billing){
+	public Customer(String userId, String nameTitle, String firstName, String lastName, long phoneNumber, String email, String password){
 		super(userId, nameTitle, firstName, lastName, phoneNumber, email, password);
-		this.BillingAccount = Billing;
 	}
 	
 	public Customer(BillingAccount billingAccount) {

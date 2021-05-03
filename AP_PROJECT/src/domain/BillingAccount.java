@@ -10,8 +10,8 @@ public class BillingAccount  implements Serializable{
 	private String status;
 	private float amountDue;
 	private float interest;
-	private Date dueDate;
-	private Date paidDate;
+	private String dueDate;
+	private String paidDate;
 	
 	
 	public BillingAccount() {
@@ -67,24 +67,23 @@ public class BillingAccount  implements Serializable{
 	}
 
 
-	public Date getDueDate() {
+	public String getDueDate() {
 		return dueDate;
 	}
 
 
-	public void setDueDate(Date dueDate) {
+	public void setDueDate(String dueDate) {
 		this.dueDate = dueDate;
 	}
 
 
-	public Date getPaidDate() {
+	public String getPaidDate() {
 		return paidDate;
 	}
 
 
-	public void setPaidDate(Date paidDate) {
+	public void setPaidDate(String paidDate) {
 		this.paidDate = paidDate;
 	}
-	
 	
 }

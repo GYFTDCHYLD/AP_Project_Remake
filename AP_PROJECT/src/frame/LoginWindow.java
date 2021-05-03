@@ -108,9 +108,9 @@ public class LoginWindow extends JInternalFrame implements ActionListener{
 		
 		if(e.getActionCommand().equals("Submit")) {
 			if(loginIdField.getText().equals("")) 
-				JOptionPane.showMessageDialog(null, "Enter your User Id", "",JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(MainWindow.getDesktopPane(), "Enter your User Id", "",JOptionPane.ERROR_MESSAGE);
 			else if(passwordField.getText().equals("")) 
-				JOptionPane.showMessageDialog(null, "Enter your Password", "",JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(MainWindow.getDesktopPane(), "Enter your Password", "",JOptionPane.ERROR_MESSAGE);
 			else {
 				User user = new User();// create a user object
 				user.setUserId(loginIdField.getText()); // set the user id

@@ -86,7 +86,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	private List<Packet03Chat> messages;// a list of chats for the messages being recieved from the server
 	private List<Complain> complains; 
 	private List<String[][]>  onlineClient;
-	private List<String[][]>  technitions; 
+	private List<String[][]>  technicions; 
 	private boolean displayComplainTable;
 	
 	
@@ -126,7 +126,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		messages = new ArrayList<>();// the will contain all chat that was recieve since being online
 		complains = new ArrayList<>(); 
 		onlineClient = new ArrayList<>();
-		technitions = new ArrayList<>();
+		technicions = new ArrayList<>();
 		profileImage = new JLabel();
 		profileImage.setHorizontalAlignment(SwingConstants.CENTER);
 		profileImage.setBounds(40, 10,50, 50);
@@ -316,7 +316,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 					assign.setAssignment("Assign a complain");// command/instruction for the server 
 					assign.setLoginId(user.getUserId());// rep id to be attacched to the complain
 					assign.setInfo(ComplainID);// complain id
-					assign.setInfo2(technitions.get(technitionDropdownList.getSelectedIndex()-1)[0][0].toString());// technition id
+					assign.setInfo2(technicions.get(technitionDropdownList.getSelectedIndex()-1)[0][0].toString());// technition id
 					assign.writeData(MainWindow.getClientSocket());  // send info to client
 				}else {
 					JOptionPane.showInternalMessageDialog(dashboard, "Selected a Technition", user.getFirstName(), JOptionPane.ERROR_MESSAGE);
@@ -416,7 +416,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			case "Assign a complain":
 										technitionDropdownList.removeAllItems(); 
 										technitionDropdownList.addItem("Select Technition");
-										for(String[][] tecInfo : technitions) { 
+										for(String[][] tecInfo : technicions) { 
 											technitionDropdownList.addItem(tecInfo[0][1]);// add the technitions name to the dropdown  
 										}
 										editTable = true;
@@ -510,10 +510,10 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 				rowData[row][3] = "ME";
 			else
 				rowData[row][3] = complains.get(row).getRepId();
-			if(complains.get(row).getTecId().matches(user.getUserId()))// if technition is loggedin
+			if(complains.get(row).getTechId().matches(user.getUserId()))// if Technician is loggedin
 				rowData[row][4] = "ME";
 			else
-				rowData[row][4] = complains.get(row).getTecId();
+				rowData[row][4] = complains.get(row).getTechId();
 			rowData[row][5] = complains.get(row).getVisitDate(); 
 			
 			total ++;
@@ -542,7 +542,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	
 	String ComplainID = "";
 	@Override
-	public void valueChanged(ListSelectionEvent e) {// use for table selection for assignng complains and setting date for technition
+	public void valueChanged(ListSelectionEvent e) {// use for table selection for assigning complains and setting date for Technician
 		 
 		String Data = null;
 		int[] row = table.getSelectedRows();
@@ -643,12 +643,12 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	}
 
 
-	public List<String[][]> getTechnitions() {
-		return technitions;
+	public List<String[][]> getTechnicions() {
+		return technicions; 
 	}
 
 
-	public void setTechnitions(List<String[][]> technitions) {
-		this.technitions = technitions;
+	public void setTechnicions(List<String[][]> technicions) {
+		this.technicions = technicions;
 	}
 }

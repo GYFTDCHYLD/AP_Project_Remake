@@ -50,14 +50,16 @@ public class Server{
 			User = new Employee("D112", "Ms", "Danielle", "Dixon", 876985764, "Dixon@yahoo.com",  "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Representative"); 
 			userDatabase.add(User);
 			
-			User = new Customer("A121", "Ms", "Akielia", "Willbrugh", 876985764, "Willbrugh@yahoo.com", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", new BillingAccount("A121","Due", 15000)); 
+			User = new Customer("A121", "Ms", "Akielia", "Willbrugh", 876985764, "Willbrugh@yahoo.com", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"); 
+			((Customer) User).setBillingAccount(new BillingAccount("A121","Due", 15000));
 			billigAccountDatabase.add(((Customer) User).getBillingAccount());
 			userDatabase.add(User);
 			
-			User = new Employee("C123", "Mr", "Craig", "Reid", 876985764, "Reid@yahoo.com",  "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Technitian"); 
+			User = new Employee("C123", "Mr", "Craig", "Reid", 876985764, "Reid@yahoo.com",  "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", "Technician"); 
 			userDatabase.add(User);
 			
-			User = new Customer("C124", "Mr", "Craig", "Reid", 876985764, "Reid@yahoo.com", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5", new BillingAccount("A121","Due", 15000)); 
+			User = new Customer("C124", "Mr", "Craig", "Reid", 876985764, "Reid@yahoo.com", "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"); 
+			((Customer) User).setBillingAccount(new BillingAccount("A121","Due", 15000));
 			billigAccountDatabase.add(((Customer) User).getBillingAccount());
 			userDatabase.add(User);
 			
@@ -246,13 +248,13 @@ public class Server{
 		
 
 		private void LoginHandler(Packet01Login data) { // handle login
-			Packet01Login loginData;
+			User loginData;
 			boolean found = false;
 			for (User user : userDatabase) {//check the database for the user
 				if(user.getUserId().matches(data.getUserId()) && user.getPassword().matches(data.getPassword())) {
-					loginData = new Packet01Login(user); 
+					loginData = user; 
 					for(ClientHandler client : onlineClient) {// loop through the client connected to the server
-						if(client.UserInfo[0][0].matches(loginData.getData().getUserId())) { // check first row first column where user id is stored
+						if(client.UserInfo[0][0].matches(loginData.getUserId())) { // check first row first column where user id is stored
 							Packet infoPacket = new Packet9Info("User Already Logedin");
 							sendData(infoPacket);// send the info object/packet to the user if user is already lodged in
 							return;// stop the code here if user already logged in 
@@ -260,35 +262,35 @@ public class Server{
 					}
 					
 					String UserType;// userd to Prepared complain list for specific user
-					if(loginData.getData() instanceof Customer) {// check if its a customer is loging in
+					if(loginData instanceof Customer) {// check if its a customer is loging in
 						for(BillingAccount account : billigAccountDatabase) {// search for their account in database
-							if(account.getId().equals(loginData.getData().getUserId())) {
-								((Customer)loginData.getData()).setBillingAccount(account);/// ass the account to the user object to be sent to customer
+							if(account.getId().equals(loginData.getUserId())) {
+								((Customer)loginData).setBillingAccount(account);/// ass the account to the user object to be sent to customer
 							}
 						}
 						UserType = "Customer";
 					}else {
-						UserType = ((Employee) loginData.getData()).getJobTitle();//Representative  Technitian
+						UserType = ((Employee) loginData).getJobTitle();//Representative  Technician
 					}
 					
-					UserInfo[0][0] = loginData.getData().getUserId();// set the UserId of this client handler to the Id of the loggedin user
-					UserInfo[0][1] = loginData.getData().getFirstName();// add the user firstname to the handler for chat purpose
+					UserInfo[0][0] = loginData.getUserId();// set the UserId of this client handler to the Id of the loggedin user
+					UserInfo[0][1] = loginData.getFirstName();// add the user firstname to the handler for chat purpose
 					userType = UserType;// usertype to help filter complain list when sending to all clients
 					
-					sendData(loginData);// send the login data for the user dashboard
+					sendData(new Packet01Login(loginData));// send the login data for the user dashboard
 					
-					sendComplainListToAllClients(Complains());// send the packet to the user
+					Packet9Info infoPacket = new Packet9Info("Login Sussessfully");// prepare message 
+					sendData(infoPacket); // send info to client
 					
 					Packet11List online = new Packet11List(onlineClient());// return list of client and add it to the packet/object
 					online.setType("Online Clients");
 					sendOnlineClientListToAllClients(online);// send list of clients id to all connected user
 					
-					Packet11List tech = new Packet11List(technitionList());// return list of technition and add it to the packet/object
-					tech.setType("Technitions");
-					sendTechClientListToAllRep(tech);// send list of technitions id to all rep
-					 
-					Packet9Info infoPacket = new Packet9Info("Login Sussessfully");// prepare message 
-					sendData(infoPacket); // send info to client
+					Packet11List tech = new Packet11List(technitionList());// return list of Technician and add it to the packet/object
+					tech.setType("Technicians");
+					sendTechClientListToAllRep(tech);// send list of Technician id to all rep
+					
+					sendComplainListToAllClients(Complains());// send the packet to the user
 					
 					found = true;
 					break;
@@ -307,29 +309,47 @@ public class Server{
 		} 
 		
 		private void ComplainHandler(Packet04Complain data) {
-			data.getData().makeComplain();// Hibernate method
+			try {
+				data.getData().makeComplain();// Hibernate method
+			}catch(Exception e) {
+				Packet10Error error = new Packet10Error("Complain not sent ");// prepare message  
+				sendData(error); // send info to client
+				return;
+			}
 			Packet9Info infoPacket = new Packet9Info("Complain Recieved");// create a message/packer/object
 			sendData(infoPacket);// send the info object/packet/message to the user
 			sendComplainListToAllClients(Complains());// send the packet to the user
 		}
 		
-		private void  assignComplain(int complainId, String repId, String techId) {// use for rep to assign complain to technition
+		private void  assignComplain(int complainId, String repId, String techId) {// use for rep to assign complain to Technician
 			Complain complain = new Complain(); 
 			complain.setId(complainId);
 			complain.setRepId(repId);
-			complain.setTecId(techId);
-			complain.assignComplain();// Hibernate method
+			complain.setTechId(techId);
+			try {
+				complain.assignComplain();// Hibernate method
+			}catch(Exception e) {
+				Packet10Error error = new Packet10Error("Complain not assigned ");// prepare message  
+				sendData(error); // send info to client
+				return;
+			}
 			
 			sendComplainListToAllClients(Complains());// send the packet to the user
 			Packet9Info infoPacket = new Packet9Info("Complain Assigned");// prepare message 
 			sendData(infoPacket); // send info to client
 		}
 		
-		private void  setVisitDaTe(int complainId, String Date) {// use for rep to assign complain to technition
+		private void  setVisitDaTe(int complainId, String Date) {// use for rep to assign complain to Technician
 			Complain complain = new Complain(); 
 			complain.setId(complainId);
 			complain.setVisitDate(Date);
-			complain.setDate();// Hibernate method
+			try {
+				complain.setDate();// Hibernate method
+			}catch(Exception e) {
+				Packet10Error error = new Packet10Error("Date not set ");// prepare message  
+				sendData(error); // send info to client
+				return;
+			}
 			
 			sendComplainListToAllClients(Complains());// send the packet to the user
 			Packet9Info infoPacket = new Packet9Info("Date Set");// prepare message 
@@ -353,12 +373,12 @@ public class Server{
 			return list;
 		}
 		
-		private List<String[][]> technitionList(){// a list of technition to be sent to rep in order to assign complain(s)
+		private List<String[][]> technitionList(){// a list of Technician to be sent to rep in order to assign complain(s)
 			List<String[][]>  list = new ArrayList<>();
 			String techInfo[][] = new String[1][2];
 			for (User user : userDatabase) { 
 				if(user instanceof Employee) {
-					if(((Employee) user).getJobTitle().equals("Technitian")) {
+					if(((Employee) user).getJobTitle().equals("Technician")) {
 						techInfo[0][0] = user.getUserId(); 
 						techInfo[0][1] = user.getFirstName();
 						list.add(techInfo);
@@ -440,7 +460,7 @@ public class Server{
 	public void sendTechClientListToAllRep(Packet11List data) {
 		for (ClientHandler client : onlineClient) {
 			if(client.userType.equals("Representative")){
-				data.writeData(client);// send the list of technitions to all representative
+				data.writeData(client);// send the list of Technician to all representative
 			}
 		}
 	}
@@ -453,14 +473,14 @@ public class Server{
 	
 	private Packet11List myComplains(Packet11List Packet11List,  String userId, String userType){// filter the complain list
 		List<Complain> list = new ArrayList<>();//create an arraylist to store the complains to be sent back to the user
-		for (Complain complain : (List<Complain>)Packet11List.getData()) {// loop through the list of complain that was pass through the perameter
+		for (Complain complain : (List<Complain>)Packet11List.getData()) {// loop through the list of complain that was pass through the parameter
 			if (userType.equals("Customer")) {
-				if (complain.getcustId().equals(userId)) {// check if the user id match the user id in the complain list
+				if (complain.getCustId().equals(userId)) {// check if the user id match the user id in the complain list
 					list.add(complain);// if the id match, store the complain in the arraylist that will be sent to the user
 				}
-			}else if (userType.equals("Technitian")) {
-				if (complain.getTecId().equals(userId)) {// check if a complain has been assigned to the technition
-					list.add(complain);// if the id match, store the complain in the arraylist that will be sent to the technition
+			}else if (userType.equals("Technician")) {
+				if (complain.getTechId().equals(userId)) {// check if a complain has been assigned to the Technician
+					list.add(complain);// if the id match, store the complain in the arraylist that will be sent to the Technician
 				}
 			}else { 
 				list.add(complain);// all complain should be sent to rep

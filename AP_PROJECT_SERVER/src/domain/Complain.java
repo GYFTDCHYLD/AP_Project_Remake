@@ -39,8 +39,8 @@ public class Complain implements Serializable{
 	@Column(name = "repId")
 	private String repId;
 	
-	@Column(name = "tecId")
-	private String tecId;
+	@Column(name = "techId")
+	private String techId;
 	
 	@Column(name = "visitDate")
 	private String visitDate; 
@@ -50,14 +50,14 @@ public class Complain implements Serializable{
 		super();
 	}
 	
-	public Complain(int id, String custId, String type, String message, String repId, String tecId, String visitDate) {
+	public Complain(int id, String custId, String type, String message, String repId, String techId, String visitDate) {
 		super();
 		this.id = id;
 		this.custId = custId;
 		this.type = type;
 		this.message = message;
 		this.repId = repId;
-		this.tecId = tecId;
+		this.techId = techId;
 		this.visitDate = visitDate;
 	}
 
@@ -68,13 +68,12 @@ public class Complain implements Serializable{
 	public void setId(int id) {
 		this.id = id;
 	}
-	
 
-	public String getcustId() {
+	public String getCustId() {
 		return custId;
 	}
 
-	public void setcustId(String custId) { 
+	public void setCustId(String custId) {
 		this.custId = custId;
 	}
 
@@ -102,12 +101,12 @@ public class Complain implements Serializable{
 		this.repId = repId;
 	}
 
-	public String getTecId() {
-		return tecId;
+	public String getTechId() {
+		return techId;
 	}
 
-	public void setTecId(String tecId) {
-		this.tecId = tecId;
+	public void setTechId(String techId) {
+		this.techId = techId;
 	}
 
 	public String getVisitDate() {
@@ -117,7 +116,7 @@ public class Complain implements Serializable{
 	public void setVisitDate(String visitDate) {
 		this.visitDate = visitDate;
 	}
-	
+
 	public void makeComplain(){
 		Session session = complainSessionFactoryBuilder.getSessionFactory().getCurrentSession();
 		Transaction transaction = session.beginTransaction();
@@ -131,7 +130,7 @@ public class Complain implements Serializable{
 		Transaction transaction = session.beginTransaction();
 		Complain complain = (Complain) session.get(Complain.class, this.id); 
 		complain.setRepId(this.repId);
-		complain.setTecId(this.tecId);
+		complain.setTechId(this.techId);
 		session.update(complain);
 		transaction.commit();
 		session.close();

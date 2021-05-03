@@ -161,12 +161,11 @@ public class Client implements Runnable{
 		JOptionPane.showInternalMessageDialog(MainWindow.getDesktopPane(),error.getData(), "From Server",JOptionPane.ERROR_MESSAGE);// display the message sent from server
 		switch (error.getData()) {
 			case "Server Ended": 
-								System.exit(0);// end the program if an exit message is recieved from the server
+								System.exit(0);// end the program if an exit message is received from the server
 				break;
 			case "Not Connected to server:  Connection refused": 
-								System.exit(0);// end the program if an conection refused from the server
+								System.exit(0);// end the program if an connection refused from the server
 				break;
-	
 			default:
 				break;
 		}	
@@ -214,9 +213,9 @@ public class Client implements Runnable{
 		}else if(data.getType().matches("Online Clients")){
 			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setOnlineClient((List<String[][]>) data.getData());
 			System.out.println("List of online clients recieved from server");
-		}else if(data.getType().matches("Technitions")) {
-			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setTechnitions((List<String[][]>) data.getData()) ;
-			System.out.println("List of Technitions recieved from server");
+		}else if(data.getType().matches("Technicians")) {
+			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setTechnicions((List<String[][]>) data.getData()) ;
+			System.out.println("List of Technicions recieved from server");
 		}
 	}
 	
