@@ -411,7 +411,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										}
 										
 										displayComplainTable = true;
-										populateTable(); 
+										populateComplainTable(); 
 										break;
 			case "Assign a complain":
 										technitionDropdownList.removeAllItems(); 
@@ -421,14 +421,14 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										}
 										editTable = true;
 										displayComplainTable = true;
-										populateTable();
+										populateComplainTable();
 										JOptionPane.showInternalMessageDialog(dashboard, "Select the row/complain to assign", "", JOptionPane.INFORMATION_MESSAGE);
 										break;
 			case "Set visit date":		
 										setVisitDateButton.setText("Finalize Date");
 										displayComplainTable = true;
 										editTable = true;
-										populateTable();
+										populateComplainTable();
 										JOptionPane.showInternalMessageDialog(dashboard, "Select the row/complain to set date", "", JOptionPane.INFORMATION_MESSAGE);
 										break;
 			case "Finalize Date":
@@ -447,11 +447,10 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 										}
 										break;
 			case "View Account":
-										JOptionPane.showMessageDialog(dashboard, "Ammount due: "+ ((Customer)user).getBillingAccount().getAmountDue()
-												+" Due date: " + ((Customer)user).getBillingAccount().getDueDate()
-												+" Status: " + ((Customer)user).getBillingAccount().getStatus(), "",JOptionPane.INFORMATION_MESSAGE);
+										billingTable();
 										break;
-			case "Pay Bill":
+			case "Pay Bill":			
+										billingTable();
 										break;
 			case "Start Chat":
 										onlineClientsDropdown.removeAllItems();
@@ -496,7 +495,7 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 	
 			
 	boolean editTable = false;
-	public void populateTable() {
+	public void populateComplainTable() { 
 		int total = 0, resolved = 0, unResolved = 0;
 		
 		String columnNames[]={"ID","TYPE","MESSAGE","REPRESENTATIVE","ASSIGNED TECHNICIAN","VISIT DATE"};
@@ -538,6 +537,23 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		}else {
 			scrollPane.setVisible(false); 
 		}
+	}
+	
+	public void billingTable() { 
+		String columnNames[]={"Amount due","Due date","Interest","Paid date","Status","Total"};
+		Object[][] rowData = new Object[((Customer)user).getBillingAccount().size()][columnNames.length];
+		
+		for(int row = 0; row < ((Customer)user).getBillingAccount().size(); row ++) { 
+			rowData[row][0] = "$" + ((Customer)user).getBillingAccount().get(row).getAmountDue();
+			rowData[row][1] = ((Customer)user).getBillingAccount().get(row).getDueDate();
+			rowData[row][2] = "$" + ((Customer)user).getBillingAccount().get(row).getInterest();  
+			rowData[row][3] = ((Customer)user).getBillingAccount().get(row).getPaidDate();
+			rowData[row][4] = ((Customer)user).getBillingAccount().get(row).getStatus();
+			rowData[row][5] = "$" + (((Customer)user).getBillingAccount().get(row).getAmountDue() + ((Customer)user).getBillingAccount().get(row).getInterest());
+		}
+		DefaultTableModel tableModel = new DefaultTableModel(rowData, columnNames);
+		table.setModel(tableModel);
+		scrollPane.setVisible(true); 
 	}
 	
 	String ComplainID = "";
@@ -620,30 +636,15 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 		this.complainDropdownCategory.setSelectedIndex(index);
 	}
 	
-	public JDesktopPane getDashboard() {
-		return dashboard; 
-	}
-	
 	public void setComplainText(String complainText) {
 		this.complainTextField.setText(complainText);
 	}
 
 
-	public List<Complain> getComplains() {
-		return complains;
-	}
-
-
 	public void setComplains(List<Complain> complains) { 
 		this.complains = complains;
-		populateTable();
+		populateComplainTable();
 	}
-
-
-	public List<String[][]> getOnlineClient() { 
-		return onlineClient;
-	}
-
 
 	public void setOnlineClient(List<String[][]> onlineClient) {
 		this.onlineClient = onlineClient;
@@ -652,12 +653,6 @@ public class Dashboard extends JInternalFrame implements ActionListener, ListSel
 			onlineClient.remove(clientInfo);//remove this user info from the list to prevent yourself from showing up in the chat
 		}
 	}
-
-
-	public List<String[][]> getTechnicions() {
-		return technicions; 
-	}
-
 
 	public void setTechnicions(List<String[][]> technicions) {
 		this.technicions = technicions;

@@ -2,7 +2,7 @@ package domain;
 
 import java.io.Serializable;
 
-public class BillingAccount  implements Serializable{
+public class Billing  implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	private String id;
@@ -13,19 +13,20 @@ public class BillingAccount  implements Serializable{
 	private String paidDate;
 	
 	
-	public BillingAccount() {
+	public Billing() {
 		super();
 	}
 
 
-	public BillingAccount(String id, String status, float amountDue) {
+	public Billing(String id, String status, float amountDue) {
 		super();
 		this.id = id;
 		this.status = status;
 		this.amountDue = amountDue;
 	}
 
-	public BillingAccount(String id, String status, float amountDue, float interest, String dueDate, String paidDate) {
+
+	public Billing(String id, String status, float amountDue, float interest, String dueDate, String paidDate) {
 		super();
 		this.id = id;
 		this.status = status;

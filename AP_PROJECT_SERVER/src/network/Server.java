@@ -195,14 +195,11 @@ public class Server{
 				case "killThread":
 											killThread(assign.getThreadID());
 					break;
-					
 				case "Assign a complain":
-											assignComplain(Integer.valueOf(assign.getInfo()), assign.getLoginId(), assign.getInfo2());
-											
+											assignComplain(Integer.valueOf(assign.getInfo()), assign.getLoginId(), assign.getInfo2());					
 					break;
 				case "Set Date":
 											setVisitDaTe(Integer.valueOf(assign.getInfo()), assign.getInfo2());
-					
 					break;
 	
 				default:
@@ -224,6 +221,7 @@ public class Server{
 				while(result.next()) {//check the database for the user
 					databaseSize++;
 				} 
+				statement.close();
 			}catch (SQLException e) {
 				System.err.println("sql exception caught");
 			}
@@ -232,7 +230,7 @@ public class Server{
 			User newUser = data.getData();  
 			newUser.setUserId(id); // set the user id to the new id
 			Register(newUser);//add user to database
-			BillCustomer(id,"unpaid", 15000, "30/05/2021");// add a bill to the account for the customer
+			BillCustomer(id,"Due", 15000, "30/05/2021");// add a bill to the account for the customer
 			Packet infoPacket = new Packet9Info("Sussessfully Registered");
 			Packet00Register registered = new  Packet00Register(newUser);// prepare the object with the New User ID to be sent to the user for login
 			sendData(registered);// send the the object to the user to extract the User ID
@@ -240,31 +238,42 @@ public class Server{
 			
 		} 
 		
-		private void Register(User newUser) { 
+		private boolean Register(User newUser) { 
 			String query = ("INSERT INTO microstar. `User` (userId, nameTitle, firstName, lastName, password, jobTitle)"
 					+ "VALUES ('" + newUser.getUserId() + "', '" + newUser.getNameTitle() + "', '" + newUser.getFirstName() + "', '" + newUser.getLastName() + "', '" + newUser.getPassword() + "', '" + "" + "');");
-			 
+			String query2 = ("INSERT INTO microstar. `Phone` (userId, phoneNumber)"
+					+ "VALUES ('" + newUser.getUserId() + "', '" + newUser.getPhoneNumber() + "');");
+			String query3 = ("INSERT INTO microstar. `Email` (userId, email)"
+					+ "VALUES ('" + newUser.getUserId() + "', '" + newUser.getEmail() + "');");
 			try {
 				statement = databaseConnection.createStatement();
-				statement.executeUpdate(query);
+				statement.addBatch(query);
+				statement.addBatch(query2);
+				statement.addBatch(query3);
+				statement.executeBatch();
+				statement.clearBatch();
+				statement.closeOnCompletion(); 
 			} catch (SQLException e) {
 				Packet10Error error = new Packet10Error("Cannot register at the moment, please try again Later");// create a message/packer/object
 				sendData(error);// send the info object/packet/message to the user
-				return;
+				return false;
 			}
+			return true; 
 		}
 		
-		private void BillCustomer(String userId, String status, float amountDue, String dueDate) {  
+		private boolean BillCustomer(String userId, String status, float amountDue, String dueDate) {  
 			String query = ("INSERT INTO microstar. `Billing` (userId, status, amountDue, dueDate)"
 					+ "VALUES ('" + userId + "', '" + status + "', '" + amountDue + "', '" + dueDate + "');");
 			try {
 				statement = databaseConnection.createStatement();
 				statement.executeUpdate(query);
+				statement.close();
 			} catch (SQLException e) {
 				Packet10Error error = new Packet10Error("Error updating billing account");// create a message/packer/object
 				sendData(error);// send the info object/packet/message to the user
-				return;
+				return false;
 			}
+			return true;
 		}
 		
 
@@ -274,8 +283,7 @@ public class Server{
 			try {
 				String loginQuery = "SELECT * FROM `User` WHERE userId = '" + data.getUserId() + "' AND password = '" + data.getPassword() + "'";
 				statement = databaseConnection.createStatement();
-				result = statement.executeQuery(loginQuery); 
-				
+				result = statement.executeQuery(loginQuery);
 				if(result.next()) {// if id and password match
 					if(!result.getString("jobTitle").equals("")) {
 						loginData = new Employee();
@@ -297,19 +305,15 @@ public class Server{
 					}
 					
 					String UserType;// userd to Prepared complain list for specific user
-					Packet11List billing = null; 
 					if(loginData instanceof Customer) {// check if its a customer is loging in
-						List<BillingAccount>  billingList = new ArrayList<>();
+						List<Billing>  billingList = new ArrayList<>();
 						String billingQuery = "SELECT * FROM microstar. `Billing` WHERE userId = '" + loginData.getUserId() + "'";  // search for their account in database
 						try {
-							statement = databaseConnection.createStatement();
 							result = statement.executeQuery(billingQuery);
 							while(result.next()) {//check the database for the billing info
-								billingList.add(new BillingAccount(result.getString("userId"), result.getString("status"), result.getFloat("amountDue"), result.getFloat("interest"), result.getString("dueDate"), result.getString("paidDate")));
+								billingList.add(new Billing(result.getString("userId"), result.getString("status"), result.getFloat("amountDue"), result.getFloat("interest"), result.getString("dueDate"), result.getString("paidDate")));
 							}  
-							billing = new Packet11List(billingList);// add the list to the object to be sent 
-							billing.setType("billing");
-							
+							((Customer) loginData).setBillingAccount(billingList);// attach the account info to the Customer object
 						} catch (SQLException e) {
 							System.err.println("sql exception caught");
 						}
@@ -337,8 +341,8 @@ public class Server{
 					
 					sendComplainListToAllClients(Complains());// send the packet to the user
 					
-					sendData(billing);// send list of bills to user 
 					found = true;
+					statement.close();
 				}
 			} catch (SQLException e) {
 				Packet10Error error = new Packet10Error("Cannot login at the moment, please try again Later");// create a message/packer/object

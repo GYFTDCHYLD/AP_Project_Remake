@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: May 04, 2021 at 12:22 AM
+-- Generation Time: May 04, 2021 at 01:32 PM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 8.0.3
 
@@ -36,6 +36,14 @@ CREATE TABLE `Billing` (
   `paidDate` varchar(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `Billing`
+--
+
+INSERT INTO `Billing` (`userId`, `status`, `amountDue`, `interest`, `dueDate`, `paidDate`) VALUES
+('A121', 'due', 15000, NULL, '20/05/2021', NULL),
+('N346', 'Due', 15000, NULL, '30/05/2021', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -51,14 +59,6 @@ CREATE TABLE `Complain` (
   `techId` varchar(10) DEFAULT NULL,
   `visitDate` varchar(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `Complain`
---
-
-INSERT INTO `Complain` (`id`, `custId`, `type`, `message`, `repId`, `techId`, `visitDate`) VALUES
-(3, 'A121', 'Other', 'aeaegaeg', 'S122', 'C123', '10/05/2021'),
-(4, 'A346', 'Network (Tellephone)', 'not picking up good where i am', 'S122', 'C123', '20/05/2021');
 
 -- --------------------------------------------------------
 
@@ -80,6 +80,7 @@ INSERT INTO `Email` (`userId`, `email`) VALUES
 ('C123', 'Reid@yahoo.com'),
 ('D111', 'Holness@yahoo.com'),
 ('D112', 'Dixon@yahoo.com'),
+('N346', 'nesh@yahoo.com'),
 ('S122', 'Jones@yahoo.com');
 
 -- --------------------------------------------------------
@@ -89,8 +90,8 @@ INSERT INTO `Email` (`userId`, `email`) VALUES
 --
 
 CREATE TABLE `Phone` (
-  `userId` varchar(10) NOT NULL,
-  `phoneNumber` int(10) NOT NULL
+  `userId` varchar(11) NOT NULL,
+  `phoneNumber` bigint(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -98,11 +99,12 @@ CREATE TABLE `Phone` (
 --
 
 INSERT INTO `Phone` (`userId`, `phoneNumber`) VALUES
-('A121', 876985764),
-('C123', 876985764),
-('D111', 876985764),
-('D112', 876985764),
-('S122', 876938746);
+('A121', 8769855764),
+('C123', 8769852764),
+('D111', 8769885764),
+('D112', 8769857643),
+('N346', 8763452746),
+('S122', 8769387463);
 
 -- --------------------------------------------------------
 
@@ -126,10 +128,10 @@ CREATE TABLE `User` (
 INSERT INTO `User` (`userId`, `nameTitle`, `firstName`, `lastName`, `password`, `jobTitle`) VALUES
 ('', '', '', '', '', ''),
 ('A121', 'Ms', 'Akielia', 'Willbrugh', '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', ''),
-('A346', 'Ms', 'Ashari', 'Joness', '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', ''),
 ('C123', 'Mr', 'Craig', 'Reid', '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', 'Technician'),
 ('D111', 'Ms', 'Dahlia', 'Holness', '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', 'Representative'),
 ('D112', 'Ms', 'Danielle', 'Dixon', '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', 'Representative'),
+('N346', 'Ms', 'Neshkafay', 'Johnson', '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', ''),
 ('S122', 'Ms', 'Shericka', 'Jones', '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', 'Representative');
 
 --
