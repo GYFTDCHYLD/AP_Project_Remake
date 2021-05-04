@@ -1,7 +1,6 @@
 package domain;
 
 import java.io.Serializable;
-import java.sql.Date;
 
 public class BillingAccount  implements Serializable{
 	private static final long serialVersionUID = 1L;
@@ -24,6 +23,16 @@ public class BillingAccount  implements Serializable{
 		this.id = id;
 		this.status = status;
 		this.amountDue = amountDue;
+	}
+
+	public BillingAccount(String id, String status, float amountDue, float interest, String dueDate, String paidDate) {
+		super();
+		this.id = id;
+		this.status = status;
+		this.amountDue = amountDue;
+		this.interest = interest;
+		this.dueDate = dueDate;
+		this.paidDate = paidDate;
 	}
 
 

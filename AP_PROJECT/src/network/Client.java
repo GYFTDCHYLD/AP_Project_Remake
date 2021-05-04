@@ -216,6 +216,8 @@ public class Client implements Runnable{
 		}else if(data.getType().matches("Technicians")) {
 			((Dashboard)MainWindow.getDesktopPane().getComponent(0)).setTechnicions((List<String[][]>) data.getData()) ;
 			System.out.println("List of Technicions recieved from server");
+		}else if(data.getType().matches("billing")) {
+			System.out.println("List of billing for your account");
 		}
 	}
 	
