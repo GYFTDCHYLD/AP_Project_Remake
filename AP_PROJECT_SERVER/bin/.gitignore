@@ -1,8 +1,7 @@
-/factories/
-/hibernate.cfg.xml
 /domain/
-/network/
-/main/
-/image/
+/factories/
 /frame/
+/image/
+/main/
+/network/
 /packet/

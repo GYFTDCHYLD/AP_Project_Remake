@@ -90,7 +90,7 @@ INSERT INTO `Email` (`userId`, `email`) VALUES
 --
 
 CREATE TABLE `Phone` (
-  `userId` varchar(11) NOT NULL,
+  `userId` varchar(10) NOT NULL,
   `phoneNumber` bigint(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
