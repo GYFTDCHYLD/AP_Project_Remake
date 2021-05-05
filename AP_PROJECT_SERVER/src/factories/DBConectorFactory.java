@@ -4,6 +4,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import javax.swing.JOptionPane;
+
+import frame.ServerWindow;
+
 public class DBConectorFactory {
 	private static java.sql.Connection connection = null;
 	static String url = "jdbc:mysql://localhost:3306/microstar";
@@ -14,7 +18,7 @@ public class DBConectorFactory {
 			if(connection == null)
 				connection =  DriverManager.getConnection(url, "root", "");
 		} catch (SQLException e) {
-			System.err.println("Could not establish a connection to database!!");
+			JOptionPane.showInternalMessageDialog(ServerWindow.getServerDash(),"Could not establish a connection!!", "Database",JOptionPane.ERROR_MESSAGE);// display the message sent from server
 		}
 		return connection;
 	}
